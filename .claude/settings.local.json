@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object -First 100 FullName)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\\\\audit.log\" -Raw\\).Length; Get-Item \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\\\\audit.log\" | Select-Object Length, LastWriteTime)",
+      "PowerShell($f = \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\\\\audit.log\"; if \\(Test-Path $f\\) { $i = Get-Item $f; \"EXISTS: size=$\\($i.Length\\) bytes, modified=$\\($i.LastWriteTime\\)\" } else { \"FILE DOES NOT EXIST\" })",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\\\\frontend\\\\js\" -Recurse -Filter \"*.js\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\" -Recurse -Force)",
+      "Bash(grep -n \"270deg\\\\|right: \\\\${barX\\\\|right: \\\\${nowX\\\\|nowLeft\\\\|totalW - \\(d\" \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\\\\frontend\\\\js\\\\tabs\\\\timeline.js\")",
+      "Bash(Select-Object -Property FullName, Name, Extension)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx puppeteer *)",
+      "Bash(npm install *)",
+      "Bash(node export_slides.js)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\" -Force | Select-Object Name, Mode, @{Name=\"Size\";Expression={$_.Length}} | Format-Table -AutoSize)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

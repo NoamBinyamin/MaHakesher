@@ -1,0 +1,28 @@
+{
+  "config": {
+    "frequency_bands": {
+      "UHF": {
+        "min": 255.0,
+        "max": 395.5
+      },
+      "HVHF": {
+        "min": 120.0,
+        "max": 140.0
+      },
+      "LVHF": {
+        "min": 33.0,
+        "max": 95.0
+      }
+    },
+    "radio_types": [],
+    "missions": [],
+    "owners": []
+  },
+  "data": {
+    "sectors": [],
+    "sites": [],
+    "radios": [],
+    "planned_missions": [],
+    "archived_missions": []
+  }
+}

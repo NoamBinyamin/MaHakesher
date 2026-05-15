@@ -1,0 +1,2762 @@
+<!doctype html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מה הקשר?</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      // Runs before first paint — no dark mode flash, no translation flash
+      if (localStorage.getItem("mahakesher-dark") === "1") {
+        document.documentElement.classList.add("dark");
+      }
+      document.documentElement.style.opacity = "0";
+    </script>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="navbar-container">
+        <h1 class="navbar-title">📡 מה הקשר?</h1>
+        <div
+          class="navbar-info"
+          style="display: flex; align-items: center; gap: 1rem"
+        >
+          <button
+            id="modeToggle"
+            onclick="toggleMode()"
+            title="Switch mode"
+            style="display: flex; align-items: center; gap: 0.4rem"
+          >
+            <i class="fa-solid fa-pen-to-square"></i> Edit Mode
+          </button>
+          <button
+            id="darkModeToggle"
+            onclick="toggleDarkMode()"
+            data-i18n="btn.dark"
+            data-i18n-title="btn.toggleDark"
+            title="Toggle dark mode"
+          >
+            🌙 Dark
+          </button>
+          <small id="serverStatus">Connecting...</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- View-mode banner (hidden in edit mode via CSS) -->
+      <div id="viewModeBanner" class="view-mode-banner" data-i18n="mode.banner">
+        צפייה בלבד — עבור למצב עריכה לביצוע שינויים
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs">
+        <button
+          class="tab-button active"
+          data-tab="overview"
+          data-i18n="tab.overview"
+        >
+          Overview
+        </button>
+        <button class="tab-button" data-tab="missions" data-i18n="tab.missions">
+          Missions
+        </button>
+        <button class="tab-button" data-tab="timeline" data-i18n="tab.timeline">
+          Timeline
+        </button>
+        <button class="tab-button" data-tab="links" data-i18n="tab.links">
+          Link Dictionary
+        </button>
+        <button class="tab-button" data-tab="search" data-i18n="tab.search">
+          Search
+        </button>
+        <button class="tab-button" data-tab="summary" data-i18n="tab.summary">
+          Summary
+        </button>
+        <button class="tab-button" data-tab="history" data-i18n="tab.history">
+          History
+        </button>
+        <button
+          class="tab-button view-mode-hide"
+          data-tab="preferences"
+          data-i18n="tab.preferences"
+        >
+          Preferences
+        </button>
+      </div>
+
+      <!-- Overview Tab: Unified Table -->
+      <div id="overview" class="tab-content active">
+        <div class="tab-header">
+          <h2 data-i18n="overview.title">Deployment Overview</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center">
+            <div style="display: flex; gap: 0.5rem">
+              <button
+                id="overviewFreqModeBtn"
+                class="btn btn-primary"
+                onclick="setOverviewFreqMode('frequency')"
+                data-i18n="overview.modeFrequency"
+                data-i18n-title="overview.freqModeTitle"
+                title="Show frequencies as numbers"
+              >
+                <i class="fa-solid fa-wave-square"></i> Frequency
+              </button>
+              <button
+                id="overviewLinkModeBtn"
+                class="btn btn-secondary"
+                onclick="setOverviewFreqMode('link')"
+                data-i18n="overview.modeLink"
+                data-i18n-title="overview.linkModeTitle"
+                title="Show frequencies as link names"
+              >
+                <i class="fa-solid fa-link"></i> Link
+              </button>
+            </div>
+            <button
+              class="btn btn-primary view-mode-hide"
+              onclick="openAddSectorModal()"
+              data-i18n="overview.addSector"
+            >
+              <i class="fa-solid fa-plus"></i> Add Sector
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table
+            class="overview-table"
+            style="table-layout: fixed; width: 100%"
+          >
+            <colgroup>
+              <col style="width: 6%" />
+              <col style="width: 6%" />
+              <col style="width: 8%" />
+              <col style="width: 12%" />
+              <col style="width: 10%" />
+              <col style="width: 8%" />
+              <col style="width: 8%" />
+              <col style="width: 12%" />
+              <col style="width: 10%" />
+              <col style="width: 8%" />
+              <col style="width: 3%" />
+              <col style="width: 4%" />
+              <col style="width: 5%" />
+            </colgroup>
+            <thead>
+              <tr class="global-header">
+                <th class="col-band" data-i18n="overview.col.band">
+                  Frequency Band
+                </th>
+                <th class="col-device" data-i18n="overview.col.device">
+                  Device Type
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  data-i18n="overview.col.current"
+                >
+                  Current State
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  data-i18n="overview.col.standby"
+                >
+                  Standby State
+                </th>
+                <th class="col-status" data-i18n="overview.col.status">
+                  Status
+                </th>
+                <th class="col-notes" data-i18n="overview.col.notes">Notes</th>
+                <th class="col-actions" data-i18n="overview.col.actions">
+                  Actions
+                </th>
+              </tr>
+              <tr class="sub-header">
+                <th></th>
+                <th></th>
+                <th data-i18n="overview.col.frequency">Frequency</th>
+                <th data-i18n="overview.col.owner">Owner</th>
+                <th data-i18n="overview.col.mission">Mission</th>
+                <th data-i18n="overview.col.role">Role</th>
+                <th data-i18n="overview.col.frequency">Frequency</th>
+                <th data-i18n="overview.col.owner">Owner</th>
+                <th data-i18n="overview.col.mission">Mission</th>
+                <th data-i18n="overview.col.role">Role</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="overviewTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Missions Tab -->
+      <div id="missions" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="missions.title">Missions Management</h2>
+          <button
+            class="btn btn-primary view-mode-hide"
+            onclick="openPlanMissionModal()"
+            data-i18n="missions.planMission"
+          >
+            <i class="fa-solid fa-rocket"></i> Plan Mission
+          </button>
+        </div>
+        <div class="missions-container">
+          <div id="missionsContent">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Link Dictionary Tab (NEW) -->
+      <div id="links" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="links.title">Link Dictionary</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center">
+            <button
+              class="btn btn-secondary"
+              onclick="downloadLinkTemplate()"
+              data-i18n="links.template"
+            >
+              <i class="fa-solid fa-download"></i> Template
+            </button>
+            <button
+              class="btn btn-secondary view-mode-hide"
+              onclick="document.getElementById('linkExcelUpload').click()"
+              data-i18n="links.importExcel"
+            >
+              <i class="fa-solid fa-file-excel" style="color: #16a34a"></i>
+              Import Excel
+            </button>
+            <input
+              type="file"
+              id="linkExcelUpload"
+              accept=".xlsx,.xls,.csv"
+              style="display: none"
+              onchange="handleLinkExcelUpload(this)"
+            />
+            <button
+              class="btn btn-primary view-mode-hide"
+              onclick="openAddLinkModal()"
+              data-i18n="links.addLink"
+            >
+              <i class="fa-solid fa-link"></i> Add Link
+            </button>
+          </div>
+        </div>
+        <!-- Lookup Panel -->
+        <div
+          id="linkLookupPanel"
+          style="
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--box-shadow-lg);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+          "
+        >
+          <div style="display: flex; gap: 0.75rem; align-items: center">
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="
+                color: var(--primary-color);
+                font-size: 1rem;
+                flex-shrink: 0;
+              "
+            ></i>
+            <input
+              type="text"
+              id="linkLookupInput"
+              placeholder="Search by link name or frequency…"
+              data-i18n-placeholder="links.searchPlaceholder"
+              oninput="lookupLink()"
+              style="
+                flex: 1;
+                border: none;
+                outline: none;
+                font-size: 0.95rem;
+                color: var(--gray-800);
+                background: transparent;
+              "
+            />
+            <button
+              class="btn btn-secondary"
+              onclick="clearLinkLookup()"
+              style="padding: 0.4rem 0.9rem; font-size: 0.85rem"
+            >
+              <i class="fa-solid fa-xmark"></i>
+              <span data-i18n="links.clearSearch">Clear</span>
+            </button>
+          </div>
+          <div
+            id="linkLookupResults"
+            style="
+              display: none;
+              margin-top: 1rem;
+              padding-top: 1rem;
+              border-top: 1px solid var(--gray-100);
+            "
+          ></div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th
+                  onclick="sortLinksBy('link_name')"
+                  style="cursor: pointer; user-select: none"
+                >
+                  <span data-i18n="links.col.name">Link Name</span>
+                  <span id="sort-link_name"></span>
+                </th>
+                <th
+                  onclick="sortLinksBy('frequency')"
+                  style="cursor: pointer; user-select: none"
+                >
+                  <span data-i18n="links.col.frequency">Frequency</span>
+                  <span id="sort-frequency"></span>
+                </th>
+                <th
+                  onclick="sortLinksBy('frequency_band')"
+                  style="cursor: pointer; user-select: none"
+                >
+                  <span data-i18n="links.col.band">Band</span>
+                  <span id="sort-frequency_band"></span>
+                </th>
+                <th
+                  onclick="sortLinksBy('owner')"
+                  style="cursor: pointer; user-select: none"
+                >
+                  <span data-i18n="links.col.owner">Owner</span>
+                  <span id="sort-owner"></span>
+                </th>
+                <th data-i18n="links.col.actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="linksTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Search Tab -->
+      <div id="search" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="search.title">Search & Filter</h2>
+          <button
+            class="btn btn-secondary"
+            onclick="clearSearch()"
+            data-i18n="search.clear"
+          >
+            <i class="fa-solid fa-xmark"></i> Clear
+          </button>
+        </div>
+
+        <div class="search-panel" style="padding: 1.25rem 1.5rem">
+          <!-- Main search input -->
+          <div style="position: relative; margin-bottom: 1.1rem">
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--gray-400);
+                pointer-events: none;
+              "
+            ></i>
+            <input
+              type="text"
+              id="searchQuery"
+              placeholder="Search frequencies, owners, missions, device types, notes…"
+              data-i18n-placeholder="search.placeholder"
+              class="search-box"
+              style="width: 100%; padding-right: 2.75rem"
+              oninput="performSearch()"
+            />
+          </div>
+
+          <!-- Filter row -->
+          <div
+            style="
+              display: flex;
+              gap: 1.5rem;
+              flex-wrap: wrap;
+              align-items: flex-end;
+            "
+          >
+            <div style="display: flex; flex-direction: column; gap: 0.35rem">
+              <label
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.6px;
+                "
+              >
+                <i
+                  class="fa-solid fa-layer-group"
+                  style="margin-left: 0.25rem"
+                ></i>
+                <span data-i18n="search.stateLabel">State</span>
+              </label>
+              <select
+                id="searchState"
+                class="search-select"
+                onchange="performSearch()"
+              >
+                <option value="both" data-i18n="search.bothStates">
+                  Both States
+                </option>
+                <option value="current" data-i18n="search.currentState">
+                  Current
+                </option>
+                <option value="standby" data-i18n="search.standbyState">
+                  Standby
+                </option>
+              </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.35rem">
+              <label
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.6px;
+                "
+              >
+                <i class="fa-solid fa-rocket" style="margin-left: 0.25rem"></i>
+                <span data-i18n="search.missionLabel">Mission</span>
+              </label>
+              <select
+                id="searchMission"
+                class="search-select"
+                onchange="performSearch()"
+              >
+                <option value="" data-i18n="search.allMissions">
+                  All Missions
+                </option>
+              </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.35rem">
+              <label
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.6px;
+                "
+              >
+                <i
+                  class="fa-solid fa-circle-check"
+                  style="margin-left: 0.25rem"
+                ></i>
+                <span data-i18n="search.statusLabel">Status</span>
+              </label>
+              <select
+                id="searchStatus"
+                class="search-select"
+                onchange="performSearch()"
+              >
+                <option value="" data-i18n="search.allStatuses">
+                  All Statuses
+                </option>
+                <option value="Usable" data-i18n="search.statusUsable">
+                  ✓ Usable
+                </option>
+                <option value="Unusable" data-i18n="search.statusUnusable">
+                  ✗ Unusable
+                </option>
+              </select>
+            </div>
+            <div
+              id="searchResultCount"
+              style="
+                margin-right: auto;
+                align-self: flex-end;
+                padding-bottom: 0.5rem;
+                font-size: 0.85rem;
+                color: var(--gray-500);
+              "
+            ></div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <colgroup>
+              <col style="width: 6%" />
+              <col style="width: 6%" />
+              <col style="width: 7%" />
+              <col style="width: 9%" />
+              <col style="width: 8%" />
+              <col style="width: 7%" />
+              <col style="width: 7%" />
+              <col style="width: 9%" />
+              <col style="width: 8%" />
+              <col style="width: 7%" />
+              <col style="width: 6%" />
+              <col style="width: 8%" />
+              <col style="width: 6%" />
+              <col style="width: 6%" />
+            </colgroup>
+            <thead>
+              <tr class="global-header">
+                <th class="col-band" data-i18n="overview.col.band">
+                  Frequency Band
+                </th>
+                <th class="col-device" data-i18n="overview.col.device">
+                  Device Type
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  data-i18n="overview.col.current"
+                >
+                  Current State
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  data-i18n="overview.col.standby"
+                >
+                  Standby State
+                </th>
+                <th class="col-status" data-i18n="overview.col.status">
+                  Status
+                </th>
+                <th class="col-site" data-i18n="overview.col.site">Site</th>
+                <th class="col-notes" data-i18n="overview.col.notes">Notes</th>
+                <th class="col-actions" data-i18n="overview.col.actions">
+                  Actions
+                </th>
+              </tr>
+              <tr class="sub-header">
+                <th></th>
+                <th></th>
+                <th data-i18n="overview.col.frequency">Frequency</th>
+                <th data-i18n="overview.col.owner">Owner</th>
+                <th data-i18n="overview.col.mission">Mission</th>
+                <th data-i18n="overview.col.role">Role</th>
+                <th data-i18n="overview.col.frequency">Frequency</th>
+                <th data-i18n="overview.col.owner">Owner</th>
+                <th data-i18n="overview.col.mission">Mission</th>
+                <th data-i18n="overview.col.role">Role</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="searchResultsBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Summary Tab -->
+      <div id="summary" class="tab-content">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h2 data-i18n="summary.title">Summary Statistics</h2>
+          <div style="display: flex; gap: 0.75rem">
+            <button class="btn btn-secondary" onclick="exportData()">
+              <i class="fa-solid fa-download"></i>
+              <span data-i18n="summary.export">Export Backup</span>
+            </button>
+            <button
+              class="btn btn-secondary view-mode-hide"
+              onclick="document.getElementById('importFileInput').click()"
+            >
+              <i class="fa-solid fa-upload"></i>
+              <span data-i18n="summary.import">Import Backup</span>
+            </button>
+            <input
+              type="file"
+              id="importFileInput"
+              accept=".json"
+              style="display: none"
+              onchange="importData(this)"
+            />
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-value" id="totalSectors">0</div>
+            <div class="summary-label" data-i18n="summary.totalSectors">
+              Total Sectors
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="totalSites">0</div>
+            <div class="summary-label" data-i18n="summary.totalSites">
+              Total Sites
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="totalRadios">0</div>
+            <div class="summary-label" data-i18n="summary.totalRadios">
+              Total Radios
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="usableRadios">0</div>
+            <div class="summary-label" data-i18n="summary.usable">
+              Usable Devices
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="unusableRadios">0</div>
+            <div class="summary-label" data-i18n="summary.unusable">
+              Unusable Devices
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="frequencyBands">0</div>
+            <div class="summary-label" data-i18n="summary.activeBands">
+              Active Bands
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div style="margin: 2rem 0 0 0">
+          <h3
+            style="
+              margin: 0 0 1.25rem 0;
+              font-size: 1.2rem;
+              color: var(--gray-900);
+              font-weight: 700;
+            "
+            data-i18n="summary.analytics"
+          >
+            Analytics
+          </h3>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 2fr;
+              gap: 1.5rem;
+              align-items: start;
+            "
+          >
+            <div
+              class="analytics-card"
+              style="
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: var(--box-shadow-lg);
+                border: 1px solid var(--gray-200);
+              "
+            >
+              <h4
+                style="
+                  margin: 0 0 1rem 0;
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                "
+                data-i18n="summary.chartHealth"
+              >
+                Device Health
+              </h4>
+              <canvas id="chartDeviceHealth"></canvas>
+            </div>
+            <div
+              class="analytics-card"
+              style="
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: var(--box-shadow-lg);
+                border: 1px solid var(--gray-200);
+              "
+            >
+              <h4
+                style="
+                  margin: 0 0 1rem 0;
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                "
+                data-i18n="summary.chartMission"
+              >
+                Mission Coverage
+              </h4>
+              <canvas id="chartMissionCoverage"></canvas>
+            </div>
+            <div
+              class="analytics-card"
+              style="
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: var(--box-shadow-lg);
+                border: 1px solid var(--gray-200);
+              "
+            >
+              <h4
+                style="
+                  margin: 0 0 1rem 0;
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gray-500);
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                "
+                data-i18n="summary.chartBands"
+              >
+                Devices by Frequency Band
+              </h4>
+              <canvas id="chartBandDistribution"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+          "
+        >
+          <h3 style="margin: 0" data-i18n="summary.radioSummary">
+            Radio Summary
+          </h3>
+          <div class="view-toggle" style="display: flex; gap: 0.5rem">
+            <button
+              id="viewSitesBtn"
+              class="btn btn-primary"
+              onclick="window.setSummaryView('sites')"
+              data-i18n="summary.sitesView"
+            >
+              Sites View
+            </button>
+            <button
+              id="viewSectorsBtn"
+              class="btn btn-secondary"
+              onclick="window.setSummaryView('sectors')"
+              data-i18n="summary.sectorsView"
+            >
+              Sectors View
+            </button>
+          </div>
+        </div>
+        <div id="radioSummaryContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div id="history" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="history.title">History</h2>
+          <button
+            class="btn btn-secondary"
+            onclick="refreshHistory()"
+            data-i18n="history.refresh"
+          >
+            <i class="fa-solid fa-rotate-right"></i> Refresh
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div
+          style="
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+          "
+        >
+          <button
+            id="hf-all"
+            class="btn btn-sm btn-primary"
+            onclick="setHistoryFilter('all')"
+            data-i18n="history.all"
+          >
+            All
+          </button>
+          <button
+            id="hf-radio"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('radio')"
+            data-i18n="history.radio"
+          >
+            Radio
+          </button>
+          <button
+            id="hf-mission"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('mission')"
+            data-i18n="history.mission"
+          >
+            Mission
+          </button>
+          <button
+            id="hf-sector"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('sector')"
+            data-i18n="history.sector"
+          >
+            Sector
+          </button>
+          <button
+            id="hf-site"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('site')"
+            data-i18n="history.site"
+          >
+            Site
+          </button>
+          <button
+            id="hf-link"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('link')"
+            data-i18n="history.link"
+          >
+            Link
+          </button>
+          <button
+            id="hf-preferences"
+            class="btn btn-sm btn-secondary"
+            onclick="setHistoryFilter('preferences')"
+            data-i18n="history.preferences"
+          >
+            Preferences
+          </button>
+        </div>
+
+        <div
+          id="historyContainer"
+          style="
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius-sm);
+            background: white;
+            overflow: hidden;
+          "
+        >
+          <div id="historyList">
+            <p
+              style="
+                color: var(--gray-400);
+                text-align: center;
+                padding: 3rem 1rem;
+              "
+            >
+              <span data-i18n="history.loadPrompt"
+                >Click Refresh or switch to this tab to load history.</span
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Timeline Tab -->
+      <div id="timeline" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="timeline.title">Mission Timeline</h2>
+        </div>
+        <div id="timelineContent">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Preferences Tab -->
+      <div id="preferences" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="tab.preferences">
+            <i
+              class="fa-solid fa-sliders"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Preferences
+          </h2>
+        </div>
+        <div id="preferencesContent">
+          <!-- Populated by preferences.js -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Sector Modal -->
+    <div id="sectorModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="sectorModalTitle">
+            <i
+              class="fa-solid fa-layer-group"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i
+            >Sector Management
+          </h3>
+          <button class="modal-close" onclick="closeSectorModal()">
+            &times;
+          </button>
+        </div>
+        <form id="sectorForm" class="modal-form">
+          <input type="hidden" id="sectorId" />
+          <div
+            style="
+              padding: 0.5rem 0;
+              border-bottom: 2px solid var(--gray-200);
+              margin-bottom: 1.5rem;
+            "
+          >
+            <p
+              style="color: var(--gray-600); font-size: 0.9rem; margin: 0"
+              data-i18n="sector.help"
+            >
+              Enter the sector identifier below
+            </p>
+          </div>
+          <div class="form-group">
+            <label for="sectorIdDisplay">
+              <i
+                class="fa-solid fa-fingerprint"
+                style="color: var(--gray-400); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="sector.idLabel">Sector ID</span>
+            </label>
+            <input
+              type="text"
+              id="sectorIdDisplay"
+              readonly
+              style="
+                color: var(--gray-500);
+                font-family: monospace;
+                font-size: 0.85rem;
+              "
+            />
+          </div>
+          <div class="form-group">
+            <label for="sectorName">
+              <i
+                class="fa-solid fa-signature"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="sector.nameLabel">Sector Name</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="text"
+              id="sectorName"
+              data-i18n-placeholder="sector.namePlaceholder"
+              placeholder="e.g., Northern Zone, Region A"
+              required
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="deleteSector()"
+            >
+              <i class="fa-solid fa-trash"></i>
+              <span data-i18n="btn.delete">Delete</span>
+            </button>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeSectorModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveSector()"
+              >
+                <i class="fa-solid fa-check"></i>
+                <span data-i18n="btn.save">Save</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Site Modal -->
+    <div id="siteModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="siteModalTitle">
+            <i
+              class="fa-solid fa-location-dot"
+              style="color: var(--info-color); margin-right: 0.5rem"
+            ></i
+            >Site Management
+          </h3>
+          <button class="modal-close" onclick="closeSiteModal()">
+            &times;
+          </button>
+        </div>
+        <form id="siteForm" class="modal-form">
+          <input type="hidden" id="siteId" />
+          <input type="hidden" id="sectorId" />
+
+          <!-- Basic Information Section -->
+          <div style="margin-bottom: 1.75rem">
+            <div
+              style="
+                padding: 0.5rem 0;
+                border-bottom: 2px solid var(--gray-200);
+                margin-bottom: 1.25rem;
+              "
+            >
+              <h4
+                style="
+                  color: var(--gray-900);
+                  font-size: 1rem;
+                  margin: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-info-circle"
+                  style="color: var(--info-color)"
+                ></i>
+                <span data-i18n="site.basicInfo">Basic Information</span>
+              </h4>
+            </div>
+            <div class="form-group">
+              <label for="siteIdDisplay">
+                <i
+                  class="fa-solid fa-fingerprint"
+                  style="color: var(--gray-400); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="site.idLabel">Site ID</span>
+              </label>
+              <input
+                type="text"
+                id="siteIdDisplay"
+                readonly
+                style="
+                  color: var(--gray-500);
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                "
+              />
+            </div>
+            <div class="form-group">
+              <label for="siteName">
+                <i
+                  class="fa-solid fa-signature"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="site.nameLabel">Site Name</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <input
+                type="text"
+                id="siteName"
+                data-i18n-placeholder="site.namePlaceholder"
+                placeholder="e.g., Forward Base Alpha, Deployment Point 1"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="siteType">
+                <i
+                  class="fa-solid fa-sitemap"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="site.typeLabel">Site Type</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <select id="siteType" required>
+                <option value="" data-i18n="site.typeSelect">
+                  Select site type...
+                </option>
+                <option value="Mobile" data-i18n="site.typeMobile">
+                  Mobile
+                </option>
+                <option value="Fixed" data-i18n="site.typeFixed">Fixed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Location Section -->
+          <div style="margin-bottom: 1.75rem">
+            <div
+              style="
+                padding: 0.5rem 0;
+                border-bottom: 2px solid var(--gray-200);
+                margin-bottom: 1.25rem;
+              "
+            >
+              <h4
+                style="
+                  color: var(--gray-900);
+                  font-size: 1rem;
+                  margin: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-map"
+                  style="color: var(--warning-color)"
+                ></i>
+                <span data-i18n="site.coordsSection">Coordinates</span>
+              </h4>
+            </div>
+            <div class="form-group">
+              <label for="siteCoordinates">
+                <i
+                  class="fa-solid fa-compass"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="site.utmLabel">UTM Coordinates</span>
+              </label>
+              <input
+                type="text"
+                id="siteCoordinates"
+                data-i18n-placeholder="site.utmPlaceholder"
+                placeholder="e.g., 31U ES 500000 4500000"
+              />
+              <small
+                style="
+                  color: var(--gray-600);
+                  display: block;
+                  margin-top: 0.4rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-question-circle"
+                  style="margin-right: 0.3rem"
+                ></i>
+                <span data-i18n="site.utmHelp"
+                  >Format: Zone Letter + Easting Northing</span
+                >
+              </small>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              id="deleteSiteBtn"
+              class="btn btn-danger"
+              onclick="deleteSite()"
+            >
+              <i class="fa-solid fa-trash"></i>
+              <span data-i18n="btn.delete">Delete</span>
+            </button>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeSiteModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveSite()"
+              >
+                <i class="fa-solid fa-check"></i>
+                <span data-i18n="btn.save">Save</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Radio Modal -->
+    <div id="radioModal" class="modal hidden">
+      <div class="modal-content modal-lg">
+        <div class="modal-header">
+          <h3 id="radioModalTitle">
+            <i
+              class="fa-solid fa-tower-cell"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i
+            ><span data-i18n="radio.title">Radio Device Configuration</span>
+          </h3>
+          <button class="modal-close" onclick="closeRadioModal()">
+            &times;
+          </button>
+        </div>
+        <form id="radioForm" class="modal-form">
+          <input type="hidden" id="radioId" />
+
+          <!-- Device Information Section -->
+          <div
+            style="
+              margin-bottom: 2rem;
+              padding-bottom: 1.5rem;
+              border-bottom: 2px solid var(--gray-200);
+            "
+          >
+            <h4
+              style="
+                color: var(--gray-900);
+                font-size: 1rem;
+                margin: 0 0 1rem 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
+            >
+              <i
+                class="fa-solid fa-microchip"
+                style="color: var(--primary-color)"
+              ></i>
+              <span data-i18n="radio.deviceInfo">Device Information</span>
+            </h4>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem"
+            >
+              <div class="form-group" style="grid-column: 1 / -1">
+                <label for="radioIdDisplay">
+                  <i
+                    class="fa-solid fa-fingerprint"
+                    style="color: var(--gray-400); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="radio.deviceId">Device ID</span>
+                </label>
+                <input
+                  type="text"
+                  id="radioIdDisplay"
+                  readonly
+                  style="
+                    color: var(--gray-500);
+                    font-family: monospace;
+                    font-size: 0.85rem;
+                  "
+                />
+              </div>
+              <div class="form-group">
+                <label for="radioDeviceType">
+                  <i
+                    class="fa-solid fa-layer-group"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="radio.deviceType">Device Type</span>
+                </label>
+                <select id="radioDeviceType" disabled>
+                  <option value="">Select device type...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="radioFrequencyBand">
+                  <i
+                    class="fa-solid fa-wave-square"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="radio.freqBand">Frequency Band</span>
+                </label>
+                <input type="text" id="radioFrequencyBand" readonly />
+                <small
+                  id="frequencyBandLimits"
+                  style="
+                    color: var(--gray-600);
+                    display: block;
+                    margin-top: 0.4rem;
+                  "
+                ></small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radio States Section -->
+          <div style="margin-bottom: 2rem">
+            <h4
+              style="
+                color: var(--gray-900);
+                font-size: 1rem;
+                margin: 0 0 1.25rem 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
+            >
+              <i
+                class="fa-solid fa-sitemap"
+                style="color: var(--warning-color)"
+              ></i>
+              <span data-i18n="radio.statesConfig"
+                >Radio States Configuration</span
+              >
+            </h4>
+
+            <!-- Current State Card -->
+            <div
+              class="current-state-card"
+              style="
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border: 2px solid var(--info-color);
+                border-radius: var(--border-radius-sm);
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                  margin-bottom: 1rem;
+                  padding-bottom: 1rem;
+                  border-bottom: 2px solid rgba(14, 165, 233, 0.3);
+                "
+              >
+                <div
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background-color: #10b981;
+                  "
+                ></div>
+                <h5
+                  style="
+                    color: var(--gray-900);
+                    margin: 0;
+                    font-size: 1rem;
+                    font-weight: 600;
+                  "
+                >
+                  <span data-i18n="radio.currentState">Current State</span>
+                </h5>
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--gray-600);
+                    margin-left: auto;
+                  "
+                  data-i18n="radio.activeConfig"
+                  >Active Configuration</span
+                >
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 1.25rem;
+                "
+              >
+                <div class="form-group">
+                  <label for="radioFrequency">
+                    <i
+                      class="fa-solid fa-wave-square"
+                      style="color: var(--info-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.freqMhz">Frequency (MHz)</span>
+                  </label>
+                  <div style="position: relative; width: 100%">
+                    <input
+                      type="text"
+                      id="radioFrequency"
+                      placeholder="e.g., 120.5 or link name"
+                      data-i18n-placeholder="radio.freqPlaceholder"
+                      style="width: 100%"
+                      onchange="validateFrequency()"
+                      oninput="
+                        showRadioFreqSuggestions(
+                          'radioFrequency',
+                          'radioFreqSuggestions',
+                        )
+                      "
+                      onblur="hideRadioFreqSuggestions('radioFreqSuggestions')"
+                      autocomplete="off"
+                    />
+                    <div
+                      id="radioFreqSuggestions"
+                      style="
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        right: 0;
+                        left: 0;
+                        z-index: 9999;
+                        background: white;
+                        border: 1.5px solid var(--primary-color);
+                        border-top: none;
+                        border-radius: 0 0 8px 8px;
+                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                        max-height: 220px;
+                        overflow-y: auto;
+                      "
+                    ></div>
+                  </div>
+                  <div id="frequencyError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                  <label for="radioOwner">
+                    <i
+                      class="fa-solid fa-user"
+                      style="color: var(--info-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.owner">Owner</span>
+                  </label>
+                  <select id="radioOwner">
+                    <option value="" data-i18n="select.owner">
+                      Select an owner...
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="radioMission">
+                    <i
+                      class="fa-solid fa-rocket"
+                      style="color: var(--info-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.mission">Mission</span>
+                  </label>
+                  <select id="radioMission">
+                    <option value="" data-i18n="select.noMission">
+                      No Mission
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="radioRole">
+                    <i
+                      class="fa-solid fa-person-chalkboard"
+                      style="color: var(--info-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.role">Role</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="radioRole"
+                    data-i18n-placeholder="radio.rolePlaceholder"
+                    placeholder="Auto-filled from mission"
+                    style="width: 100%"
+                    readonly
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Standby State Card -->
+            <div
+              class="standby-state-card"
+              style="
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border: 2px solid var(--warning-color);
+                border-radius: var(--border-radius-sm);
+                padding: 1.25rem;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                  margin-bottom: 1rem;
+                  padding-bottom: 1rem;
+                  border-bottom: 2px solid rgba(217, 119, 6, 0.3);
+                "
+              >
+                <div
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background-color: #f59e0b;
+                  "
+                ></div>
+                <h5
+                  style="
+                    color: var(--gray-900);
+                    margin: 0;
+                    font-size: 1rem;
+                    font-weight: 600;
+                  "
+                >
+                  <span data-i18n="radio.standbyState">Standby State</span>
+                </h5>
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--gray-600);
+                    margin-left: auto;
+                  "
+                  data-i18n="radio.backupConfig"
+                  >Backup Configuration</span
+                >
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 1.25rem;
+                "
+              >
+                <div class="form-group">
+                  <label for="radioStandbyFrequency">
+                    <i
+                      class="fa-solid fa-wave-square"
+                      style="color: var(--warning-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.freqMhz">Frequency (MHz)</span>
+                  </label>
+                  <div style="position: relative; width: 100%">
+                    <input
+                      type="text"
+                      id="radioStandbyFrequency"
+                      placeholder="e.g., 120.5 or link name"
+                      data-i18n-placeholder="radio.freqPlaceholder"
+                      style="width: 100%"
+                      onchange="validateStandbyFrequency()"
+                      oninput="
+                        showRadioFreqSuggestions(
+                          'radioStandbyFrequency',
+                          'radioStandbyFreqSuggestions',
+                        )
+                      "
+                      onblur="
+                        hideRadioFreqSuggestions('radioStandbyFreqSuggestions')
+                      "
+                      autocomplete="off"
+                    />
+                    <div
+                      id="radioStandbyFreqSuggestions"
+                      style="
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        right: 0;
+                        left: 0;
+                        z-index: 9999;
+                        background: white;
+                        border: 1.5px solid var(--warning-color);
+                        border-top: none;
+                        border-radius: 0 0 8px 8px;
+                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                        max-height: 220px;
+                        overflow-y: auto;
+                      "
+                    ></div>
+                  </div>
+                  <div id="standbyFrequencyError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                  <label for="radioStandbyOwner">
+                    <i
+                      class="fa-solid fa-user"
+                      style="color: var(--warning-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.owner">Owner</span>
+                  </label>
+                  <select id="radioStandbyOwner">
+                    <option value="" data-i18n="select.owner">
+                      Select an owner...
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="radioStandbyMission">
+                    <i
+                      class="fa-solid fa-rocket"
+                      style="color: var(--warning-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.mission">Mission</span>
+                  </label>
+                  <select id="radioStandbyMission">
+                    <option value="" data-i18n="select.noMission">
+                      No Mission
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="radioStandbyRole">
+                    <i
+                      class="fa-solid fa-person-chalkboard"
+                      style="color: var(--warning-color); margin-right: 0.4rem"
+                    ></i>
+                    <span data-i18n="radio.role">Role</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="radioStandbyRole"
+                    data-i18n-placeholder="radio.rolePlaceholder"
+                    placeholder="Auto-filled from mission"
+                    style="width: 100%"
+                    readonly
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Section -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 1.5rem;
+              padding-bottom: 1.5rem;
+              border-bottom: 2px solid var(--gray-200);
+            "
+          >
+            <div class="form-group">
+              <label for="radioStatus">
+                <i
+                  class="fa-solid fa-circle-info"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="radio.status">Status</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <select id="radioStatus" required>
+                <option value="Usable" data-i18n="search.statusUsable">
+                  ✓ Usable
+                </option>
+                <option value="Unusable" data-i18n="search.statusUnusable">
+                  ✗ Unusable
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="radioNotes">
+                <i
+                  class="fa-solid fa-note-sticky"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="radio.notes">Notes</span>
+              </label>
+              <textarea
+                id="radioNotes"
+                rows="2"
+                data-i18n-placeholder="radio.notesPlaceholder"
+                placeholder="Add any relevant notes..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="deleteRadio()"
+            >
+              <i class="fa-solid fa-trash"></i>
+              <span data-i18n="btn.delete">Delete</span>
+            </button>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeRadioModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveRadio()"
+              >
+                <i class="fa-solid fa-check"></i>
+                <span data-i18n="btn.save">Save</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add New Radio Modal -->
+    <div id="addRadioModal" class="modal hidden">
+      <div class="modal-content modal-lg">
+        <div class="modal-header">
+          <h3>
+            <i
+              class="fa-solid fa-plus"
+              style="color: var(--success-color); margin-right: 0.5rem"
+            ></i
+            ><span data-i18n="radio.addTitle">Add New Radio Device</span>
+          </h3>
+          <button class="modal-close" onclick="closeAddRadioModal()">
+            &times;
+          </button>
+        </div>
+        <form id="addRadioForm" class="modal-form">
+          <input type="hidden" id="addRadioSite" />
+          <div
+            style="
+              padding: 0.5rem 0;
+              border-bottom: 2px solid var(--gray-200);
+              margin-bottom: 1.5rem;
+            "
+          >
+            <p
+              style="color: var(--gray-600); font-size: 0.9rem; margin: 0"
+              data-i18n="radio.addHelp"
+            >
+              Select the device type to add to this site
+            </p>
+          </div>
+          <div class="form-group">
+            <label for="addRadioDeviceType">
+              <i
+                class="fa-solid fa-layer-group"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="radio.deviceType">Device Type</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <select id="addRadioDeviceType" required>
+              <option value="" data-i18n="select.deviceType">
+                Select device type...
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="addRadioQuantity">
+              <i
+                class="fa-solid fa-hashtag"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="radio.quantity">Quantity</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="number"
+              id="addRadioQuantity"
+              min="1"
+              max="50"
+              value="1"
+              required
+            />
+          </div>
+
+          <div class="modal-footer">
+            <div></div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeAddRadioModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveNewRadio()"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span data-i18n="radio.addBtn">Add Device</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Link Modal -->
+    <div id="addLinkModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <i
+              class="fa-solid fa-link"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i
+            ><span data-i18n="addLink.title">Add Link Mapping</span>
+          </h3>
+          <button class="modal-close" onclick="closeAddLinkModal()">
+            &times;
+          </button>
+        </div>
+        <form id="addLinkForm" class="modal-form">
+          <div
+            style="
+              padding: 0.5rem 0;
+              border-bottom: 2px solid var(--gray-200);
+              margin-bottom: 1.5rem;
+            "
+          >
+            <p
+              style="color: var(--gray-600); font-size: 0.9rem; margin: 0"
+              data-i18n="addLink.help"
+            >
+              Create a new link mapping for frequency management
+            </p>
+          </div>
+          <div class="form-group">
+            <label for="linkName">
+              <i
+                class="fa-solid fa-signature"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.name">Link Name</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="text"
+              id="linkName"
+              data-i18n-placeholder="addLink.namePlaceholder"
+              placeholder="e.g., Primary Network, Backup Link"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="linkFrequency">
+              <i
+                class="fa-solid fa-wave-square"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.frequency">Frequency</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="text"
+              id="linkFrequency"
+              data-i18n-placeholder="addLink.freqPlaceholder"
+              placeholder="e.g., 120.5"
+              required
+              oninput="updateLinkBand('linkFrequency', 'linkFrequencyBand')"
+            />
+          </div>
+          <div class="form-group">
+            <label for="linkFrequencyBand">
+              <i
+                class="fa-solid fa-signal"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.band">Frequency Band</span>
+            </label>
+            <input
+              type="text"
+              id="linkFrequencyBand"
+              readonly
+              data-i18n-placeholder="addLink.bandPlaceholder"
+              placeholder="Auto-detected from frequency"
+              style="color: var(--gray-500)"
+            />
+          </div>
+          <div class="form-group">
+            <label for="linkOwner">
+              <i
+                class="fa-solid fa-user"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.owner">Owner</span>
+            </label>
+            <select id="linkOwner">
+              <option value="" data-i18n="select.owner">
+                Select an owner...
+              </option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <div></div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeAddLinkModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveNewLink()"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span data-i18n="addLink.addBtn">Add Link</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Link Modal -->
+    <div id="editLinkModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <i
+              class="fa-solid fa-link"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i
+            ><span data-i18n="editLink.title">Edit Link Mapping</span>
+          </h3>
+          <button class="modal-close" onclick="closeEditLinkModal()">
+            &times;
+          </button>
+        </div>
+        <form id="editLinkForm" class="modal-form">
+          <input type="hidden" id="editLinkId" />
+          <div
+            style="
+              padding: 0.5rem 0;
+              border-bottom: 2px solid var(--gray-200);
+              margin-bottom: 1.5rem;
+            "
+          >
+            <p
+              style="color: var(--gray-600); font-size: 0.9rem; margin: 0"
+              data-i18n="editLink.help"
+            >
+              Update the link mapping details
+            </p>
+          </div>
+          <div class="form-group">
+            <label for="editLinkName">
+              <i
+                class="fa-solid fa-signature"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.name">Link Name</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="text"
+              id="editLinkName"
+              data-i18n-placeholder="addLink.namePlaceholder"
+              placeholder="e.g., Primary Network, Backup Link"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editLinkFrequency">
+              <i
+                class="fa-solid fa-wave-square"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.frequency">Frequency</span>
+              <span style="color: var(--danger-color)">*</span>
+            </label>
+            <input
+              type="text"
+              id="editLinkFrequency"
+              data-i18n-placeholder="addLink.freqPlaceholder"
+              placeholder="e.g., 120.5"
+              required
+              oninput="
+                updateLinkBand('editLinkFrequency', 'editLinkFrequencyBand')
+              "
+            />
+          </div>
+          <div class="form-group">
+            <label for="editLinkFrequencyBand">
+              <i
+                class="fa-solid fa-signal"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.band">Frequency Band</span>
+            </label>
+            <input
+              type="text"
+              id="editLinkFrequencyBand"
+              readonly
+              data-i18n-placeholder="addLink.bandPlaceholder"
+              placeholder="Auto-detected from frequency"
+              style="color: var(--gray-500)"
+            />
+          </div>
+          <div class="form-group">
+            <label for="editLinkOwner">
+              <i
+                class="fa-solid fa-user"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.owner">Owner</span>
+            </label>
+            <select id="editLinkOwner">
+              <option value="" data-i18n="select.owner">
+                Select an owner...
+              </option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" onclick="deleteLink()">
+              <i class="fa-solid fa-trash"></i>
+              <span data-i18n="btn.delete">Delete</span>
+            </button>
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeEditLinkModal()"
+                data-i18n="btn.cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="saveEditLink()"
+              >
+                <i class="fa-solid fa-check"></i>
+                <span data-i18n="btn.save">Save</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Plan Mission Modal -->
+    <div id="planMissionModal" class="modal hidden">
+      <div class="modal-content modal-xl">
+        <div
+          id="planMissionModalHeader"
+          class="modal-header"
+          style="transition: background 0.3s"
+        >
+          <h3 data-i18n="planMission.title">
+            <i
+              class="fa-solid fa-rocket"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i>
+            Plan Mission
+          </h3>
+          <button class="modal-close" onclick="closePlanMissionModal()">
+            &times;
+          </button>
+        </div>
+
+        <form id="planMissionForm" class="modal-form">
+          <!-- Mission Information -->
+          <div
+            style="
+              margin-bottom: 1.75rem;
+              padding-bottom: 1.5rem;
+              border-bottom: 2px solid var(--gray-200);
+            "
+          >
+            <div
+              style="
+                padding: 0.5rem 0;
+                border-bottom: 2px solid var(--gray-200);
+                margin-bottom: 1.25rem;
+              "
+            >
+              <h4
+                style="
+                  color: var(--gray-900);
+                  font-size: 1rem;
+                  margin: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-file-lines"
+                  style="color: var(--primary-color)"
+                ></i>
+                <span data-i18n="planMission.infoSection"
+                  >Mission Information</span
+                >
+              </h4>
+            </div>
+            <div
+              id="missionInfoGrid"
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                align-items: end;
+              "
+            >
+              <div class="form-group" style="margin-bottom: 0">
+                <label for="planMissionName">
+                  <i
+                    class="fa-solid fa-signature"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.name">Mission Name</span>
+                  <span style="color: var(--danger-color)">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="planMissionName"
+                  data-i18n-placeholder="planMission.namePlaceholder"
+                  placeholder="e.g., Saving Willy"
+                />
+              </div>
+              <div class="form-group" style="margin-bottom: 0">
+                <label for="planMissionOwner">
+                  <i
+                    class="fa-solid fa-user-tie"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.owner">Mission Owner</span>
+                  <span style="color: var(--danger-color)">*</span>
+                </label>
+                <select
+                  id="planMissionOwner"
+                  onchange="updatePlanMissionHeaderColor()"
+                >
+                  <option value="" data-i18n="planMission.ownerSelect">
+                    Select an owner...
+                  </option>
+                </select>
+              </div>
+              <div
+                class="form-group"
+                id="missionCreatedAtGroup"
+                style="display: none; margin-bottom: 0"
+              >
+                <label for="missionCreatedAt">
+                  <i
+                    class="fa-solid fa-clock"
+                    style="color: var(--gray-400); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.created">Created</span>
+                </label>
+                <input
+                  type="text"
+                  id="missionCreatedAt"
+                  readonly
+                  style="color: var(--gray-500); font-size: 0.85rem"
+                />
+              </div>
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                margin-top: 1.25rem;
+              "
+            >
+              <div class="form-group" style="margin-bottom: 0">
+                <label for="planMissionTimeStart">
+                  <i
+                    class="fa-regular fa-clock"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.timeStart">Start Time</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  id="planMissionTimeStart"
+                  dir="ltr"
+                />
+              </div>
+              <div class="form-group" style="margin-bottom: 0">
+                <label for="planMissionTimeEnd">
+                  <i
+                    class="fa-regular fa-clock"
+                    style="color: var(--primary-color); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.timeEnd">End Time</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  id="planMissionTimeEnd"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="downloadMissionTemplate()"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span data-i18n="planMission.downloadTemplate"
+                  >Download Template</span
+                >
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="document.getElementById('missionExcelUpload').click()"
+              >
+                <i class="fa-solid fa-file-excel" style="color: #16a34a"></i>
+                <span data-i18n="planMission.loadExcel">Load from Excel</span>
+              </button>
+              <input
+                type="file"
+                id="missionExcelUpload"
+                accept=".xlsx,.xls,.csv"
+                style="display: none"
+                onchange="handleMissionExcelUpload(this)"
+              />
+            </div>
+          </div>
+
+          <!-- Device Requirements -->
+          <div
+            style="
+              margin-bottom: 1.75rem;
+              padding-bottom: 1.5rem;
+              border-bottom: 2px solid var(--gray-200);
+            "
+          >
+            <div
+              style="
+                padding: 0.5rem 0;
+                border-bottom: 2px solid var(--gray-200);
+                margin-bottom: 1.25rem;
+              "
+            >
+              <h4
+                style="
+                  color: var(--gray-900);
+                  font-size: 1rem;
+                  margin: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-tower-cell"
+                  style="color: var(--primary-color)"
+                ></i>
+                <span data-i18n="planMission.deviceReqs"
+                  >Device Requirements</span
+                >
+              </h4>
+            </div>
+
+            <!-- Add Requirement Form -->
+            <div
+              id="reqFormBox"
+              style="
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border: 2px solid var(--info-color);
+                border-radius: var(--border-radius-sm);
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+                transition:
+                  background 0.25s,
+                  border-color 0.25s;
+              "
+            >
+              <p
+                style="
+                  color: var(--gray-600);
+                  font-size: 0.875rem;
+                  margin: 0 0 1rem 0;
+                "
+              >
+                <i
+                  class="fa-solid fa-circle-info"
+                  style="color: var(--info-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="planMission.addReqHint"
+                  >Add specific device requirements for this mission</span
+                >
+              </p>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1.5fr 1fr 1fr auto;
+                  gap: 1rem;
+                  align-items: flex-end;
+                "
+              >
+                <!-- Frequency Band -->
+                <div class="form-group" style="margin-bottom: 0">
+                  <label for="reqFrequencyBand" style="font-size: 0.8rem">
+                    <i
+                      class="fa-solid fa-wave-square"
+                      style="color: var(--info-color); margin-right: 0.3rem"
+                    ></i>
+                    <span data-i18n="planMission.freqBand">Freq Band</span>
+                    <span style="color: var(--danger-color)">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="reqFrequencyBand"
+                    readonly
+                    data-i18n-placeholder="planMission.freqBandAuto"
+                    placeholder="Auto-detected"
+                    style="color: var(--gray-500)"
+                  />
+                </div>
+
+                <!-- Location (toggle + selector combined in one column) -->
+                <div class="form-group" style="margin-bottom: 0">
+                  <label
+                    style="
+                      font-size: 0.8rem;
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    <i
+                      class="fa-solid fa-map"
+                      style="color: var(--info-color); margin-right: 0.1rem"
+                    ></i>
+                    <span
+                      id="lblSector"
+                      style="color: var(--gray-700)"
+                      data-i18n="planMission.sector"
+                      >Sector</span
+                    >
+                    <label
+                      style="
+                        width: 32px;
+                        height: 16px;
+                        background: var(--primary-color);
+                        border-radius: 9999px;
+                        position: relative;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                      "
+                    >
+                      <input
+                        type="checkbox"
+                        id="reqLocationToggle"
+                        onchange="toggleLocationType()"
+                        style="display: none"
+                        checked
+                      />
+                      <span
+                        style="
+                          width: 12px;
+                          height: 12px;
+                          background: white;
+                          border-radius: 9999px;
+                          position: absolute;
+                          right: 4px;
+                          top: 2px;
+                          display: block;
+                          transition: all 0.2s ease;
+                        "
+                      ></span>
+                    </label>
+                    <span
+                      id="lblSite"
+                      style="color: var(--gray-700)"
+                      data-i18n="planMission.site"
+                      >Site</span
+                    >
+                  </label>
+                  <select id="reqSector" style="display: none">
+                    <option value="" data-i18n="planMission.sectorSelect">
+                      Select a sector...
+                    </option>
+                  </select>
+                  <select id="reqSite">
+                    <option value="" data-i18n="planMission.siteSelect">
+                      Select a site...
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Frequency -->
+                <div
+                  class="form-group"
+                  style="margin-bottom: 0; position: relative"
+                >
+                  <label for="reqFrequency" style="font-size: 0.8rem">
+                    <i
+                      class="fa-solid fa-dial"
+                      style="color: var(--info-color); margin-right: 0.3rem"
+                    ></i>
+                    <span data-i18n="planMission.freqMhz">Freq (MHz)</span>
+                    <span style="color: var(--danger-color)">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="reqFrequency"
+                    data-i18n-placeholder="planMission.freqPlaceholder"
+                    placeholder="e.g., 120.5 or link name"
+                    oninput="
+                      autoFillReqBand();
+                      showFreqLinkSuggestions();
+                      checkFreqOwnerMismatch();
+                    "
+                    onblur="hideFreqLinkSuggestions()"
+                    autocomplete="off"
+                  />
+                  <div
+                    id="reqFreqSuggestions"
+                    style="
+                      display: none;
+                      position: absolute;
+                      top: 100%;
+                      right: 0;
+                      left: 0;
+                      z-index: 9999;
+                      background: white;
+                      border: 1.5px solid var(--primary-color);
+                      border-top: none;
+                      border-radius: 0 0 8px 8px;
+                      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                      max-height: 220px;
+                      overflow-y: auto;
+                    "
+                  ></div>
+                </div>
+
+                <!-- Role -->
+                <div class="form-group" style="margin-bottom: 0">
+                  <label for="reqRole" style="font-size: 0.8rem">
+                    <i
+                      class="fa-solid fa-briefcase"
+                      style="color: var(--info-color); margin-right: 0.3rem"
+                    ></i>
+                    <span data-i18n="planMission.role">Role</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="reqRole"
+                    data-i18n-placeholder="planMission.rolePlaceholder"
+                    placeholder="e.g., Commander"
+                  />
+                </div>
+
+                <!-- Add Button -->
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onclick="addMissionRequirement()"
+                  style="white-space: nowrap; align-self: flex-end"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  <span data-i18n="planMission.addBtn">Add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Planned Requirements List -->
+          <div style="margin-bottom: 1.75rem">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+              "
+            >
+              <h4
+                style="
+                  color: var(--gray-900);
+                  font-size: 1rem;
+                  margin: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-list-check"
+                  style="color: var(--primary-color)"
+                ></i>
+                <span data-i18n="planMission.plannedReqs"
+                  >Planned Requirements</span
+                >
+              </h4>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  font-size: 13px;
+                  color: var(--gray-600);
+                "
+              >
+                <label
+                  for="reqSortOrder"
+                  style="font-weight: 500"
+                  data-i18n="planMission.sortBy"
+                  >Sort by:</label
+                >
+                <select
+                  id="reqSortOrder"
+                  onchange="setSortOrder(this.value)"
+                  style="
+                    padding: 4px 8px;
+                    border: 1px solid var(--gray-300);
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-family: inherit;
+                  "
+                >
+                  <option value="none" data-i18n="planMission.sortNone">
+                    None
+                  </option>
+                  <option value="state" data-i18n="planMission.sortState">
+                    State
+                  </option>
+                  <option value="frequency" data-i18n="planMission.sortFreq">
+                    Frequency
+                  </option>
+                  <option value="location" data-i18n="planMission.sortLocation">
+                    Location
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="req-list-container"
+              style="
+                border: 2px solid var(--gray-200);
+                border-radius: var(--border-radius-sm);
+                overflow: hidden;
+                background: white;
+              "
+            >
+              <div id="plannedRequirementsList" style="min-height: 50px">
+                <p
+                  style="
+                    color: var(--gray-400);
+                    font-size: 14px;
+                    text-align: center;
+                    margin: 16px;
+                  "
+                >
+                  No requirements added yet.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Devices Section -->
+          <div
+            id="extraDevicesSection"
+            style="display: none; margin-bottom: 1rem"
+          >
+            <h4
+              style="
+                color: var(--gray-900);
+                font-size: 1rem;
+                margin: 0 0 1rem 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
+            >
+              <i
+                class="fa-solid fa-microchip"
+                style="color: var(--warning-color)"
+              ></i>
+              <span data-i18n="planMission.extraDevices"
+                >Extra Devices (Not in Requirements)</span
+              >
+            </h4>
+            <div
+              class="extra-devices-box"
+              style="
+                border: 2px solid var(--warning-light);
+                border-radius: var(--border-radius-sm);
+                overflow: hidden;
+                background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+              "
+            >
+              <div id="extraDevicesList" style="min-height: 50px">
+                <p
+                  style="
+                    color: #92400e;
+                    font-size: 14px;
+                    text-align: center;
+                    margin: 16px;
+                  "
+                >
+                  No extra devices.
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="modal-footer">
+          <div></div>
+          <div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closePlanMissionModal()"
+              data-i18n="btn.cancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="savePlannedMission()"
+            >
+              <i class="fa-solid fa-check"></i>
+              <span data-i18n="planMission.saveMission">Save Mission</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passkey Modal -->
+    <div id="passkeyModal" class="modal hidden">
+      <div class="modal-content" style="max-width: 360px">
+        <div class="modal-header">
+          <h3>
+            <i
+              class="fa-solid fa-lock"
+              style="color: var(--warning-color); margin-right: 0.5rem"
+            ></i>
+            <span data-i18n="passkey.title">Enter Passkey</span>
+          </h3>
+          <button class="modal-close" onclick="closePasskeyModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-form">
+          <p
+            style="
+              color: var(--gray-600);
+              font-size: 0.88rem;
+              margin-bottom: 1.25rem;
+            "
+            data-i18n="passkey.hint"
+          >
+            Enter the passkey to switch to Edit Mode.
+          </p>
+          <div class="form-group">
+            <label for="passkeyInput">
+              <i
+                class="fa-solid fa-key"
+                style="color: var(--warning-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="passkey.label">Passkey</span>
+            </label>
+            <input
+              type="password"
+              id="passkeyInput"
+              data-i18n-placeholder="passkey.placeholder"
+              placeholder="••••••••"
+              onkeydown="if (event.key === 'Enter') submitPasskey();"
+              autocomplete="off"
+            />
+          </div>
+          <p
+            id="passkeyError"
+            style="
+              display: none;
+              color: var(--danger-color);
+              font-size: 0.83rem;
+              margin-top: 0.5rem;
+            "
+            data-i18n="passkey.error"
+          >
+            Incorrect passkey. Try again.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <div></div>
+          <div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closePasskeyModal()"
+              data-i18n="btn.cancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="submitPasskey()"
+            >
+              <i class="fa-solid fa-unlock"></i>
+              <span data-i18n="passkey.confirm">Unlock</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification hidden"></div>
+
+    <!-- Scripts -->
+    <script>
+      // Runs after HTML is parsed, before external scripts — no tab flash
+      (function () {
+        var saved = localStorage.getItem("mahakesher-tab");
+        if (!saved || saved === "overview") return;
+        var fromBtn = document.querySelector(
+          '.tab-button[data-tab="overview"]',
+        );
+        var fromContent = document.getElementById("overview");
+        var toBtn = document.querySelector(
+          '.tab-button[data-tab="' + saved + '"]',
+        );
+        var toContent = document.getElementById(saved);
+        if (!toBtn || !toContent) return;
+        if (fromBtn) fromBtn.classList.remove("active");
+        if (fromContent) fromContent.classList.remove("active");
+        toBtn.classList.add("active");
+        toContent.classList.add("active");
+      })();
+    </script>
+    <script src="js/i18n.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/selectors.js"></script>
+    <script src="js/validators.js"></script>
+    <script src="js/inline-editor.js"></script>
+
+    <!-- Modals -->
+    <script src="js/modals/link.js"></script>
+    <script src="js/modals/mission.js"></script>
+    <script src="js/modals/radio.js"></script>
+    <script src="js/modals/sector.js"></script>
+    <script src="js/modals/site.js"></script>
+
+    <!-- Tabs -->
+    <script src="js/tabs/links.js"></script>
+    <script src="js/tabs/missions.js"></script>
+    <script src="js/tabs/overview.js"></script>
+    <script src="js/tabs/search.js"></script>
+    <script src="js/tabs/summary.js"></script>
+    <script src="js/tabs/history.js"></script>
+    <script src="js/tabs/timeline.js"></script>
+    <script src="js/tabs/preferences.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

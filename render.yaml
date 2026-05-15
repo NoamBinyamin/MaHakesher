@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: mahakesher
+    runtime: python
+    buildCommand: pip3 install -r requirements.txt
+    startCommand: python3 server.py
