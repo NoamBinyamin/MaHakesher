@@ -163,6 +163,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_hierarchy()
         elif path == '/api/links':
             return self.handle_get_links()
+        elif path == '/api/version':
+            return self.handle_version()
         elif path == '/api/export':
             return self.handle_export()
         elif path == '/api/audit':
@@ -1115,6 +1117,16 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json_response(500, {'error': str(e)})
 
     # ==================== Export / Import ====================
+
+    def handle_version(self):
+        """GET /api/version - Returns the last-modified timestamp of the data files.
+        Used by the frontend to detect changes made by other users without a full reload."""
+        try:
+            data_ts    = os.path.getmtime(DATA_FILE)    if os.path.exists(DATA_FILE)    else 0
+            mapping_ts = os.path.getmtime(MAPPING_FILE) if os.path.exists(MAPPING_FILE) else 0
+            return self.send_json_response(200, {'ts': max(data_ts, mapping_ts)})
+        except Exception:
+            return self.send_json_response(200, {'ts': 0})
 
     def handle_export(self):
         """GET /api/export - Export all data and mappings as a single JSON backup"""

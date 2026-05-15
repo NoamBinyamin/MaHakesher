@@ -205,6 +205,7 @@ async function initializeApp() {
     renderSummaryTab();
     renderTimelineTab();
     updateServerStatus(t("server.connected"), true);
+    _startPolling();
   } catch (error) {
     console.error("Initialization error:", error);
     updateServerStatus(t("server.disconnected"), false);
@@ -301,4 +302,49 @@ function setupDirtyTracking() {
     input.addEventListener("input", () => markModalDirty("siteModal"));
     input.addEventListener("change", () => markModalDirty("siteModal"));
   });
+}
+
+// ==================== Live Sync Polling ====================
+
+const POLL_INTERVAL_MS = 10000; // 10 seconds
+let _lastKnownTs = 0;
+
+function _startPolling() {
+  setInterval(_pollForChanges, POLL_INTERVAL_MS);
+}
+
+async function _pollForChanges() {
+  // Skip poll while the user has a modal open — avoids overwriting mid-edit state
+  const openModal = document.querySelector(".modal:not(.hidden)");
+  if (openModal) return;
+
+  try {
+    const { ts } = await fetch(window.API_BASE + "/version").then(r => r.json());
+
+    if (_lastKnownTs === 0) {
+      // First poll after init — just record the baseline
+      _lastKnownTs = ts;
+      return;
+    }
+
+    if (ts > _lastKnownTs) {
+      _lastKnownTs = ts;
+      await loadConfiguration();
+      await loadAllData();
+      await loadLinks();
+      populateSelects();
+      renderOverview();
+      renderMissionsTab();
+      renderLinksTab();
+      renderSummaryTab();
+      renderTimelineTab();
+      if (window.performSearch) performSearch();
+      if (window.renderPreferencesTab &&
+          document.getElementById("preferences")?.classList.contains("active")) {
+        renderPreferencesTab();
+      }
+    }
+  } catch (_) {
+    // Silent — server may be temporarily unreachable
+  }
 }
