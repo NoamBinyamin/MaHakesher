@@ -1,3 +1,25 @@
 {
-  "mappings": []
+  "mappings": [
+    {
+      "id": "link-8b691626",
+      "link_name": "כובע",
+      "frequency": 256,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-df5fbbbb",
+      "link_name": "מקל",
+      "frequency": 132,
+      "frequency_band": "HVHF",
+      "owner": "בעלים איכותי"
+    },
+    {
+      "id": "link-1bf72375",
+      "link_name": "קסמים",
+      "frequency": 35.85,
+      "frequency_band": "LVHF",
+      "owner": "המדור החזק"
+    }
+  ]
 }

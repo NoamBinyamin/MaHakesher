@@ -17,7 +17,7 @@ function isModalDirty(modalId) {
 
 function confirmCloseModal(modalId) {
   if (isModalDirty(modalId)) {
-    return confirm("You have unsaved changes. Close anyway?");
+    return confirm(t("confirm.unsavedChanges"));
   }
   return true;
 }
@@ -27,34 +27,47 @@ window.markModalClean = markModalClean;
 window.isModalDirty = isModalDirty;
 window.confirmCloseModal = confirmCloseModal;
 
-// ==================== View / Edit Mode ====================
+// ==================== Auth & Edit Mode ====================
 
-// ── Hardcoded passkey — change this value to set your own ──────────────────
-const EDIT_PASSKEY = "1234";
-// ──────────────────────────────────────────────────────────────────────────
+let _editModeActive  = false;
+let _loggedInUser    = null; // {username, role} when authenticated
 
-// Edit mode is NOT persisted — every page load starts in View Only
-let _editModeActive = false;
+function isViewMode()      { return !_editModeActive; }
+function isAuthenticated() { return _loggedInUser !== null; }
 
-function isViewMode() {
-  return !_editModeActive;
+// On page load — restore session if token is still valid
+async function restoreSession() {
+  const token = localStorage.getItem("mahakesher-token");
+  if (!token) return;
+  try {
+    // Use raw fetch to avoid showing an error notification for a stale token
+    const res = await fetch(window.API_BASE + "/me", {
+      headers: { "X-Auth-Token": token, "Content-Type": "application/json" }
+    });
+    if (!res.ok) { localStorage.removeItem("mahakesher-token"); return; }
+    const me = await res.json();
+    _loggedInUser = me;
+    _editModeActive = true;
+    document.documentElement.classList.remove("view-mode");
+    _updateModeButton();
+    _updateUserButton();
+  } catch (_) {
+    localStorage.removeItem("mahakesher-token");
+  }
 }
 
 function applyStoredMode() {
-  // Always start in View Only; user must enter passkey to edit
   _editModeActive = false;
   document.documentElement.classList.add("view-mode");
   _updateModeButton();
 }
 
 function toggleMode() {
-  if (_editModeActive) {
-    // Edit → View: no passkey needed
-    _setEditMode(false);
-  } else {
-    // View → Edit: require passkey
-    _openPasskeyModal();
+  if (!isAuthenticated()) {
+    openLoginModal();
+    return;
   }
+  _setEditMode(!_editModeActive);
 }
 
 function _setEditMode(active) {
@@ -62,15 +75,11 @@ function _setEditMode(active) {
   document.documentElement.classList.toggle("view-mode", !active);
   _updateModeButton();
 
-  // When leaving edit mode, redirect away from preferences tab (edit-only)
   if (!active) {
     const activeContent = document.querySelector(".tab-content.active");
     if (activeContent && activeContent.id === "preferences") {
       const overviewBtn = document.querySelector('.tab-button[data-tab="overview"]');
-      if (overviewBtn) {
-        overviewBtn.click(); // triggers all re-renders via tab navigation
-        return;
-      }
+      if (overviewBtn) { overviewBtn.click(); return; }
     }
   }
 
@@ -85,7 +94,12 @@ function _setEditMode(active) {
 function _updateModeButton() {
   const btn = document.getElementById("modeToggle");
   if (!btn) return;
-  if (isViewMode()) {
+  if (!isAuthenticated()) {
+    btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> ${t("login.btnLogin")}`;
+    btn.title = t("login.btnLogin");
+    btn.style.background = "rgba(217,119,6,0.25)";
+    btn.style.borderColor = "rgba(217,119,6,0.5)";
+  } else if (isViewMode()) {
     btn.innerHTML = `<i class="fa-solid fa-eye"></i> ${t("mode.view")}`;
     btn.title = t("mode.toggleToEdit");
     btn.style.background = "rgba(217,119,6,0.25)";
@@ -98,43 +112,79 @@ function _updateModeButton() {
   }
 }
 
-// ── Passkey modal ──────────────────────────────────────────────────────────
-
-function _openPasskeyModal() {
-  const modal = document.getElementById("passkeyModal");
-  const input = document.getElementById("passkeyInput");
-  const err   = document.getElementById("passkeyError");
-  if (input) input.value = "";
-  if (err)   err.style.display = "none";
-  if (modal) {
-    modal.classList.remove("hidden");
-    disableBodyScroll();
-    requestAnimationFrame(() => { if (input) input.focus(); });
+function _updateUserButton() {
+  const btn  = document.getElementById("userInfoBtn");
+  const name = document.getElementById("userInfoName");
+  if (!btn) return;
+  if (isAuthenticated()) {
+    if (name) name.textContent = t("login.loggedInAs").replace("{name}", _loggedInUser.username);
+    btn.title = t("login.logoutTooltip");
+    btn.style.display = "flex";
+  } else {
+    btn.style.display = "none";
   }
 }
 
-function closePasskeyModal() {
-  const modal = document.getElementById("passkeyModal");
+async function confirmLogout() {
+  if (confirm(t("login.confirmLogout"))) {
+    await logout();
+  }
+}
+
+// ── Login modal ────────────────────────────────────────────────────────────
+
+function openLoginModal() {
+  const modal = document.getElementById("loginModal");
+  if (!modal) return;
+  document.getElementById("loginUsername").value = "";
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("loginError").style.display = "none";
+  modal.classList.remove("hidden");
+  disableBodyScroll();
+  requestAnimationFrame(() => document.getElementById("loginUsername").focus());
+}
+
+function closeLoginModal() {
+  const modal = document.getElementById("loginModal");
   if (modal) { modal.classList.add("hidden"); enableBodyScroll(); }
 }
 
-function submitPasskey() {
-  const input = document.getElementById("passkeyInput");
-  const err   = document.getElementById("passkeyError");
-  if (!input) return;
+async function submitLogin() {
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errorEl  = document.getElementById("loginError");
+  errorEl.style.display = "none";
 
-  if (input.value === EDIT_PASSKEY) {
-    closePasskeyModal();
-    _setEditMode(true);
-  } else {
-    input.value = "";
-    if (err) err.style.display = "block";
-    // Shake the input to signal wrong passkey
-    input.classList.remove("passkey-shake");
-    void input.offsetWidth; // reflow to restart animation
-    input.classList.add("passkey-shake");
-    input.focus();
+  if (!username || !password) {
+    errorEl.textContent = t("login.fieldRequired");
+    errorEl.style.display = "block";
+    return;
   }
+
+  let result;
+  try {
+    result = await apiLogin(username, password);
+  } catch (_) {
+    errorEl.textContent = t("login.invalidCredentials");
+    errorEl.style.display = "block";
+    document.getElementById("loginPassword").value = "";
+    document.getElementById("loginPassword").focus();
+    return;
+  }
+  // Login succeeded — apply auth state
+  localStorage.setItem("mahakesher-token", result.token);
+  _loggedInUser = { username: result.username, role: result.role };
+  closeLoginModal();
+  _setEditMode(true);
+  _updateUserButton();
+}
+
+async function logout() {
+  await apiLogout();
+  _loggedInUser = null;
+  _setEditMode(false);
+  _updateUserButton();
+  showNotification(t("login.loggedOut"), "success");
 }
 
 // Guard helper — call at the top of every mutating function
@@ -146,23 +196,29 @@ function guardViewMode() {
   return false;
 }
 
-window.isViewMode        = isViewMode;
-window.toggleMode        = toggleMode;
-window.closePasskeyModal = closePasskeyModal;
-window.submitPasskey     = submitPasskey;
-window.guardViewMode     = guardViewMode;
+window.isViewMode      = isViewMode;
+window.isAuthenticated = isAuthenticated;
+window.toggleMode      = toggleMode;
+window.openLoginModal  = openLoginModal;
+window.closeLoginModal = closeLoginModal;
+window.submitLogin     = submitLogin;
+window.logout          = logout;
+window.confirmLogout   = confirmLogout;
+window.guardViewMode   = guardViewMode;
 
 // ==================== Initialization ====================
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyI18n();
   applyStoredDarkMode();
-  applyStoredMode();   // reads localStorage + sets class + updates button label
+  applyStoredMode();
   document.documentElement.style.opacity = '';
+  await restoreSession(); // validates stored token with server before data loads
   await initializeApp();
   setupTabNavigation();
   setupModalCloseHandlers();
   setupDirtyTracking();
+  setupKeyboardShortcuts();
   restoreLastTab();
 });
 
@@ -346,5 +402,77 @@ async function _pollForChanges() {
     }
   } catch (_) {
     // Silent — server may be temporarily unreachable
+  }
+}
+
+// ==================== Keyboard Shortcuts ====================
+
+function setupKeyboardShortcuts() {
+  document.addEventListener("keydown", (e) => {
+    const tag = document.activeElement?.tagName;
+    const isTyping = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+    const openModal = document.querySelector(".modal:not(.hidden)");
+
+    // Escape — close open modal (works even while typing inside it)
+    if (e.key === "Escape" && openModal) {
+      const closeBtn = openModal.querySelector(".modal-close");
+      if (closeBtn) closeBtn.click();
+      return;
+    }
+
+    // Alt+S — save open modal (works even while typing inside it)
+    if (e.altKey && e.key === "s" && openModal) {
+      e.preventDefault();
+      const saveBtn = openModal.querySelector(".modal-footer .btn-primary");
+      if (saveBtn) saveBtn.click();
+      return;
+    }
+
+    // Remaining shortcuts are suppressed while typing in a field
+    if (isTyping) return;
+
+    // Alt+E — toggle edit / view mode
+    if (e.altKey && e.key === "e") {
+      e.preventDefault();
+      toggleMode();
+      return;
+    }
+
+    // Alt+R — force data refresh without page reload
+    if (e.altKey && e.key === "r") {
+      e.preventDefault();
+      _keyboardForceRefresh();
+      return;
+    }
+
+    // Alt+1–9 — switch to the Nth visible tab
+    if (e.altKey && e.key >= "1" && e.key <= "9") {
+      e.preventDefault();
+      const visibleTabs = Array.from(
+        document.querySelectorAll(".tab-button")
+      ).filter((btn) => btn.offsetParent !== null);
+      const idx = parseInt(e.key) - 1;
+      if (visibleTabs[idx]) visibleTabs[idx].click();
+      return;
+    }
+  });
+}
+
+async function _keyboardForceRefresh() {
+  try {
+    showNotification(t("notify.refreshing"), "info");
+    await loadConfiguration();
+    await loadAllData();
+    await loadLinks();
+    populateSelects();
+    renderOverview();
+    renderMissionsTab();
+    renderLinksTab();
+    renderSummaryTab();
+    renderTimelineTab();
+    if (window.performSearch) performSearch();
+    showNotification(t("notify.dataRefreshed"), "success");
+  } catch (_) {
+    showNotification(t("notify.refreshFailed"), "error");
   }
 }

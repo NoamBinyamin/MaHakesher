@@ -2023,14 +2023,20 @@ body {
 }
 
 /* Dark mode toggle button in navbar */
+/* Shared size for all three navbar action buttons */
+#modeToggle, #userInfoBtn, #darkModeToggle {
+  height: 2.1rem;
+  font-size: 0.875rem;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+}
+
 #darkModeToggle {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   border-radius: var(--border-radius-sm);
-  padding: 0.35rem 0.75rem;
   cursor: pointer;
-  font-size: 1rem;
   transition: background 0.2s;
   display: flex;
   align-items: center;
@@ -2063,9 +2069,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   border-radius: var(--border-radius-sm);
-  padding: 0.35rem 0.75rem;
   cursor: pointer;
-  font-size: 0.9rem;
   transition:
     background 0.2s,
     border-color 0.2s;
@@ -2075,6 +2079,24 @@ body {
 }
 #modeToggle:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+#userInfoBtn {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.55);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+#userInfoBtn:hover {
+  background: rgba(16, 185, 129, 0.35);
+  border-color: rgba(16, 185, 129, 0.75);
 }
 
 /* View-mode banner — slides down from navbar, collapses back up on exit */

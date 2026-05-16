@@ -18,7 +18,8 @@
       "Bash(Get-ChildItem -Force)",
       "Bash(Select-Object Name, Mode)",
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\" -Force | Select-Object Name, Mode, @{Name=\"Size\";Expression={$_.Length}} | Format-Table -AutoSize)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

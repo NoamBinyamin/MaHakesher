@@ -38,6 +38,13 @@
             <i class="fa-solid fa-pen-to-square"></i> Edit Mode
           </button>
           <button
+            id="userInfoBtn"
+            onclick="confirmLogout()"
+          >
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="userInfoName"></span>
+          </button>
+          <button
             id="darkModeToggle"
             onclick="toggleDarkMode()"
             data-i18n="btn.dark"
@@ -2627,80 +2634,59 @@
       </div>
     </div>
 
-    <!-- Passkey Modal -->
-    <div id="passkeyModal" class="modal hidden">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal hidden">
       <div class="modal-content" style="max-width: 360px">
         <div class="modal-header">
           <h3>
-            <i
-              class="fa-solid fa-lock"
-              style="color: var(--warning-color); margin-right: 0.5rem"
-            ></i>
-            <span data-i18n="passkey.title">Enter Passkey</span>
+            <i class="fa-solid fa-right-to-bracket" style="color:var(--primary-color);margin-right:0.5rem"></i>
+            <span data-i18n="login.title">Login</span>
           </h3>
-          <button class="modal-close" onclick="closePasskeyModal()">
-            &times;
-          </button>
+          <button class="modal-close" onclick="closeLoginModal()">&times;</button>
         </div>
         <div class="modal-form">
-          <p
-            style="
-              color: var(--gray-600);
-              font-size: 0.88rem;
-              margin-bottom: 1.25rem;
-            "
-            data-i18n="passkey.hint"
-          >
-            Enter the passkey to switch to Edit Mode.
-          </p>
           <div class="form-group">
-            <label for="passkeyInput">
-              <i
-                class="fa-solid fa-key"
-                style="color: var(--warning-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="passkey.label">Passkey</span>
+            <label for="loginUsername">
+              <i class="fa-solid fa-user" style="color:var(--gray-400);margin-right:0.4rem"></i>
+              <span data-i18n="login.username">Username</span>
+            </label>
+            <input
+              type="text"
+              id="loginUsername"
+              data-i18n-placeholder="login.usernamePlaceholder"
+              placeholder="Username"
+              autocomplete="username"
+              onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()"
+            />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">
+              <i class="fa-solid fa-lock" style="color:var(--gray-400);margin-right:0.4rem"></i>
+              <span data-i18n="login.password">Password</span>
             </label>
             <input
               type="password"
-              id="passkeyInput"
-              data-i18n-placeholder="passkey.placeholder"
+              id="loginPassword"
+              data-i18n-placeholder="login.passwordPlaceholder"
               placeholder="••••••••"
-              onkeydown="if (event.key === 'Enter') submitPasskey();"
-              autocomplete="off"
+              autocomplete="current-password"
+              onkeydown="if(event.key==='Enter') submitLogin()"
             />
           </div>
           <p
-            id="passkeyError"
-            style="
-              display: none;
-              color: var(--danger-color);
-              font-size: 0.83rem;
-              margin-top: 0.5rem;
-            "
-            data-i18n="passkey.error"
-          >
-            Incorrect passkey. Try again.
-          </p>
+            id="loginError"
+            style="display:none; color:var(--danger-color); font-size:0.83rem; margin-top:0.5rem;"
+          ></p>
         </div>
         <div class="modal-footer">
           <div></div>
           <div>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closePasskeyModal()"
-              data-i18n="btn.cancel"
-            >
+            <button type="button" class="btn btn-secondary" onclick="closeLoginModal()" data-i18n="btn.cancel">
               Cancel
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="submitPasskey()"
-            >
-              <i class="fa-solid fa-unlock"></i>
-              <span data-i18n="passkey.confirm">Unlock</span>
+            <button type="button" class="btn btn-primary" onclick="submitLogin()">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              <span data-i18n="login.submit">Login</span>
             </button>
           </div>
         </div>

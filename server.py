@@ -9,6 +9,8 @@ import json
 import os
 import uuid
 import mimetypes
+import hashlib
+import secrets
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
@@ -21,6 +23,10 @@ AUDIT_LOG_FILE = os.path.join(_BASE_DIR, 'audit.log')
 HOST = '0.0.0.0'
 PORT = int(os.environ.get('PORT', 8000))
 FRONTEND_DIR = os.path.join(_BASE_DIR, 'frontend')
+USERS_FILE   = os.path.join(_BASE_DIR, 'users.json')
+
+# In-memory session store: token → {username, role}
+_sessions = {}
 
 
 # ==================== Utility Functions ====================
@@ -119,7 +125,7 @@ def generate_id(prefix):
     """Generate a unique ID"""
     return f"{prefix}-{str(uuid.uuid4())[:8]}"
 
-def audit_log(action, entity_type, entity_id=None, details=None):
+def audit_log(action, entity_type, entity_id=None, details=None, changed_by=None):
     """Append an entry to the audit log (JSON-lines format)"""
     entry = {
         'timestamp': datetime.now().isoformat(),
@@ -130,11 +136,60 @@ def audit_log(action, entity_type, entity_id=None, details=None):
         entry['entity_id'] = entity_id
     if details:
         entry['details'] = details
+    if changed_by:
+        entry['changed_by'] = changed_by
     try:
         with open(AUDIT_LOG_FILE, 'a', encoding='utf-8') as f:
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
     except Exception as e:
         print(f"[AUDIT LOG ERROR] {e}")
+
+# ==================== Auth Helpers ====================
+
+def hash_password(password):
+    salt = secrets.token_hex(16)
+    h = hashlib.sha256(f"{salt}:{password}".encode()).hexdigest()
+    return f"sha256:{salt}:{h}"
+
+def verify_password(password, stored):
+    try:
+        _, salt, h = stored.split(":", 2)
+        expected = hashlib.sha256(f"{salt}:{password}".encode()).hexdigest()
+        return secrets.compare_digest(h, expected)
+    except Exception:
+        return False
+
+def load_users():
+    try:
+        with open(USERS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_users(users):
+    with open(USERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(users, f, indent=2, ensure_ascii=False)
+
+def create_default_users():
+    if not os.path.exists(USERS_FILE):
+        default_password = 'admin123'
+        users = [{'username': 'admin', 'password_hash': hash_password(default_password), 'role': 'admin'}]
+        save_users(users)
+        print(f"⚠️  Created default admin account  →  username: admin  |  password: {default_password}")
+        print(f"⚠️  Edit {USERS_FILE} to change credentials.")
+
+def create_session(username, role):
+    token = str(uuid.uuid4())
+    _sessions[token] = {'username': username, 'role': role}
+    return token
+
+def get_session(token):
+    if not token:
+        return None
+    return _sessions.get(token)
+
+def delete_session(token):
+    _sessions.pop(token, None)
 
 # ==================== HTTP Request Handler ====================
 
@@ -147,7 +202,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_path.path
 
         # API endpoints
-        if path == '/api/config':
+        if path == '/api/me':
+            return self.handle_me()
+        elif path == '/api/config':
             return self.handle_config()
         elif path == '/api/sectors':
             return self.handle_get_sectors()
@@ -189,7 +246,18 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         except json.JSONDecodeError:
             return self.send_json_response(400, {'error': 'Invalid JSON'})
 
-        # API endpoints
+        # Login and logout do not require a session
+        if path == '/api/login':
+            return self.handle_login(post_data)
+        if path == '/api/logout':
+            return self.handle_logout()
+
+        # All other POST endpoints require authentication
+        _post_session = get_session(self.headers.get('X-Auth-Token', ''))
+        if not _post_session:
+            return self.send_json_response(401, {'error': 'Authentication required'})
+        self._request_user = _post_session['username']
+
         if path == '/api/config/owners':
             return self.handle_create_owner(post_data)
         elif path.startswith('/api/config/owners/'):
@@ -262,6 +330,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
 
+        # All DELETE endpoints require authentication
+        _del_session = get_session(self.headers.get('X-Auth-Token', ''))
+        if not _del_session:
+            return self.send_json_response(401, {'error': 'Authentication required'})
+        self._request_user = _del_session['username']
+
         if path.startswith('/api/config/owners/'):
             owner_id = path.split('/')[-1]
             return self.handle_delete_owner(owner_id)
@@ -290,6 +364,40 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json_response(404, {'error': 'Endpoint not found'})
 
     # ==================== API Handlers ====================
+
+    def _audit(self, action, entity_type, entity_id=None, details=None):
+        """Audit log with the current request's username attached."""
+        audit_log(action, entity_type, entity_id, details,
+                  changed_by=getattr(self, '_request_user', None))
+
+    # ==================== Auth Endpoints ====================
+
+    def handle_me(self):
+        """GET /api/me - Check if current token is valid"""
+        session = get_session(self.headers.get('X-Auth-Token', ''))
+        if session:
+            return self.send_json_response(200, {'username': session['username'], 'role': session['role']})
+        return self.send_json_response(401, {'error': 'Not authenticated'})
+
+    def handle_login(self, post_data):
+        """POST /api/login"""
+        username = (post_data.get('username') or '').strip()
+        password = post_data.get('password') or ''
+        if not username or not password:
+            return self.send_json_response(400, {'error': 'Username and password are required'})
+        users = load_users()
+        user = next((u for u in users if u['username'] == username), None)
+        if not user or not verify_password(password, user.get('password_hash', '')):
+            return self.send_json_response(401, {'error': 'Invalid username or password'})
+        token = create_session(username, user['role'])
+        self._audit('login', 'user', details={'username': username})
+        return self.send_json_response(200, {'token': token, 'username': username, 'role': user['role']})
+
+    def handle_logout(self):
+        """POST /api/logout"""
+        token = self.headers.get('X-Auth-Token', '')
+        delete_session(token)
+        return self.send_json_response(200, {'message': 'Logged out'})
 
     def handle_config(self):
         """GET /api/config"""
@@ -395,7 +503,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         owners.append(new_owner)
         data['config']['owners'] = owners
         save_data(data)
-        audit_log('create', 'owner', new_owner['id'], {'name': name})
+        self._audit('create', 'owner', new_owner['id'], {'name': name})
         return self.send_json_response(201, new_owner)
 
     def handle_update_owner(self, owner_id, post_data):
@@ -435,7 +543,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 if link.get('owner') == old_name:
                     link['owner'] = new_name
             save_mapping(mapping)
-        audit_log('update', 'owner', owner_id, {'old_name': old_name, 'new_name': new_name})
+        self._audit('update', 'owner', owner_id, {'old_name': old_name, 'new_name': new_name})
         return self.send_json_response(200, owner)
 
     def handle_delete_owner(self, owner_id):
@@ -468,7 +576,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             })
         data['config']['owners'] = [o for o in owners if o.get('id') != owner_id]
         save_data(data)
-        audit_log('delete', 'owner', owner_id, {'name': owner_name})
+        self._audit('delete', 'owner', owner_id, {'name': owner_name})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     # ==================== Config: Devices ====================
@@ -492,7 +600,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         devices.append(new_device)
         data['config']['radio_types'] = devices
         save_data(data)
-        audit_log('create', 'device', new_device['id'], {'name': name, 'band': band})
+        self._audit('create', 'device', new_device['id'], {'name': name, 'band': band})
         return self.send_json_response(201, new_device)
 
     def handle_update_device(self, device_id, post_data):
@@ -535,7 +643,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 if r.get('device_type') == old_name:
                     r['device_type'] = new_name
         save_data(data)
-        audit_log('update', 'device', device_id, {'old_name': old_name, 'new_name': new_name, 'old_band': old_band, 'new_band': new_band})
+        self._audit('update', 'device', device_id, {'old_name': old_name, 'new_name': new_name, 'old_band': old_band, 'new_band': new_band})
         return self.send_json_response(200, device)
 
     def handle_delete_device(self, device_id):
@@ -554,7 +662,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             })
         data['config']['radio_types'] = [d for d in devices if d.get('id') != device_id]
         save_data(data)
-        audit_log('delete', 'device', device_id, {'name': device_name})
+        self._audit('delete', 'device', device_id, {'name': device_name})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_create_sector(self, post_data):
@@ -566,7 +674,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         data['data']['sectors'].append(new_sector)
         save_data(data)
-        audit_log('create', 'sector', new_sector['id'], {'name': new_sector['name']})
+        self._audit('create', 'sector', new_sector['id'], {'name': new_sector['name']})
         return self.send_json_response(201, new_sector)
 
     def handle_create_site(self, post_data):
@@ -581,7 +689,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         data['data']['sites'].append(new_site)
         save_data(data)
-        audit_log('create', 'site', new_site['id'], {'name': new_site['name']})
+        self._audit('create', 'site', new_site['id'], {'name': new_site['name']})
         return self.send_json_response(201, new_site)
 
     def handle_create_radio(self, post_data):
@@ -617,7 +725,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         data['data']['radios'].append(new_radio)
         save_data(data)
-        audit_log('create', 'radio', new_radio['id'], {'device_type': new_radio['device_type'], 'site_id': new_radio['site_id']})
+        site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == new_radio['site_id']), '')
+        self._audit('create', 'radio', new_radio['id'], {
+            'device_type': new_radio['device_type'],
+            'site_id':     new_radio['site_id'],
+            'site_name':   site_name,
+        })
         return self.send_json_response(201, new_radio)
 
     def handle_update_sector(self, sector_id, post_data):
@@ -631,7 +744,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after = {k: sector.get(k) for k in ('name',)}
                 changed = [k for k in before if before[k] != after[k]]
-                audit_log('update', 'sector', sector_id, {
+                self._audit('update', 'sector', sector_id, {
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -649,7 +762,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after = {k: site.get(k) for k in ('name', 'coordinates_utm', 'site_type')}
                 changed = [k for k in before if before[k] != after[k]]
-                audit_log('update', 'site', site_id, {
+                self._audit('update', 'site', site_id, {
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -686,7 +799,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after = {k: radio.get(k) for k in _tracked}
                 changed = [k for k in _tracked if before[k] != after[k]]
-                audit_log('update', 'radio', radio_id, {
+                self._audit('update', 'radio', radio_id, {
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -708,19 +821,19 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         # Filter out the sector
         data['data']['sectors'] = [s for s in data['data']['sectors'] if s['id'] != sector_id]
         save_data(data)
-        audit_log('delete', 'sector', sector_id, {'cascaded_sites': sites_in_sector})
+        self._audit('delete', 'sector', sector_id, {'cascaded_sites': sites_in_sector})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_site(self, site_id):
         """DELETE /api/sites/<id>"""
         data = load_data()
-        # Filter out radios belonging to the site
-        data['data']['radios'] = [r for r in data['data']['radios'] if r.get('site_id') != site_id]
+        site = next((s for s in data['data']['sites'] if s['id'] == site_id), None)
+        site_name = site.get('name', '') if site else ''
 
-        # Filter out the site
-        data['data']['sites'] = [s for s in data['data']['sites'] if s['id'] != site_id]
+        data['data']['radios'] = [r for r in data['data']['radios'] if r.get('site_id') != site_id]
+        data['data']['sites']  = [s for s in data['data']['sites']  if s['id'] != site_id]
         save_data(data)
-        audit_log('delete', 'site', site_id)
+        self._audit('delete', 'site', site_id, {'name': site_name})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_radio(self, radio_id):
@@ -728,7 +841,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data = load_data()
         data['data']['radios'] = [r for r in data['data']['radios'] if r['id'] != radio_id]
         save_data(data)
-        audit_log('delete', 'radio', radio_id)
+        self._audit('delete', 'radio', radio_id)
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_get_planned_missions(self):
@@ -759,7 +872,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'time_end': post_data.get('time_end') or None,
         }
         data['data']['planned_missions'].append(new_mission)
-        audit_log('create', 'mission', new_mission['id'], {'name': new_mission['name'], 'owner': new_mission['owner']})
+        self._audit('create', 'mission', new_mission['id'], {'name': new_mission['name'], 'owner': new_mission['owner']})
 
         # Add the mission name to config.missions so it can be selected for devices
         mission_name = new_mission['name']
@@ -805,7 +918,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after_m = {k: mission.get(k) for k in ('name', 'owner')}
                 changed_m = [k for k in before_m if before_m[k] != after_m[k]]
-                audit_log('update', 'mission', mission_id, {
+                self._audit('update', 'mission', mission_id, {
                     'before': {k: before_m[k] for k in changed_m},
                     'after':  {k: after_m[k]  for k in changed_m},
                 })
@@ -833,7 +946,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 data['config']['missions'].remove(mission_name)
 
         save_data(data)
-        audit_log('delete', 'mission', mission_id, {'name': mission_name})
+        self._audit('delete', 'mission', mission_id, {'name': mission_name})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_end_mission(self, mission_id, post_data=None):
@@ -874,7 +987,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data['data']['planned_missions'] = [m for m in data['data']['planned_missions'] if m['id'] != mission_id]
 
         save_data(data)
-        audit_log('end_mission', 'mission', mission_id, {'name': mission_name})
+        self._audit('end_mission', 'mission', mission_id, {'name': mission_name})
         return self.send_json_response(200, {'message': 'Mission ended', 'archived': mission})
 
     def handle_start_mission(self, mission_id, post_data=None):
@@ -924,7 +1037,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json_response(400, {'error': 'Requirements not satisfied', 'details': errors})
 
         save_data(data)
-        audit_log('start_mission', 'mission', mission_id, {'name': mission_name})
+        self._audit('start_mission', 'mission', mission_id, {'name': mission_name})
         return self.send_json_response(200, {'message': 'Mission started', 'mission': mission})
 
     def handle_archive_mission(self, mission_id):
@@ -954,7 +1067,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data['data']['planned_missions'] = [m for m in data['data']['planned_missions'] if m['id'] != mission_id]
 
         save_data(data)
-        audit_log('archive', 'mission', mission_id, {'name': mission.get('name')})
+        self._audit('archive', 'mission', mission_id, {'name': mission.get('name')})
         return self.send_json_response(200, {'message': 'Mission archived', 'archived': mission})
 
     def handle_restore_archived_mission(self, mission_id):
@@ -977,7 +1090,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data['data']['archived_missions'] = [m for m in data['data']['archived_missions'] if m['id'] != mission_id]
 
         save_data(data)
-        audit_log('restore', 'mission', mission_id, {'name': mission.get('name')})
+        self._audit('restore', 'mission', mission_id, {'name': mission.get('name')})
         return self.send_json_response(200, {'message': 'Mission restored', 'mission': mission})
 
     def handle_archive_archived_mission(self, mission_id):
@@ -1004,7 +1117,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
         data['data']['archived_missions'] = [m for m in data['data']['archived_missions'] if m['id'] != mission_id]
         save_data(data)
-        audit_log('delete', 'archived_mission', mission_id, {'name': mission_name})
+        self._audit('delete', 'archived_mission', mission_id, {'name': mission_name})
         return self.send_json_response(200, {'message': 'Archived mission deleted'})
 
     def handle_get_links(self):
@@ -1025,7 +1138,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         mapping['mappings'].append(new_link)
         save_mapping(mapping)
-        audit_log('create', 'link', new_link['id'], {'link_name': new_link['link_name']})
+        self._audit('create', 'link', new_link['id'], {'link_name': new_link['link_name']})
         return self.send_json_response(201, new_link)
 
     def handle_update_link(self, link_id, post_data):
@@ -1039,7 +1152,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_mapping(mapping)
                 after = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner')}
                 changed = [k for k in before if before[k] != after[k]]
-                audit_log('update', 'link', link_id, {
+                self._audit('update', 'link', link_id, {
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -1051,7 +1164,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         mapping = load_mapping()
         mapping['mappings'] = [l for l in mapping['mappings'] if l['id'] != link_id]
         save_mapping(mapping)
-        audit_log('delete', 'link', link_id)
+        self._audit('delete', 'link', link_id)
         return self.send_json_response(200, {'message': 'Deleted'})
 
     # ==================== Batch Operations ====================
@@ -1078,7 +1191,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 cleared += 1
 
         save_data(data)
-        audit_log('batch_clear', 'site', site_id, {'devices_cleared': cleared})
+        self._audit('batch_clear', 'site', site_id, {'devices_cleared': cleared})
         return self.send_json_response(200, {'message': f'{cleared} device(s) cleared', 'cleared': cleared})
 
     # ==================== Audit Log ====================
@@ -1164,7 +1277,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             if 'mappings' in imported_mapping:
                 save_mapping(imported_mapping)
 
-        audit_log('import', 'full_backup', details={'sectors': len(imported_data['data'].get('sectors', [])), 'sites': len(imported_data['data'].get('sites', [])), 'radios': len(imported_data['data'].get('radios', []))})
+        self._audit('import', 'full_backup', details={'sectors': len(imported_data['data'].get('sectors', [])), 'sites': len(imported_data['data'].get('sites', [])), 'radios': len(imported_data['data'].get('radios', []))})
         return self.send_json_response(200, {'message': 'Data imported successfully'})
 
     # ==================== Helper Methods ====================
@@ -1223,6 +1336,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     # Create frontend directory if it doesn't exist
     os.makedirs(FRONTEND_DIR, exist_ok=True)
+
+    # Create default admin account if users.json is missing
+    create_default_users()
 
     # Initialize data files if they don't exist, migrate if they do
     if not os.path.exists(DATA_FILE):

@@ -502,10 +502,7 @@ async function placeOnStandby(missionId) {
   }
 
   if (requirementsToFulfill.length === 0) {
-    showNotification(
-      "Mission already has all requirements placed on standby or currently active",
-      "info",
-    );
+    showNotification(t("error.missionFulfilled"), "info");
     return;
   }
 

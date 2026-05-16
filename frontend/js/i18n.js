@@ -3,9 +3,9 @@
 // To add a language: add a new key (e.g. "he") with translated values.
 // Untranslated keys fall back to "en" automatically.
 
-let _currentLang = localStorage.getItem('mahakesher-lang') || 'en';
+let _currentLang = localStorage.getItem("mahakesher-lang") || "he";
 
-const LANG_NAMES = { en: 'English', he: 'עברית' };
+const LANG_NAMES = { en: "English", he: "עברית" };
 
 // ── Shared field labels (single source of truth) ──────────────────────────
 // Translators: change a value here once and it updates every tab,
@@ -70,6 +70,22 @@ const TRANSLATIONS = {
     "tab.history": "History",
     "tab.timeline": "Timeline",
     "tab.preferences": "Preferences",
+
+    // ── Login ─────────────────────────────────────────────────
+    "login.title":               "Login",
+    "login.username":            "Username",
+    "login.usernamePlaceholder": "Enter username",
+    "login.password":            "Password",
+    "login.passwordPlaceholder": "••••••••",
+    "login.submit":              "Login",
+    "login.btnLogin":            "Login",
+    "login.btnLogout":           "Logout",
+    "login.fieldRequired":       "Please enter username and password",
+    "login.invalidCredentials":  "Invalid username or password",
+    "login.loggedOut":           "Logged out successfully",
+    "login.loggedInAs":          "Logged in as {name}",
+    "login.confirmLogout":       "Log out?",
+    "login.logoutTooltip":       "Click to log out",
 
     // ── Server status ─────────────────────────────────────────
     "server.connecting": "Connecting...",
@@ -264,7 +280,8 @@ const TRANSLATIONS = {
     "history.badge.owner": "Owner",
     "history.badge.device": "Device",
     "history.preferences": "Preferences",
-    "history.empty": "No history entries found.",
+    "history.empty":     "No history entries found.",
+    "history.changedBy": "by {name}",
     "history.field.frequency": _en.frequency,
     "history.field.owner": _en.owner,
     "history.field.mission": _en.mission,
@@ -300,7 +317,7 @@ const TRANSLATIONS = {
     "history.delete.sector": "Deleted sector",
     "history.delete.sectorWithSites":
       "Deleted sector ({count} site(s) removed)",
-    "history.delete.site": "Deleted site",
+    "history.delete.site": 'Deleted site "{name}"',
     "history.delete.mission": 'Deleted mission "{name}"',
     "history.delete.archivedMission": 'Deleted archived mission "{name}"',
     "history.delete.link": "Deleted link",
@@ -433,6 +450,9 @@ const TRANSLATIONS = {
     "excel.errorDetails": "Error Details",
     "notify.excelNoBandCol": "Could not find 'Frequency Band' column in Excel",
     "notify.excelParseFailed": "Failed to parse Excel file: {error}",
+    "notify.refreshing":    "Refreshing data...",
+    "notify.dataRefreshed": "Data refreshed",
+    "notify.refreshFailed": "Refresh failed",
     "notify.exportOk": "Backup exported successfully",
     "notify.exportFailed": "Failed to export data: {error}",
     "notify.importOk": "Data imported successfully. Reloading...",
@@ -590,41 +610,44 @@ const TRANSLATIONS = {
       "This will clear {total} device(s) ({allocated} allocated, {extra} extra).\n\n",
 
     // ── Preferences tab ───────────────────────────────────────
-    "pref.languageLabel":          "Interface Language",
-    "pref.langChanged":            "Language updated",
-    "pref.owners":                 "Owners",
-    "pref.devices":                "Device Types",
-    "pref.col.light":              "Light",
-    "pref.col.dark":               "Dark",
-    "pref.col.name":               _en.name,
-    "pref.col.actions":            _en.actions,
-    "pref.col.band":               _en.band,
-    "pref.addOwner":               "Add Owner",
-    "pref.addDevice":              "Add Device",
-    "pref.label.name":             _en.name,
-    "pref.label.lightColor":       "Light Color",
-    "pref.label.darkColor":        "Dark Color",
-    "pref.label.autoSuggested":    "(auto-suggested)",
-    "pref.label.band":             _en.band,
-    "pref.btn.add":                "Add",
-    "pref.btn.cancel":             "Cancel",
-    "pref.confirm.deleteOwner":    'Delete owner "{name}"?',
-    "pref.confirm.deleteDevice":   'Delete device "{name}"?',
-    "pref.notify.ownerAdded":      "Owner added successfully",
-    "pref.notify.ownerDeleted":    "Owner deleted",
-    "pref.notify.deviceAdded":     "Device added successfully",
-    "pref.notify.deviceDeleted":   "Device deleted",
-    "pref.notify.nameRequired":    "Owner name is required",
+    "pref.languageLabel": "Interface Language",
+    "pref.langChanged": "Language updated",
+    "pref.owners": "Owners",
+    "pref.devices": "Device Types",
+    "pref.col.light": "Light",
+    "pref.col.dark": "Dark",
+    "pref.col.name": _en.name,
+    "pref.col.actions": _en.actions,
+    "pref.col.band": _en.band,
+    "pref.addOwner": "Add Owner",
+    "pref.addDevice": "Add Device",
+    "pref.label.name": _en.name,
+    "pref.label.lightColor": "Light Color",
+    "pref.label.darkColor": "Dark Color",
+    "pref.label.autoSuggested": "(auto-suggested)",
+    "pref.label.band": _en.band,
+    "pref.btn.add": "Add",
+    "pref.btn.cancel": "Cancel",
+    "pref.confirm.deleteOwner": 'Delete owner "{name}"?',
+    "pref.confirm.deleteDevice": 'Delete device "{name}"?',
+    "pref.notify.ownerAdded": "Owner added successfully",
+    "pref.notify.ownerDeleted": "Owner deleted",
+    "pref.notify.deviceAdded": "Device added successfully",
+    "pref.notify.deviceDeleted": "Device deleted",
+    "pref.notify.nameRequired": "Owner name is required",
     "pref.notify.devNameRequired": "Device name is required",
-    "pref.error.generic":          "An error occurred",
-    "pref.error.alreadyExists":    "This name already exists in the system",
-    "pref.error.nameRequired":     "Name is required",
-    "pref.error.bandRequired":     "Band is required",
-    "pref.error.ownerInUse":       "Cannot delete — owner is assigned to existing items",
-    "pref.error.deviceInUse":      "Cannot delete — existing radios use this device type",
-    "pref.error.bandChangeLocked": "Cannot change band — radios of this type have active assignments. Clear them first.",
-    "pref.error.notFound":         "Record not found",
-    "pref.error.invalidBand":      "Invalid band",
+    "pref.error.generic": "An error occurred",
+    "pref.error.alreadyExists": "This name already exists in the system",
+    "pref.error.nameRequired": "Name is required",
+    "pref.error.bandRequired": "Band is required",
+    "pref.error.ownerInUse":
+      "Cannot delete — owner is assigned to existing items",
+    "pref.error.deviceInUse":
+      "Cannot delete — existing radios use this device type",
+    "pref.error.bandChangeLocked":
+      "Cannot change band — radios of this type have active assignments. Clear them first.",
+    "pref.error.notFound": "Record not found",
+    "pref.error.invalidBand": "Invalid band",
   },
   // ── HEBREW ────────────────────────────────────────────────
 
@@ -638,6 +661,22 @@ const TRANSLATIONS = {
     "tab.history": "היסטוריה",
     "tab.timeline": "ציר זמן",
     "tab.preferences": "העדפות",
+
+    // ── Login ─────────────────────────────────────────────────
+    "login.title":               "התחברות",
+    "login.username":            "שם משתמש",
+    "login.usernamePlaceholder": "הזן שם משתמש",
+    "login.password":            "סיסמה",
+    "login.passwordPlaceholder": "••••••••",
+    "login.submit":              "התחבר",
+    "login.btnLogin":            "התחברות",
+    "login.btnLogout":           "התנתקות",
+    "login.fieldRequired":       "נא להזין שם משתמש וסיסמה",
+    "login.invalidCredentials":  "שם משתמש או סיסמה שגויים",
+    "login.loggedOut":           "התנתקת בהצלחה",
+    "login.loggedInAs":          "מחובר כ-{name}",
+    "login.confirmLogout":       "להתנתק?",
+    "login.logoutTooltip":       "לחץ להתנתקות",
 
     // ── Server status ─────────────────────────────────────────
     "server.connecting": "מתחבר...",
@@ -808,7 +847,7 @@ const TRANSLATIONS = {
     "search.standbyState": "הקצאה בכוננות",
     "search.missionLabel": _he.mission,
     "search.allMissions": "כל המשימות",
-    "search.statusLabel": _he.status,
+    "search.statusLabel": "סטטוס מכשיר",
     "search.allStatuses": "כל המצבים",
     "search.results": "{count} תוצאות",
     "search.resultsPlural": "{count} תוצאות",
@@ -830,7 +869,8 @@ const TRANSLATIONS = {
     "history.badge.owner": "בעלים",
     "history.badge.device": "מכשיר",
     "history.preferences": "העדפות",
-    "history.empty": "לא נמצאה היסטוריה.",
+    "history.empty":     "לא נמצאה היסטוריה.",
+    "history.changedBy": "על ידי {name}",
     "history.field.frequency": _he.frequency,
     "history.field.owner": _he.owner,
     "history.field.mission": _he.mission,
@@ -865,7 +905,7 @@ const TRANSLATIONS = {
     "history.delete.radio": "נמחק מכשיר קשר",
     "history.delete.sector": "נמחקה גזרה",
     "history.delete.sectorWithSites": "נמחקה גזרה ({count} אתרים הוסרו)",
-    "history.delete.site": "נמחק אתר",
+    "history.delete.site": 'נמחק אתר "{name}"',
     "history.delete.mission": 'נמחקה משימה "{name}"',
     "history.delete.archivedMission": 'נמחקה משימה מהארכיון "{name}"',
     "history.delete.link": "נמחק קישור",
@@ -999,6 +1039,9 @@ const TRANSLATIONS = {
     "excel.errorDetails": "פרטי השגיאה",
     "notify.excelNoBandCol": "לא ניתן למצוא בקובץ עמודת תחום תדר",
     "notify.excelParseFailed": "תקלה בעיבוד הקובץ: {error}",
+    "notify.refreshing":    "מרענן נתונים...",
+    "notify.dataRefreshed": "הנתונים רועננו",
+    "notify.refreshFailed": "רענון נכשל",
     "notify.exportOk": "הגיבוי נוצר בהצלחה",
     "notify.exportFailed": "כשלון בייצוא המידע: {error}",
     "notify.importOk": "המידע הועלה בהצלחה, טוען מחדש...",
@@ -1153,41 +1196,42 @@ const TRANSLATIONS = {
       "פעולה זו תנקה {total} מכשירים ({allocated} מוקצים, {extra} נוספים).\n\n",
 
     // ── Preferences tab ───────────────────────────────────────
-    "pref.languageLabel":          "שפת ממשק",
-    "pref.langChanged":            "השפה עודכנה",
-    "pref.owners":                 "בעלים",
-    "pref.devices":                "סוגי מכשירים",
-    "pref.col.light":              "בהיר",
-    "pref.col.dark":               "כהה",
-    "pref.col.name":               _he.name,
-    "pref.col.actions":            _he.actions,
-    "pref.col.band":               _he.band,
-    "pref.addOwner":               "הוסף בעלים",
-    "pref.addDevice":              "הוסף מכשיר",
-    "pref.label.name":             _he.name,
-    "pref.label.lightColor":       "צבע בהיר",
-    "pref.label.darkColor":        "צבע כהה",
-    "pref.label.autoSuggested":    "(מוצע אוטומטית)",
-    "pref.label.band":             _he.band,
-    "pref.btn.add":                "הוסף",
-    "pref.btn.cancel":             "ביטול",
-    "pref.confirm.deleteOwner":    'למחוק את הבעלים "{name}"?',
-    "pref.confirm.deleteDevice":   'למחוק את המכשיר "{name}"?',
-    "pref.notify.ownerAdded":      "הבעלים נוסף בהצלחה",
-    "pref.notify.ownerDeleted":    "הבעלים נמחק",
-    "pref.notify.deviceAdded":     "המכשיר נוסף בהצלחה",
-    "pref.notify.deviceDeleted":   "המכשיר נמחק",
-    "pref.notify.nameRequired":    "שם הבעלים נדרש",
+    "pref.languageLabel": "שפת ממשק",
+    "pref.langChanged": "השפה עודכנה",
+    "pref.owners": "בעלים",
+    "pref.devices": "סוגי מכשירים",
+    "pref.col.light": "בהיר",
+    "pref.col.dark": "כהה",
+    "pref.col.name": _he.name,
+    "pref.col.actions": _he.actions,
+    "pref.col.band": _he.band,
+    "pref.addOwner": "הוסף בעלים",
+    "pref.addDevice": "הוסף מכשיר",
+    "pref.label.name": _he.name,
+    "pref.label.lightColor": "צבע בהיר",
+    "pref.label.darkColor": "צבע כהה",
+    "pref.label.autoSuggested": "(מוצע אוטומטית)",
+    "pref.label.band": _he.band,
+    "pref.btn.add": "הוסף",
+    "pref.btn.cancel": "ביטול",
+    "pref.confirm.deleteOwner": 'למחוק את הבעלים "{name}"?',
+    "pref.confirm.deleteDevice": 'למחוק את המכשיר "{name}"?',
+    "pref.notify.ownerAdded": "הבעלים נוסף בהצלחה",
+    "pref.notify.ownerDeleted": "הבעלים נמחק",
+    "pref.notify.deviceAdded": "המכשיר נוסף בהצלחה",
+    "pref.notify.deviceDeleted": "המכשיר נמחק",
+    "pref.notify.nameRequired": "שם הבעלים נדרש",
     "pref.notify.devNameRequired": "שם המכשיר נדרש",
-    "pref.error.generic":          "אירעה שגיאה",
-    "pref.error.alreadyExists":    "שם זה כבר קיים במערכת",
-    "pref.error.nameRequired":     "שם הוא שדה חובה",
-    "pref.error.bandRequired":     "יש לבחור תדר",
-    "pref.error.ownerInUse":       "לא ניתן למחוק — הבעלים משויך לרכיבים קיימים",
-    "pref.error.deviceInUse":      "לא ניתן למחוק — מכשירים קיימים משתמשים בסוג זה",
-    "pref.error.bandChangeLocked": "לא ניתן לשנות תדר — למכשירים מסוג זה יש הקצאות פעילות. יש לנקות אותן תחילה",
-    "pref.error.notFound":         "הרשומה לא נמצאה",
-    "pref.error.invalidBand":      "תדר לא חוקי",
+    "pref.error.generic": "אירעה שגיאה",
+    "pref.error.alreadyExists": "שם זה כבר קיים במערכת",
+    "pref.error.nameRequired": "שם הוא שדה חובה",
+    "pref.error.bandRequired": "יש לבחור תדר",
+    "pref.error.ownerInUse": "לא ניתן למחוק — הבעלים משויך לרכיבים קיימים",
+    "pref.error.deviceInUse": "לא ניתן למחוק — מכשירים קיימים משתמשים בסוג זה",
+    "pref.error.bandChangeLocked":
+      "לא ניתן לשנות תדר — למכשירים מסוג זה יש הקצאות פעילות. יש לנקות אותן תחילה",
+    "pref.error.notFound": "הרשומה לא נמצאה",
+    "pref.error.invalidBand": "תדר לא חוקי",
   },
 };
 
@@ -1239,36 +1283,44 @@ function applyI18n() {
   });
 }
 
-function getCurrentLang() { return _currentLang; }
+function getCurrentLang() {
+  return _currentLang;
+}
 
 function getAvailableLangs() {
-  return Object.keys(LANG_NAMES).map(code => ({ code, label: LANG_NAMES[code] }));
+  return Object.keys(LANG_NAMES).map((code) => ({
+    code,
+    label: LANG_NAMES[code],
+  }));
 }
 
 function setLang(code) {
   if (!TRANSLATIONS[code]) return;
   _currentLang = code;
-  localStorage.setItem('mahakesher-lang', code);
+  localStorage.setItem("mahakesher-lang", code);
   document.documentElement.lang = code;
   applyI18n();
   // Re-translate server status (applyI18n doesn't touch it since we removed data-i18n)
-  const _statusEl = document.getElementById('serverStatus');
+  const _statusEl = document.getElementById("serverStatus");
   if (_statusEl) {
-    const _connected = _statusEl.textContent.includes('🟢');
-    if (_statusEl.textContent.includes('🟢') || _statusEl.textContent.includes('🔴')) {
-      _statusEl.textContent = `${_connected ? '🟢' : '🔴'} ${t(_connected ? 'server.connected' : 'server.disconnected')}`;
+    const _connected = _statusEl.textContent.includes("🟢");
+    if (
+      _statusEl.textContent.includes("🟢") ||
+      _statusEl.textContent.includes("🔴")
+    ) {
+      _statusEl.textContent = `${_connected ? "🟢" : "🔴"} ${t(_connected ? "server.connected" : "server.disconnected")}`;
     }
   }
-  if (window.renderOverview)       renderOverview();
-  if (window.renderMissionsTab)    renderMissionsTab();
-  if (window.renderLinksTab)       renderLinksTab();
-  if (window.renderSummaryTab)     renderSummaryTab();
-  if (window.renderTimelineTab)    renderTimelineTab();
+  if (window.renderOverview) renderOverview();
+  if (window.renderMissionsTab) renderMissionsTab();
+  if (window.renderLinksTab) renderLinksTab();
+  if (window.renderSummaryTab) renderSummaryTab();
+  if (window.renderTimelineTab) renderTimelineTab();
   if (window.renderPreferencesTab) renderPreferencesTab();
-  if (window.performSearch)        performSearch();
-  if (window.showNotification)     showNotification(t('pref.langChanged'), 'success');
+  if (window.performSearch) performSearch();
+  if (window.showNotification)
+    showNotification(t("pref.langChanged"), "success");
 }
-
 
 window.t = t;
 window.applyI18n = applyI18n;

@@ -2,13 +2,11 @@
 
 async function apiCall(endpoint, method = "GET", data = null) {
   try {
-    const options = {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+    const headers = { "Content-Type": "application/json" };
+    const token = localStorage.getItem("mahakesher-token");
+    if (token) headers["X-Auth-Token"] = token;
 
+    const options = { method, headers };
     if (data) {
       options.body = JSON.stringify(data);
     }
@@ -68,6 +66,25 @@ async function loadLinks() {
     window.appState.links = [];
   }
 }
+
+// ==================== Auth ====================
+
+async function apiLogin(username, password) {
+  return apiCall("/login", "POST", { username, password });
+}
+
+async function apiLogout() {
+  try { await apiCall("/logout", "POST"); } catch (_) {}
+  localStorage.removeItem("mahakesher-token");
+}
+
+async function apiMe() {
+  return apiCall("/me");
+}
+
+window.apiLogin  = apiLogin;
+window.apiLogout = apiLogout;
+window.apiMe     = apiMe;
 
 // ==================== Config CRUD ====================
 

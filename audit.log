@@ -1,0 +1,80 @@
+{"timestamp": "2026-05-15T22:39:21.986995", "action": "create", "entity_type": "sector", "entity_id": "sector-b29914bc", "details": {"name": "גזרת מרכז"}}
+{"timestamp": "2026-05-15T22:39:27.844256", "action": "create", "entity_type": "site", "entity_id": "site-751f56c1", "details": {"name": "גגג"}}
+{"timestamp": "2026-05-15T22:39:42.592087", "action": "create", "entity_type": "device", "entity_id": "device-7c4b861d", "details": {"name": "גגג", "band": "UHF"}}
+{"timestamp": "2026-05-15T22:39:54.188820", "action": "create", "entity_type": "radio", "entity_id": "radio-c85e9f02", "details": {"device_type": "גגג", "site_id": "site-751f56c1"}}
+{"timestamp": "2026-05-15T22:39:54.196152", "action": "create", "entity_type": "radio", "entity_id": "radio-a3057ff8", "details": {"device_type": "גגג", "site_id": "site-751f56c1"}}
+{"timestamp": "2026-05-15T22:39:54.208613", "action": "create", "entity_type": "radio", "entity_id": "radio-0fa5b150", "details": {"device_type": "גגג", "site_id": "site-751f56c1"}}
+{"timestamp": "2026-05-15T22:40:14.632768", "action": "delete", "entity_type": "site", "entity_id": "site-751f56c1", "details": {"name": "גגג"}}
+{"timestamp": "2026-05-15T22:52:09.945549", "action": "delete", "entity_type": "device", "entity_id": "device-7c4b861d", "details": {"name": "גגג"}}
+{"timestamp": "2026-05-15T22:54:23.530977", "action": "create", "entity_type": "site", "entity_id": "site-2d288715", "details": {"name": "אתר"}}
+{"timestamp": "2026-05-15T22:54:30.221115", "action": "create", "entity_type": "device", "entity_id": "device-32f3fada", "details": {"name": "גגגגגג", "band": "UHF"}}
+{"timestamp": "2026-05-15T22:54:33.762161", "action": "create", "entity_type": "radio", "entity_id": "radio-c6964341", "details": {"device_type": "גגגגגג", "site_id": "site-2d288715"}}
+{"timestamp": "2026-05-15T22:54:50.301883", "action": "delete", "entity_type": "sector", "entity_id": "sector-b29914bc", "details": {"cascaded_sites": ["site-2d288715"]}}
+{"timestamp": "2026-05-15T22:54:54.635767", "action": "delete", "entity_type": "device", "entity_id": "device-32f3fada", "details": {"name": "גגגגגג"}}
+{"timestamp": "2026-05-16T16:37:02.364304", "action": "login", "entity_type": "user", "details": {"username": "admin"}}
+{"timestamp": "2026-05-16T16:37:37.016005", "action": "login", "entity_type": "user", "details": {"username": "admin"}}
+{"timestamp": "2026-05-16T16:55:34.935127", "action": "login", "entity_type": "user", "details": {"username": "admin"}}
+{"timestamp": "2026-05-16T16:58:02.395965", "action": "create", "entity_type": "sector", "entity_id": "sector-374d66fb", "details": {"name": "גזרקה 1"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:58:12.694287", "action": "create", "entity_type": "site", "entity_id": "site-979649fa", "details": {"name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:58:22.556805", "action": "create", "entity_type": "device", "entity_id": "device-74dda450", "details": {"name": "מכשיר מלך", "band": "UHF"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:58:27.079714", "action": "create", "entity_type": "radio", "entity_id": "radio-3f5426ad", "details": {"device_type": "מכשיר מלך", "site_id": "site-979649fa", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:58:53.241784", "action": "delete", "entity_type": "site", "entity_id": "site-979649fa", "details": {"name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:58:57.423304", "action": "delete", "entity_type": "device", "entity_id": "device-74dda450", "details": {"name": "מכשיר מלך"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T16:59:48.883376", "action": "create", "entity_type": "site", "entity_id": "site-ef4653df", "details": {"name": "אתר!"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:01.218216", "action": "create", "entity_type": "owner", "entity_id": "owner-8be53c6b", "details": {"name": "בעלים שלא מסגיר"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:08.695381", "action": "create", "entity_type": "owner", "entity_id": "owner-59f3c365", "details": {"name": "בעלים איכותי"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:19.615544", "action": "create", "entity_type": "owner", "entity_id": "owner-c09307ce", "details": {"name": "המדור החזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:25.143243", "action": "create", "entity_type": "device", "entity_id": "device-0dae4332", "details": {"name": "מכשיר שלא מסגיר", "band": "UHF"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:37.646271", "action": "create", "entity_type": "device", "entity_id": "device-bbca889b", "details": {"name": "מכשיר טוב", "band": "HVHF"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:48.476823", "action": "create", "entity_type": "device", "entity_id": "device-3fd7d1c2", "details": {"name": "מכשיר שהוא מכונה", "band": "LVHF"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:03:54.086212", "action": "update", "entity_type": "site", "entity_id": "site-ef4653df", "details": {"before": {"name": "אתר!"}, "after": {"name": "אתר"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:04:26.854121", "action": "login", "entity_type": "user", "details": {"username": "admin"}}
+{"timestamp": "2026-05-16T17:04:45.582927", "action": "update", "entity_type": "sector", "entity_id": "sector-374d66fb", "details": {"before": {"name": "גזרקה 1"}, "after": {"name": "גזרת צפון"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:04:50.993079", "action": "update", "entity_type": "site", "entity_id": "site-ef4653df", "details": {"before": {"name": "אתר"}, "after": {"name": "אתר חזק"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:04:54.508460", "action": "update", "entity_type": "site", "entity_id": "site-ef4653df", "details": {"before": {"site_type": "Fixed"}, "after": {"site_type": "Mobile"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:04:58.661095", "action": "update", "entity_type": "site", "entity_id": "site-ef4653df", "details": {"before": {"site_type": "Mobile"}, "after": {"site_type": "Fixed"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:09.260939", "action": "create", "entity_type": "radio", "entity_id": "radio-73683415", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:09.267926", "action": "create", "entity_type": "radio", "entity_id": "radio-d8438905", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:09.282908", "action": "create", "entity_type": "radio", "entity_id": "radio-541fdf14", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:13.918322", "action": "create", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"device_type": "מכשיר טוב", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:13.928338", "action": "create", "entity_type": "radio", "entity_id": "radio-0d95a3d6", "details": {"device_type": "מכשיר טוב", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:13.941809", "action": "create", "entity_type": "radio", "entity_id": "radio-319f84c1", "details": {"device_type": "מכשיר טוב", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:18.319006", "action": "create", "entity_type": "radio", "entity_id": "radio-6fde4339", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:18.325472", "action": "create", "entity_type": "radio", "entity_id": "radio-956e50e7", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:05:18.337092", "action": "create", "entity_type": "radio", "entity_id": "radio-595d7dee", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-ef4653df", "site_name": "אתר חזק"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:02.565110", "action": "create", "entity_type": "site", "entity_id": "site-c24276b5", "details": {"name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:07.878517", "action": "create", "entity_type": "radio", "entity_id": "radio-b90528d7", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:07.892512", "action": "create", "entity_type": "radio", "entity_id": "radio-d1fd52cc", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:07.903498", "action": "create", "entity_type": "radio", "entity_id": "radio-75645939", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:12.059843", "action": "create", "entity_type": "radio", "entity_id": "radio-4ba71300", "details": {"device_type": "מכשיר טוב", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:12.377417", "action": "create", "entity_type": "radio", "entity_id": "radio-37fcbc1e", "details": {"device_type": "מכשיר טוב", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:12.390364", "action": "create", "entity_type": "radio", "entity_id": "radio-44a4b905", "details": {"device_type": "מכשיר טוב", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:12.400475", "action": "create", "entity_type": "radio", "entity_id": "radio-39e9fe74", "details": {"device_type": "מכשיר טוב", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:16.248915", "action": "create", "entity_type": "radio", "entity_id": "radio-7299abc8", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:16.263303", "action": "create", "entity_type": "radio", "entity_id": "radio-a7c495fa", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:16.275980", "action": "create", "entity_type": "radio", "entity_id": "radio-09feef9b", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:16.288404", "action": "create", "entity_type": "radio", "entity_id": "radio-0c858cda", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-c24276b5", "site_name": "עפולה"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:25.290367", "action": "create", "entity_type": "sector", "entity_id": "sector-b010130f", "details": {"name": "גזרת מרכז"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:29.263252", "action": "create", "entity_type": "sector", "entity_id": "sector-f95115a4", "details": {"name": "גזרת דרום"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:35.976759", "action": "create", "entity_type": "site", "entity_id": "site-748505e4", "details": {"name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:41.303596", "action": "create", "entity_type": "radio", "entity_id": "radio-560b3b79", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:41.317330", "action": "create", "entity_type": "radio", "entity_id": "radio-687ee740", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:41.330370", "action": "create", "entity_type": "radio", "entity_id": "radio-544c816d", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:45.575888", "action": "create", "entity_type": "radio", "entity_id": "radio-8c2cb40c", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:45.588420", "action": "create", "entity_type": "radio", "entity_id": "radio-20603e2b", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:45.602682", "action": "create", "entity_type": "radio", "entity_id": "radio-fc0c0d5c", "details": {"device_type": "מכשיר שהוא מכונה", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:49.177498", "action": "create", "entity_type": "radio", "entity_id": "radio-44e01607", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:49.192326", "action": "create", "entity_type": "radio", "entity_id": "radio-a62712f7", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:06:49.206195", "action": "create", "entity_type": "radio", "entity_id": "radio-97aa1f50", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:13.773979", "action": "create", "entity_type": "mission", "entity_id": "mission-edbfdc18", "details": {"name": "להציל את נועם", "owner": "בעלים שלא מסגיר"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:23.243395", "action": "create", "entity_type": "link", "entity_id": "link-8b691626", "details": {"link_name": "כובע"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:23.559457", "action": "create", "entity_type": "link", "entity_id": "link-df5fbbbb", "details": {"link_name": "מקל"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:23.816100", "action": "create", "entity_type": "link", "entity_id": "link-1bf72375", "details": {"link_name": "קסמים"}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:30.061508", "action": "update", "entity_type": "link", "entity_id": "link-8b691626", "details": {"before": {"owner": null}, "after": {"owner": "בעלים שלא מסגיר"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:32.723026", "action": "update", "entity_type": "link", "entity_id": "link-df5fbbbb", "details": {"before": {"owner": null}, "after": {"owner": "בעלים איכותי"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:07:35.986023", "action": "update", "entity_type": "link", "entity_id": "link-1bf72375", "details": {"before": {"owner": null}, "after": {"owner": "המדור החזק"}}, "changed_by": "admin"}
+{"timestamp": "2026-05-16T17:10:05.334331", "action": "login", "entity_type": "user", "details": {"username": "Noam"}}
+{"timestamp": "2026-05-16T17:10:18.136547", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"owner": ""}, "after": {"owner": "בעלים שלא מסגיר"}}, "changed_by": "Noam"}
+{"timestamp": "2026-05-16T17:10:24.652538", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"owner": "בעלים שלא מסגיר"}, "after": {"owner": null}}, "changed_by": "Noam"}
+{"timestamp": "2026-05-16T17:12:59.296239", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-16T17:13:07.230143", "action": "login", "entity_type": "user", "details": {"username": "אמיתי"}}

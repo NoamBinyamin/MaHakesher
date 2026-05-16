@@ -26,9 +26,13 @@ function populateSelects() {
     "#radioDeviceType, #addRadioDeviceType",
   );
   const rt = window.appState.config.radio_types;
-  const deviceNames = Array.isArray(rt) ? rt.map(d => d.name) : Object.keys(rt);
-  const deviceOptions = deviceNames
-    .map((type) => `<option value="${escapeHTML(type)}">${escapeHTML(type)}</option>`)
+  const devices = Array.isArray(rt)
+    ? rt
+    : Object.entries(rt).map(([name, band]) => ({ name, band }));
+  const deviceOptions = devices
+    .map(({ name, band }) =>
+      `<option value="${escapeHTML(name)}">${escapeHTML(name)}${band ? ` (${escapeHTML(band)})` : ''}</option>`
+    )
     .join("");
   deviceSelects.forEach((select) => {
     select.innerHTML =

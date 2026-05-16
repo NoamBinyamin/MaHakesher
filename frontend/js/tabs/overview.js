@@ -56,7 +56,11 @@ function renderOverview() {
       siteRow.innerHTML = `
         <td colspan="13" style="padding: 0;">
           <div class="site-cell">
-            <strong style="margin-right: 2rem;">${escapeHTML(site.name)} (${t("common.devicesCount", { count: site.radios.length })})</strong>
+            <strong style="margin-right: 2rem;">
+              ${escapeHTML(site.name)}
+              <span style="display:inline-block;font-size:0.7rem;font-weight:600;padding:0.1rem 0.45rem;border-radius:9999px;margin-right:0.4rem;vertical-align:middle;background:${site.site_type === 'Mobile' ? 'rgba(234,179,8,0.18)' : 'rgba(99,102,241,0.15)'};color:${site.site_type === 'Mobile' ? '#a16207' : '#4f46e5'};">${site.site_type === 'Mobile' ? t('site.typeMobile') : t('site.typeFixed')}</span>
+              (${t("common.devicesCount", { count: site.radios.length })})
+            </strong>
             <div class="site-row-actions">
               <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); openSiteModal('${site.id}')">${t("site.editTitle")}</button>
               <button class="btn btn-sm btn-add" onclick="event.stopPropagation(); openAddRadioModalForSite('${site.id}')">${t("overview.addDevice")}</button>

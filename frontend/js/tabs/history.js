@@ -159,7 +159,7 @@ function describeTitle(entry) {
 
   switch (action) {
     case "create":
-      if (entity_type === "radio")   return t("history.create.radio", { device: details.device_type, site: lookupSiteName(details.site_id || "") });
+      if (entity_type === "radio")   return t("history.create.radio", { device: details.device_type, site: details.site_name || lookupSiteName(details.site_id || "") });
       if (entity_type === "sector")  return t("history.create.sector", { name: details.name });
       if (entity_type === "site")    return t("history.create.site", { name: details.name });
       if (entity_type === "mission") return t("history.create.mission", { name: details.name }) + (details.owner ? ` (${details.owner})` : "");
@@ -194,7 +194,7 @@ function describeTitle(entry) {
       if (entity_type === "sector")           return details.cascaded_sites?.length
         ? t("history.delete.sectorWithSites", { count: details.cascaded_sites.length })
         : t("history.delete.sector");
-      if (entity_type === "site")             return t("history.delete.site");
+      if (entity_type === "site")             return t("history.delete.site", { name: details.name || entity_id });
       if (entity_type === "mission")          return t("history.delete.mission", { name: details.name });
       if (entity_type === "archived_mission") return t("history.delete.archivedMission", { name: details.name });
       if (entity_type === "link")             return t("history.delete.link");
@@ -231,7 +231,9 @@ function renderHistoryTab() {
   const container = document.getElementById("historyList");
   if (!container) return;
 
-  let entries = _historyEntries;
+  // Always exclude raw login events from the history view
+  let entries = _historyEntries.filter((e) => !(e.entity_type === "user" && e.action === "login"));
+
   if (_historyFilter !== "all") {
     entries = entries.filter((e) => {
       if (_historyFilter === "mission")     return e.entity_type === "mission" || e.entity_type === "archived_mission";
@@ -270,6 +272,7 @@ function renderHistoryTab() {
             <span style="font-weight:600; color:var(--gray-900); font-size:0.875rem;">${escapeHTML(title)}</span>
             <span style="background:${badgeColor}18; color:${badgeColor}; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap;">${escapeHTML(badgeLabel)}</span>
           </div>
+          ${entry.changed_by ? `<div style="font-size:0.72rem; color:var(--gray-400); margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.65rem; margin-left:0.25rem;"></i>${escapeHTML(t("history.changedBy").replace("{name}", entry.changed_by))}</div>` : ""}
           ${diffHTML}
         </div>
         <div style="color:var(--gray-400); font-size:0.75rem; white-space:nowrap; flex-shrink:0; margin-top:3px;">${escapeHTML(time)}</div>
