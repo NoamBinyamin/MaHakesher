@@ -391,6 +391,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json_response(401, {'error': 'Invalid username or password'})
         token = create_session(username, user['role'])
         self._audit('login', 'user', details={'username': username})
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ✅ Login: '{username}' from {self.client_address[0]}")
         return self.send_json_response(200, {'token': token, 'username': username, 'role': user['role']})
 
     def handle_logout(self):

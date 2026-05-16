@@ -78,3 +78,4 @@
 {"timestamp": "2026-05-16T17:10:24.652538", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"owner": "בעלים שלא מסגיר"}, "after": {"owner": null}}, "changed_by": "Noam"}
 {"timestamp": "2026-05-16T17:12:59.296239", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-16T17:13:07.230143", "action": "login", "entity_type": "user", "details": {"username": "אמיתי"}}
+{"timestamp": "2026-05-16T17:19:17.213660", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
