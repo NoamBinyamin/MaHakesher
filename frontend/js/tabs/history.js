@@ -212,10 +212,25 @@ function describeTitle(entry) {
   }
 }
 
+// ---- Translate known enum values stored as English strings ----
+
+const VALUE_LABELS = {
+  "Fixed":    () => t("site.typeFixed"),
+  "Mobile":   () => t("site.typeMobile"),
+  "Usable":   () => t("search.statusUsable"),
+  "Unusable": () => t("search.statusUnusable"),
+};
+
+function translateValue(v) {
+  if (v == null) return null;
+  const s = String(v);
+  return VALUE_LABELS[s] ? VALUE_LABELS[s]() : s;
+}
+
 // ---- Render one diff row ----
 
 function renderDiffRow(fieldLabel, beforeVal, afterVal) {
-  const fmt = (v) => (v == null ? '<span style="color:var(--gray-400);">—</span>' : `<span>${escapeHTML(String(v))}</span>`);
+  const fmt = (v) => (v == null ? '<span style="color:var(--gray-400);">—</span>' : `<span>${escapeHTML(translateValue(v))}</span>`);
   return `
     <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; padding: 1px 0;">
       <span style="color:var(--gray-400); min-width:6rem; flex-shrink:0;">${escapeHTML(fieldLabel)}</span>

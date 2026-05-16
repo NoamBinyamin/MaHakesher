@@ -1078,7 +1078,7 @@ async function handleMissionExcelUpload(input) {
         const role = roleIdx >= 0 ? String(row[roleIdx] || "").trim() : "";
 
         if (sectorName && siteName) {
-          errors.push(`Row ${i + 1}: Specify either Sector OR Site, not both`);
+          errors.push(t("import.mission.bothSectorSite", { row: i + 1 }));
           continue;
         }
 
@@ -1097,9 +1097,7 @@ async function handleMissionExcelUpload(input) {
           window.appState.config.frequency_bands || {},
         );
         if (!validBands.includes(frequencyBand)) {
-          errors.push(
-            `Row ${i + 1}: Unknown frequency band "${frequencyBand}"`,
-          );
+          errors.push(t("import.mission.unknownBand", { row: i + 1, band: frequencyBand }));
           continue;
         }
 
@@ -1137,7 +1135,7 @@ async function handleMissionExcelUpload(input) {
             );
             resolvedSectorName = sector ? sector.name : null;
           } else {
-            errors.push(`Row ${i + 1}: Site "${siteName}" not found`);
+            errors.push(t("import.mission.siteNotFound", { row: i + 1, name: siteName }));
             continue;
           }
         } else if (sectorName) {
@@ -1148,7 +1146,7 @@ async function handleMissionExcelUpload(input) {
             sectorId = sector.id;
             resolvedSectorName = sector.name;
           } else {
-            errors.push(`Row ${i + 1}: Sector "${sectorName}" not found`);
+            errors.push(t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }));
             continue;
           }
         }

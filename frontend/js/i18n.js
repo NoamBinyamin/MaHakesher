@@ -508,6 +508,17 @@ const TRANSLATIONS = {
       "Row {row}: {freq} MHz is out of range for {band} ({min}–{max})",
     "error.saveFailed": 'Failed to save "{name}" — {error}',
 
+    // ── Excel import row errors ───────────────────────────────
+    "import.link.invalidFreq":      'Row {row}: Invalid or missing frequency for "{name}"',
+    "import.link.nameDup":          'Row {row}: Link name "{name}" already exists — skipped',
+    "import.link.freqDup":          'Row {row}: Frequency {freq} MHz already exists — skipped',
+    "import.link.unknownOwner":     'Row {row}: Unknown owner "{name}" — skipped',
+    "import.link.saveFailed":       'Row {row}: Failed to save "{name}"',
+    "import.mission.bothSectorSite":'Row {row}: Specify either Sector OR Site, not both',
+    "import.mission.unknownBand":   'Row {row}: Unknown frequency band "{band}"',
+    "import.mission.siteNotFound":  'Row {row}: Site "{name}" not found',
+    "import.mission.sectorNotFound":'Row {row}: Sector "{name}" not found',
+
     // ── Mission table & button titles ─────────────────────────
     "missions.btn.titleEdit": "Edit Mission",
     "missions.btn.titleStart": "Start Mission",
@@ -1095,6 +1106,17 @@ const TRANSLATIONS = {
     "error.freqOutOfRangeRow":
       "שורה {row}: {freq} MHz מחוץ לתחום {band} ({min}–{max})",
     "error.saveFailed": 'כשלון בשמירת "{name}" — {error}',
+
+    // ── Excel import row errors ───────────────────────────────
+    "import.link.invalidFreq":      'שורה {row}: תדר לא תקין או חסר עבור "{name}"',
+    "import.link.nameDup":          'שורה {row}: שם עורק "{name}" כבר קיים — דולג',
+    "import.link.freqDup":          'שורה {row}: תדר {freq} MHz כבר קיים — דולג',
+    "import.link.unknownOwner":     'שורה {row}: בעלים לא מוכר "{name}" — דולג',
+    "import.link.saveFailed":       'שורה {row}: שגיאה בשמירת "{name}"',
+    "import.mission.bothSectorSite":'שורה {row}: יש לציין גזרה או אתר, לא שניהם',
+    "import.mission.unknownBand":   'שורה {row}: תחום תדר לא מוכר "{band}"',
+    "import.mission.siteNotFound":  'שורה {row}: אתר "{name}" לא נמצא',
+    "import.mission.sectorNotFound":'שורה {row}: גזרה "{name}" לא נמצאה',
 
     // ── Mission table & button titles ─────────────────────────
     "missions.btn.titleEdit": "ערוך משימה",

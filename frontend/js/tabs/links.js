@@ -210,9 +210,7 @@ async function handleLinkExcelUpload(input) {
 
         const frequency = parseFloat(String(row[freqIdx] ?? "").trim());
         if (isNaN(frequency)) {
-          errors.push(
-            `Row ${i + 1}: Invalid or missing frequency for "${linkName}"`,
-          );
+          errors.push(t("import.link.invalidFreq", { row: i + 1, name: linkName }));
           continue;
         }
 
@@ -222,9 +220,7 @@ async function handleLinkExcelUpload(input) {
         if (!frequencyBand)
           frequencyBand = getBandForFrequency(frequency) || "";
         if (!frequencyBand) {
-          errors.push(
-            `Row ${i + 1}: Could not detect frequency band for ${frequency} MHz`,
-          );
+          errors.push(t("error.noBandDetected", { row: i + 1, freq: frequency }));
           continue;
         }
 
@@ -251,9 +247,7 @@ async function handleLinkExcelUpload(input) {
           (l) => l.link_name.toLowerCase() === nameLower,
         );
         if (dupName || batchNames.has(nameLower)) {
-          errors.push(
-            `Row ${i + 1}: Link name "${linkName}" already exists — skipped`,
-          );
+          errors.push(t("import.link.nameDup", { row: i + 1, name: linkName }));
           continue;
         }
 
@@ -262,9 +256,7 @@ async function handleLinkExcelUpload(input) {
           (l) => Math.abs(Number(l.frequency) - frequency) < 0.001,
         );
         if (dupFreq || batchFreqs.has(frequency)) {
-          errors.push(
-            `Row ${i + 1}: Frequency ${frequency} MHz already exists — skipped`,
-          );
+          errors.push(t("import.link.freqDup", { row: i + 1, freq: frequency }));
           continue;
         }
 
@@ -277,7 +269,7 @@ async function handleLinkExcelUpload(input) {
             (o) => o.name.toLowerCase() === owner.toLowerCase(),
           );
           if (!ownerValid) {
-            errors.push(`Row ${i + 1}: Unknown owner "${owner}" — skipped`);
+            errors.push(t("import.link.unknownOwner", { row: i + 1, name: owner }));
             continue;
           }
         }
@@ -293,9 +285,7 @@ async function handleLinkExcelUpload(input) {
           batchNames.add(nameLower);
           batchFreqs.add(frequency);
         } catch (err) {
-          errors.push(
-            `Row ${i + 1}: Failed to save "${linkName}" — ${err.message}`,
-          );
+          errors.push(t("import.link.saveFailed", { row: i + 1, name: linkName }));
         }
       }
 
