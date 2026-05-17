@@ -2454,7 +2454,7 @@
                 </div>
 
                 <!-- Role -->
-                <div class="form-group" style="margin-bottom: 0">
+                <div class="form-group" style="margin-bottom: 0; position: relative;">
                   <label for="reqRole" style="font-size: 0.8rem">
                     <i
                       class="fa-solid fa-briefcase"
@@ -2467,7 +2467,28 @@
                     id="reqRole"
                     data-i18n-placeholder="planMission.rolePlaceholder"
                     placeholder="e.g., Commander"
+                    onfocus="showRoleSuggestions()"
+                    onblur="hideRoleSuggestions()"
+                    autocomplete="off"
                   />
+                  <div
+                    id="reqRoleSuggestions"
+                    style="
+                      display: none;
+                      position: absolute;
+                      top: 100%;
+                      right: 0;
+                      left: 0;
+                      z-index: 9999;
+                      background: white;
+                      border: 1.5px solid var(--info-color);
+                      border-top: none;
+                      border-radius: 0 0 8px 8px;
+                      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                      max-height: 220px;
+                      overflow-y: auto;
+                    "
+                  ></div>
                 </div>
 
                 <!-- Add Button -->

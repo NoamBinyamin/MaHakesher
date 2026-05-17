@@ -754,8 +754,8 @@ async function allocateToStandby(missionId) {
 
   if (toFulfill.length === 0) { showNotification(t("error.missionFulfilled"), "info"); return; }
 
-  // Only use devices with NO current allocation from any mission
-  let available = window.appState.radios.filter((r) => isAvailableForStandbyMission(r) && !r.mission_name);
+  // Only block devices already assigned to THIS mission in current state
+  let available = window.appState.radios.filter((r) => isAvailableForStandbyMission(r) && r.mission_name !== missionName);
   const assignments = [];
   const failedReqs  = [];
 

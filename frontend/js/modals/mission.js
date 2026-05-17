@@ -125,6 +125,58 @@ function selectFreqLinkSuggestion(frequency) {
   if (dropdown) dropdown.style.display = "none";
 }
 
+let _roleHideTimer = null;
+
+function showRoleSuggestions() {
+  const dropdown = document.getElementById("reqRoleSuggestions");
+  if (!dropdown) return;
+
+  const freqVal = parseFloat(document.getElementById("reqFrequency")?.value);
+  if (isNaN(freqVal)) { dropdown.style.display = "none"; return; }
+
+  const roles = [...new Set(
+    missionRequirements
+      .filter((req) => req.frequency != null &&
+                       Math.abs(req.frequency - freqVal) < 0.001 &&
+                       req.role)
+      .map((req) => req.role)
+  )];
+
+  if (roles.length === 0) { dropdown.style.display = "none"; return; }
+
+  const dark = document.documentElement.classList.contains("dark");
+  dropdown.style.background = dark ? "#1e293b" : "white";
+
+  dropdown.innerHTML = roles.map((role) => `
+    <div
+      style="padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--gray-200); font-size: 0.875rem; cursor: pointer;"
+      onmousedown="selectRoleSuggestion('${escapeHTML(role)}')"
+      onmouseover="this.style.background='var(--gray-50)'"
+      onmouseout="this.style.background=''"
+    >
+      <i class="fa-solid fa-briefcase" style="color: var(--info-color); width: 16px; flex-shrink: 0;"></i>
+      <span style="color: var(--gray-900);">${escapeHTML(role)}</span>
+    </div>`).join("");
+
+  dropdown.style.display = "block";
+}
+
+function hideRoleSuggestions() {
+  _roleHideTimer = setTimeout(() => {
+    const dropdown = document.getElementById("reqRoleSuggestions");
+    if (dropdown) dropdown.style.display = "none";
+    _roleHideTimer = null;
+  }, 150);
+}
+
+function selectRoleSuggestion(role) {
+  if (_roleHideTimer) { clearTimeout(_roleHideTimer); _roleHideTimer = null; }
+  const input = document.getElementById("reqRole");
+  if (input) input.value = role;
+  const dropdown = document.getElementById("reqRoleSuggestions");
+  if (dropdown) dropdown.style.display = "none";
+}
+
 function checkFreqOwnerMismatch() {
   const box = document.getElementById("reqFormBox");
   if (!box) return;
@@ -583,5 +635,8 @@ window.autoFillReqBand = autoFillReqBand;
 window.showFreqLinkSuggestions = showFreqLinkSuggestions;
 window.hideFreqLinkSuggestions = hideFreqLinkSuggestions;
 window.selectFreqLinkSuggestion = selectFreqLinkSuggestion;
+window.showRoleSuggestions = showRoleSuggestions;
+window.hideRoleSuggestions = hideRoleSuggestions;
+window.selectRoleSuggestion = selectRoleSuggestion;
 window.checkFreqOwnerMismatch = checkFreqOwnerMismatch;
 window.updatePlanMissionHeaderColor = updatePlanMissionHeaderColor;
