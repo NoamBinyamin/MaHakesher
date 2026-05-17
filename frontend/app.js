@@ -34,6 +34,9 @@ let _loggedInUser    = null; // {username, role} when authenticated
 
 function isViewMode()      { return !_editModeActive; }
 function isAuthenticated() { return _loggedInUser !== null; }
+function getCurrentUserRole() { return _loggedInUser ? _loggedInUser.role : null; }
+function isUserRole()      { return getCurrentUserRole() === 'user'; }
+function isAdminRole()     { return getCurrentUserRole() === 'admin'; }
 
 // On page load — restore session if token is still valid
 async function restoreSession() {
@@ -47,8 +50,7 @@ async function restoreSession() {
     if (!res.ok) { localStorage.removeItem("mahakesher-token"); return; }
     const me = await res.json();
     _loggedInUser = me;
-    _editModeActive = true;
-    document.documentElement.classList.remove("view-mode");
+    _applyRoleClasses();
     _updateModeButton();
     _updateUserButton();
   } catch (_) {
@@ -67,6 +69,7 @@ function toggleMode() {
     openLoginModal();
     return;
   }
+  if (isUserRole()) return; // user-role cannot toggle mode
   _setEditMode(!_editModeActive);
 }
 
@@ -175,30 +178,71 @@ async function submitLogin() {
   localStorage.setItem("mahakesher-token", result.token);
   _loggedInUser = { username: result.username, role: result.role };
   closeLoginModal();
-  _setEditMode(true);
+  _applyRoleClasses();
+  _updateModeButton();
   _updateUserButton();
 }
 
 async function logout() {
   await apiLogout();
   _loggedInUser = null;
+  document.documentElement.classList.remove("user-role");
   _setEditMode(false);
   _updateUserButton();
   showNotification(t("login.loggedOut"), "success");
 }
 
+function _applyRoleClasses() {
+  const role = getCurrentUserRole();
+  if (role === 'user') {
+    // user-role stays in view-mode for overview/links etc., only missions are editable
+    _editModeActive = false;
+    document.documentElement.classList.add("view-mode");
+    document.documentElement.classList.add("user-role");
+  } else if (role === 'admin') {
+    _editModeActive = true;
+    document.documentElement.classList.remove("view-mode");
+    document.documentElement.classList.remove("user-role");
+  }
+}
+
 // Guard helper — call at the top of every mutating function
 function guardViewMode() {
-  if (isViewMode()) {
+  // user-role is technically in view-mode but CAN edit missions
+  if (isViewMode() && !isUserRole()) {
     showNotification(t("notify.viewModeBlock"), "warning");
     return true;
   }
   return false;
 }
 
-window.isViewMode      = isViewMode;
-window.isAuthenticated = isAuthenticated;
-window.toggleMode      = toggleMode;
+// Guard for admin-only actions (blocked for both guests and user-role)
+function guardAdminOnly() {
+  if (!isAdminRole()) {
+    showNotification(t("notify.adminOnly"), "warning");
+    return true;
+  }
+  return false;
+}
+
+// Called by apiCall when any request gets a 401 (server restarted, session lost)
+window._handleSessionExpired = function () {
+  if (!_loggedInUser) return; // already logged out
+  _loggedInUser = null;
+  document.documentElement.classList.remove("user-role");
+  _setEditMode(false);
+  _updateUserButton();
+  showNotification(t("login.sessionExpired"), "warning");
+  openLoginModal();
+};
+
+window.isViewMode          = isViewMode;
+window.isAuthenticated     = isAuthenticated;
+window.getCurrentUserRole  = getCurrentUserRole;
+window.isUserRole          = isUserRole;
+window.isAdminRole         = isAdminRole;
+window.guardAdminOnly      = guardAdminOnly;
+window.toggleMode          = toggleMode;
 window.openLoginModal  = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.submitLogin     = submitLogin;
@@ -293,6 +337,9 @@ function setupTabNavigation() {
       }
       if (tabName === "preferences") {
         if (window.renderPreferencesTab) renderPreferencesTab();
+      }
+      if (tabName === "ownerfreqs") {
+        if (window.renderOwnerFreqsTab) renderOwnerFreqsTab();
       }
     });
   });
@@ -399,6 +446,10 @@ async function _pollForChanges() {
           document.getElementById("preferences")?.classList.contains("active")) {
         renderPreferencesTab();
       }
+      if (window.renderOwnerFreqsTab &&
+          document.getElementById("ownerfreqs")?.classList.contains("active")) {
+        renderOwnerFreqsTab();
+      }
     }
   } catch (_) {
     // Silent — server may be temporarily unreachable
@@ -471,6 +522,10 @@ async function _keyboardForceRefresh() {
     renderSummaryTab();
     renderTimelineTab();
     if (window.performSearch) performSearch();
+    if (window.renderOwnerFreqsTab &&
+        document.getElementById("ownerfreqs")?.classList.contains("active")) {
+      renderOwnerFreqsTab();
+    }
     showNotification(t("notify.dataRefreshed"), "success");
   } catch (_) {
     showNotification(t("notify.refreshFailed"), "error");

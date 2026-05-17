@@ -65,6 +65,7 @@ const TRANSLATIONS = {
     "tab.overview": "Overview",
     "tab.missions": "Missions",
     "tab.links": "Link Dictionary",
+    "tab.ownerfreqs": "Owner Frequencies",
     "tab.search": "Search",
     "tab.summary": "Summary",
     "tab.history": "History",
@@ -72,20 +73,21 @@ const TRANSLATIONS = {
     "tab.preferences": "Preferences",
 
     // ── Login ─────────────────────────────────────────────────
-    "login.title":               "Login",
-    "login.username":            "Username",
+    "login.title": "Login",
+    "login.username": "Username",
     "login.usernamePlaceholder": "Enter username",
-    "login.password":            "Password",
+    "login.password": "Password",
     "login.passwordPlaceholder": "••••••••",
-    "login.submit":              "Login",
-    "login.btnLogin":            "Login",
-    "login.btnLogout":           "Logout",
-    "login.fieldRequired":       "Please enter username and password",
-    "login.invalidCredentials":  "Invalid username or password",
-    "login.loggedOut":           "Logged out successfully",
-    "login.loggedInAs":          "Logged in as {name}",
-    "login.confirmLogout":       "Log out?",
-    "login.logoutTooltip":       "Click to log out",
+    "login.submit": "Login",
+    "login.btnLogin": "Login",
+    "login.btnLogout": "Logout",
+    "login.fieldRequired": "Please enter username and password",
+    "login.invalidCredentials": "Invalid username or password",
+    "login.loggedOut": "Logged out successfully",
+    "login.sessionExpired": "Session expired — please log in again",
+    "login.loggedInAs": "Logged in as {name}",
+    "login.confirmLogout": "Log out?",
+    "login.logoutTooltip": "Click to log out",
 
     // ── Server status ─────────────────────────────────────────
     "server.connecting": "Connecting...",
@@ -99,6 +101,7 @@ const TRANSLATIONS = {
     "mode.toggleToEdit": "Switch to Edit Mode",
     "mode.banner": "View Only — switch to Edit Mode to make changes",
     "notify.viewModeBlock": "View Only — switch to Edit Mode to make changes",
+    "notify.adminOnly": "This action requires admin access",
 
     // ── Passkey modal ─────────────────────────────────────────
     "passkey.title": "Enter Passkey",
@@ -151,8 +154,16 @@ const TRANSLATIONS = {
     // ── Missions tab ──────────────────────────────────────────
     "missions.title": "Missions Management",
     "missions.planMission": "Plan Mission",
+    "missions.plannedMissions": "Planned Missions",
+    "missions.sub.planned":
+      "Prepare requirements for the mission. Devices cannot be assigned yet.",
     "missions.activeMissions": "Active Missions",
+    "missions.sub.active":
+      "Planning is complete — requirements are now placed on standby or assigned directly to devices.",
     "missions.archivedMissions": "Archived Missions",
+    "missions.sub.archived":
+      "Completed missions. Can be restored to planning at any time.",
+    "missions.noPlanned": "No planned missions.",
     "missions.noActive": "No active missions.",
     "missions.noArchived": "No archived missions.",
     "missions.col.name": "Mission Name",
@@ -165,7 +176,14 @@ const TRANSLATIONS = {
     "missions.overdueBadge": "⚠ Overdue",
     "missions.overdueTitle":
       "This mission's scheduled end time has passed and it has not been ended yet",
+    "missions.btn.finishPlanning": "✔ Finish Planning",
+    "missions.btn.allocate": "▶ Allocate",
+    "missions.btn.allocateToStandby": "⏸ Allocate to Standby",
+    "missions.btn.activateStandby": "⚡ Activate Standby",
+    "missions.btn.returnToPlanning": "↩ Return to Planning",
+    "missions.btn.finishAndArchive": "■ Finish & Archive",
     "missions.btn.start": "▶ Start",
+    "missions.btn.update": "↺ Update",
     "missions.btn.standby": "⏸ Standby",
     "missions.btn.end": "■ End",
     "missions.btn.archive": "📦 Archive",
@@ -280,7 +298,7 @@ const TRANSLATIONS = {
     "history.badge.owner": "Owner",
     "history.badge.device": "Device",
     "history.preferences": "Preferences",
-    "history.empty":     "No history entries found.",
+    "history.empty": "No history entries found.",
     "history.changedBy": "by {name}",
     "history.field.frequency": _en.frequency,
     "history.field.owner": _en.owner,
@@ -415,6 +433,15 @@ const TRANSLATIONS = {
     "notify.siteSaveFailed": "Failed to save site",
     "notify.siteDeleted": "Site deleted successfully",
     "notify.siteDeleteFailed": "Failed to delete site",
+    "notify.missionActivated": "Mission moved to active",
+    "notify.missionDeactivated": "Mission returned to planning",
+    "notify.standbyActivated":
+      "{count} standby device(s) moved to current for '{name}'",
+    "notify.noStandbyDevices": "No standby devices found for this mission",
+    "notify.standbyActivateFailed":
+      "{count} standby device(s) could not be promoted",
+    "confirm.returnToPlanning":
+      "Return this mission to planning? All device assignments will be cleared.",
     "notify.missionSaved": "Mission planned successfully",
     "notify.missionUpdated": "Mission updated successfully",
     "notify.missionSaveFailed": "Failed to save mission: {error}",
@@ -450,7 +477,7 @@ const TRANSLATIONS = {
     "excel.errorDetails": "Error Details",
     "notify.excelNoBandCol": "Could not find 'Frequency Band' column in Excel",
     "notify.excelParseFailed": "Failed to parse Excel file: {error}",
-    "notify.refreshing":    "Refreshing data...",
+    "notify.refreshing": "Refreshing data...",
     "notify.dataRefreshed": "Data refreshed",
     "notify.refreshFailed": "Refresh failed",
     "notify.exportOk": "Backup exported successfully",
@@ -467,6 +494,7 @@ const TRANSLATIONS = {
     "confirm.deleteRadio": "Delete this radio device?",
     "confirm.deleteSector": "Delete this sector and all its sites/radios?",
     "confirm.deleteSite": "Delete this site and all its radios?",
+    "confirm.deleteMission": 'Delete planned mission "{name}"?',
     "confirm.archiveMission": "Move this mission to archive?",
     "confirm.restoreMission": "Restore this mission to active?",
     "confirm.deleteArchived": "Permanently delete this archived mission?",
@@ -509,15 +537,19 @@ const TRANSLATIONS = {
     "error.saveFailed": 'Failed to save "{name}" — {error}',
 
     // ── Excel import row errors ───────────────────────────────
-    "import.link.invalidFreq":      'Row {row}: Invalid or missing frequency for "{name}"',
-    "import.link.nameDup":          'Row {row}: Link name "{name}" already exists — skipped',
-    "import.link.freqDup":          'Row {row}: Frequency {freq} MHz already exists — skipped',
-    "import.link.unknownOwner":     'Row {row}: Unknown owner "{name}" — skipped',
-    "import.link.saveFailed":       'Row {row}: Failed to save "{name}"',
-    "import.mission.bothSectorSite":'Row {row}: Specify either Sector OR Site, not both',
-    "import.mission.unknownBand":   'Row {row}: Unknown frequency band "{band}"',
-    "import.mission.siteNotFound":  'Row {row}: Site "{name}" not found',
-    "import.mission.sectorNotFound":'Row {row}: Sector "{name}" not found',
+    "import.link.invalidFreq":
+      'Row {row}: Invalid or missing frequency for "{name}"',
+    "import.link.nameDup":
+      'Row {row}: Link name "{name}" already exists — skipped',
+    "import.link.freqDup":
+      "Row {row}: Frequency {freq} MHz already exists — skipped",
+    "import.link.unknownOwner": 'Row {row}: Unknown owner "{name}" — skipped',
+    "import.link.saveFailed": 'Row {row}: Failed to save "{name}"',
+    "import.mission.bothSectorSite":
+      "Row {row}: Specify either Sector OR Site, not both",
+    "import.mission.unknownBand": 'Row {row}: Unknown frequency band "{band}"',
+    "import.mission.siteNotFound": 'Row {row}: Site "{name}" not found',
+    "import.mission.sectorNotFound": 'Row {row}: Sector "{name}" not found',
 
     // ── Mission table & button titles ─────────────────────────
     "missions.btn.titleEdit": "Edit Mission",
@@ -538,6 +570,18 @@ const TRANSLATIONS = {
     // ── Link Dictionary extra ─────────────────────────────────
     "links.noMatches": "No matches found.",
     "links.edit": "Edit",
+
+    // ── Owner Frequencies tab ─────────────────────────────────
+    "ownerfreqs.title": "Owner Frequencies",
+    "ownerfreqs.selectLabel": "Owner:",
+    "ownerfreqs.selectPlaceholder": "Select an owner...",
+    "ownerfreqs.bandTitle": "Frequency Band: {band}",
+    "ownerfreqs.col.frequency": "Frequency",
+    "ownerfreqs.col.name": "Frequency Name",
+    "ownerfreqs.col.activeMissions": "Active Missions",
+    "ownerfreqs.col.plannedMissions": "Planned Missions",
+    "ownerfreqs.noLinks": "No frequencies assigned to this owner.",
+    "ownerfreqs.unknownBand": "Unknown Band",
 
     // ── Summary charts & table headers ────────────────────────
     "summary.chart.usable": "Usable",
@@ -647,6 +691,11 @@ const TRANSLATIONS = {
     "pref.notify.deviceDeleted": "Device deleted",
     "pref.notify.nameRequired": "Owner name is required",
     "pref.notify.devNameRequired": "Device name is required",
+    "pref.users": "Users",
+    "pref.col.username": "Username",
+    "pref.col.role": "Role",
+    "pref.noUsers": "No users found",
+    "pref.notify.userRoleUpdated": "Role updated successfully",
     "pref.error.generic": "An error occurred",
     "pref.error.alreadyExists": "This name already exists in the system",
     "pref.error.nameRequired": "Name is required",
@@ -667,6 +716,7 @@ const TRANSLATIONS = {
     "tab.overview": "סקירה כללית",
     "tab.missions": "משימות",
     "tab.links": "קישור תדרים",
+    "tab.ownerfreqs": "פלאקט עורקים",
     "tab.search": "חיפוש",
     "tab.summary": "סיכום",
     "tab.history": "היסטוריה",
@@ -674,20 +724,21 @@ const TRANSLATIONS = {
     "tab.preferences": "העדפות",
 
     // ── Login ─────────────────────────────────────────────────
-    "login.title":               "התחברות",
-    "login.username":            "שם משתמש",
+    "login.title": "התחברות",
+    "login.username": "שם משתמש",
     "login.usernamePlaceholder": "הזן שם משתמש",
-    "login.password":            "סיסמה",
+    "login.password": "סיסמה",
     "login.passwordPlaceholder": "••••••••",
-    "login.submit":              "התחבר",
-    "login.btnLogin":            "התחברות",
-    "login.btnLogout":           "התנתקות",
-    "login.fieldRequired":       "נא להזין שם משתמש וסיסמה",
-    "login.invalidCredentials":  "שם משתמש או סיסמה שגויים",
-    "login.loggedOut":           "התנתקת בהצלחה",
-    "login.loggedInAs":          "מחובר כ-{name}",
-    "login.confirmLogout":       "להתנתק?",
-    "login.logoutTooltip":       "לחץ להתנתקות",
+    "login.submit": "התחבר",
+    "login.btnLogin": "התחברות",
+    "login.btnLogout": "התנתקות",
+    "login.fieldRequired": "נא להזין שם משתמש וסיסמה",
+    "login.invalidCredentials": "שם משתמש או סיסמה שגויים",
+    "login.loggedOut": "התנתקת בהצלחה",
+    "login.sessionExpired": "הפגישה פגה — אנא התחבר מחדש",
+    "login.loggedInAs": "מחובר כ-{name}",
+    "login.confirmLogout": "להתנתק?",
+    "login.logoutTooltip": "לחץ להתנתקות",
 
     // ── Server status ─────────────────────────────────────────
     "server.connecting": "מתחבר...",
@@ -701,6 +752,7 @@ const TRANSLATIONS = {
     "mode.toggleToEdit": "עבור למצב עריכה",
     "mode.banner": "צפייה בלבד — לא ניתן לבצע שינויים",
     "notify.viewModeBlock": "לא ניתן לבצע שינויים במצב צפייה בלבד!",
+    "notify.adminOnly": "פעולה זו דורשת הרשאות מנהל",
 
     // ── Passkey modal ─────────────────────────────────────────
     "passkey.title": "הזן מפתח גישה",
@@ -753,8 +805,14 @@ const TRANSLATIONS = {
     // ── Missions tab ──────────────────────────────────────────
     "missions.title": "ניהול משימות",
     "missions.planMission": "צור משימה חדשה",
+    "missions.plannedMissions": "משימות בתכנון",
+    "missions.sub.planned": "איזור תכנון למשימות ודרישות למשימות",
     "missions.activeMissions": "משימות פעילות",
+    "missions.sub.active":
+      "משימות שסיימו את שלב התכנון - מכאן ניתן להקצות לפעילות מבצעית",
     "missions.archivedMissions": "משימות בארכיון",
+    "missions.sub.archived": "משימות שהסתיימו - ניתן לשחזרן לתכנון בכל עת.",
+    "missions.noPlanned": "לא קיימות משימות בתכנון.",
     "missions.noActive": "לא קיימות משימות פעילות.",
     "missions.noArchived": "לא קיימות משימות בארכיון.",
     "missions.col.name": "שם המשימה",
@@ -767,7 +825,14 @@ const TRANSLATIONS = {
     "missions.overdueBadge": "⚠ באיחור",
     "missions.overdueTitle":
       "זמן הסיום המתוכנן של המשימה עבר והיא טרם הועברה לארכיון",
+    "missions.btn.finishPlanning": "✔ סיים תכנון",
+    "missions.btn.allocate": "▶ הקצה",
+    "missions.btn.allocateToStandby": "⏸ הקצה לכוננות",
+    "missions.btn.activateStandby": "⚡ הפעל כוננות",
+    "missions.btn.returnToPlanning": "↩ החזר לתכנון",
+    "missions.btn.finishAndArchive": "■ סיים והעבר לארכיון",
     "missions.btn.start": "▶ התחלה",
+    "missions.btn.update": "↺ עדכן",
     "missions.btn.standby": "⏸ כוננות",
     "missions.btn.end": "■ סיום",
     "missions.btn.archive": "📦 העברה לארכיון",
@@ -880,7 +945,7 @@ const TRANSLATIONS = {
     "history.badge.owner": "בעלים",
     "history.badge.device": "מכשיר",
     "history.preferences": "העדפות",
-    "history.empty":     "לא נמצאה היסטוריה.",
+    "history.empty": "לא נמצאה היסטוריה.",
     "history.changedBy": "על ידי {name}",
     "history.field.frequency": _he.frequency,
     "history.field.owner": _he.owner,
@@ -1015,6 +1080,14 @@ const TRANSLATIONS = {
     "notify.siteSaveFailed": "כשלון בשמירת האתר",
     "notify.siteDeleted": "האתר נמחק בהצלחה",
     "notify.siteDeleteFailed": "כשלון במחיקת אתר",
+    "notify.missionActivated": "המשימה הועברה למצב פעיל",
+    "notify.missionDeactivated": "המשימה חזרה לתכנון",
+    "notify.standbyActivated":
+      "{count} מכשירים עברו מכוננות לפעיל עבור '{name}'",
+    "notify.noStandbyDevices": "לא נמצאו מכשירי כוננות למשימה זו",
+    "notify.standbyActivateFailed":
+      "{count} מכשירי כוננות לא הצליחו לעבור לפעיל",
+    "confirm.returnToPlanning": "להחזיר את המשימה לתכנון? כל ההקצאות יתנקו.",
     "notify.missionSaved": "המשימה נשמרה בהצלחה",
     "notify.missionUpdated": "המשימה עודכנה בהצלחה",
     "notify.missionSaveFailed": "כשלון בשמירת משימה: {error}",
@@ -1050,7 +1123,7 @@ const TRANSLATIONS = {
     "excel.errorDetails": "פרטי השגיאה",
     "notify.excelNoBandCol": "לא ניתן למצוא בקובץ עמודת תחום תדר",
     "notify.excelParseFailed": "תקלה בעיבוד הקובץ: {error}",
-    "notify.refreshing":    "מרענן נתונים...",
+    "notify.refreshing": "מרענן נתונים...",
     "notify.dataRefreshed": "הנתונים רועננו",
     "notify.refreshFailed": "רענון נכשל",
     "notify.exportOk": "הגיבוי נוצר בהצלחה",
@@ -1069,6 +1142,7 @@ const TRANSLATIONS = {
       "האם למחוק את גזרה זו? מחיקה תגרום למחיקת הגזרה, האתרים שלה והמכשירים שלהם!",
     "confirm.deleteSite":
       "האם למחוק אתר זה? פעולה זו תמחק את האתר עם כל המכשירים שבו!",
+    "confirm.deleteMission": 'למחוק את המשימה "{name}"?',
     "confirm.archiveMission": "האם להעביר את המשימה הזו לארכיון?",
     "confirm.restoreMission": "האם לאחזר את המשימה הזו לרשימת המשימות הפעילות?",
     "confirm.deleteArchived": "האם אתה בטוח שברצונך למחוק לתמיד את המשימה?",
@@ -1108,15 +1182,16 @@ const TRANSLATIONS = {
     "error.saveFailed": 'כשלון בשמירת "{name}" — {error}',
 
     // ── Excel import row errors ───────────────────────────────
-    "import.link.invalidFreq":      'שורה {row}: תדר לא תקין או חסר עבור "{name}"',
-    "import.link.nameDup":          'שורה {row}: שם עורק "{name}" כבר קיים — דולג',
-    "import.link.freqDup":          'שורה {row}: תדר {freq} MHz כבר קיים — דולג',
-    "import.link.unknownOwner":     'שורה {row}: בעלים לא מוכר "{name}" — דולג',
-    "import.link.saveFailed":       'שורה {row}: שגיאה בשמירת "{name}"',
-    "import.mission.bothSectorSite":'שורה {row}: יש לציין גזרה או אתר, לא שניהם',
-    "import.mission.unknownBand":   'שורה {row}: תחום תדר לא מוכר "{band}"',
-    "import.mission.siteNotFound":  'שורה {row}: אתר "{name}" לא נמצא',
-    "import.mission.sectorNotFound":'שורה {row}: גזרה "{name}" לא נמצאה',
+    "import.link.invalidFreq": 'שורה {row}: תדר לא תקין או חסר עבור "{name}"',
+    "import.link.nameDup": 'שורה {row}: שם עורק "{name}" כבר קיים — דולג',
+    "import.link.freqDup": "שורה {row}: תדר {freq} MHz כבר קיים — דולג",
+    "import.link.unknownOwner": 'שורה {row}: בעלים לא מוכר "{name}" — דולג',
+    "import.link.saveFailed": 'שורה {row}: שגיאה בשמירת "{name}"',
+    "import.mission.bothSectorSite":
+      "שורה {row}: יש לציין גזרה או אתר, לא שניהם",
+    "import.mission.unknownBand": 'שורה {row}: תחום תדר לא מוכר "{band}"',
+    "import.mission.siteNotFound": 'שורה {row}: אתר "{name}" לא נמצא',
+    "import.mission.sectorNotFound": 'שורה {row}: גזרה "{name}" לא נמצאה',
 
     // ── Mission table & button titles ─────────────────────────
     "missions.btn.titleEdit": "ערוך משימה",
@@ -1136,6 +1211,18 @@ const TRANSLATIONS = {
     // ── Link Dictionary extra ─────────────────────────────────
     "links.noMatches": "לא נמצאו התאמות",
     "links.edit": "עריכה",
+
+    // ── Owner Frequencies tab ─────────────────────────────────
+    "ownerfreqs.title": "פלאקט עורקים",
+    "ownerfreqs.selectLabel": "בעלים:",
+    "ownerfreqs.selectPlaceholder": "בחר בעלים...",
+    "ownerfreqs.bandTitle": "תחום תדר: {band}",
+    "ownerfreqs.col.frequency": "תדר",
+    "ownerfreqs.col.name": "שם התדר",
+    "ownerfreqs.col.activeMissions": "משימות פעילות",
+    "ownerfreqs.col.plannedMissions": "משימות בתכנון",
+    "ownerfreqs.noLinks": "לא קיימים תדרים לבעלים זה.",
+    "ownerfreqs.unknownBand": "תחום לא ידוע",
 
     // ── Summary charts & table headers ────────────────────────
     "summary.chart.usable": "שמיש",
@@ -1244,6 +1331,11 @@ const TRANSLATIONS = {
     "pref.notify.deviceDeleted": "המכשיר נמחק",
     "pref.notify.nameRequired": "שם הבעלים נדרש",
     "pref.notify.devNameRequired": "שם המכשיר נדרש",
+    "pref.users": "משתמשים",
+    "pref.col.username": "שם משתמש",
+    "pref.col.role": "תפקיד",
+    "pref.noUsers": "לא נמצאו משתמשים",
+    "pref.notify.userRoleUpdated": "התפקיד עודכן בהצלחה",
     "pref.error.generic": "אירעה שגיאה",
     "pref.error.alreadyExists": "שם זה כבר קיים במערכת",
     "pref.error.nameRequired": "שם הוא שדה חובה",

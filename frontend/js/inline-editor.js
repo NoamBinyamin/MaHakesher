@@ -213,7 +213,7 @@ function clearInlineError(cell) {
 }
 
 function openInlineEditor(cell, radioId, columnIndex) {
-  if (window.guardViewMode && guardViewMode()) return;
+  if (window.guardAdminOnly && guardAdminOnly()) return;
   // Close any existing editor first
   closeInlineEditor(true);
 

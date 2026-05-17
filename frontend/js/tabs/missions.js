@@ -81,6 +81,17 @@ function isAvailableForMission(radio) {
   return true;
 }
 
+// ----- Strict helper: ALL current-state fields must be completely empty -----
+// Used by Activate Standby to avoid touching any device that has ANY data.
+function _currentStateIsEmpty(radio) {
+  if (radio.status !== "Usable") return false;
+  if (radio.mission_name) return false;              // any value including "Routine"
+  if (radio.owner) return false;
+  if (radio.role) return false;
+  if (radio.frequency != null && radio.frequency !== 0) return false;
+  return true;
+}
+
 // ----- Helper: Check if a radio is available for standby mission assignment -----
 function isAvailableForStandbyMission(radio) {
   // Must be usable
@@ -95,149 +106,205 @@ function isAvailableForStandbyMission(radio) {
   return true;
 }
 
+function _missionProgressCell(count, total, colorVar) {
+  if (total === 0) return `<td style="color:var(--gray-400)">-</td>`;
+  const capped = Math.min(count, total);
+  const isFull = count >= total;
+  const labelColor = isFull ? colorVar : "inherit";
+  let barHtml;
+  if (total <= 10) {
+    const segs = Array.from({ length: total }, (_, i) => {
+      const filled = i < capped;
+      return `<span class="prog-seg${filled ? " filled" : ""}"${filled ? ` style="background:${colorVar}"` : ""}></span>`;
+    }).join("");
+    barHtml = `<div class="prog-segs">${segs}</div>`;
+  } else {
+    const pct = Math.min(Math.round((count / total) * 100), 100);
+    barHtml = `<div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${colorVar}"></div></div>`;
+  }
+  // Show actual count in label even if it exceeds total, so user knows extras exist
+  return `<td><div class="mission-prog-cell"><span class="mission-prog-label" style="color:${labelColor}">${count}/${total}</span>${barHtml}</div></td>`;
+}
+
+function _buildMissionRow(mission, actions) {
+  const reqCount = mission.requirements ? mission.requirements.length : 0;
+  const allocatedDevices = (window.appState.radios || []).filter((r) => isAllocatedToMission(r, mission)).length;
+  const standbyDevices   = (window.appState.radios || []).filter((r) => r.standby_mission === mission.name && r.status === "Usable").length;
+  const extraDevices     = (window.appState.radios || []).filter((r) => isExtraDeviceForMission(r, mission)).length;
+  const isOverdue = mission.time_end && new Date(mission.time_end) < new Date();
+  const overdueBadge = isOverdue
+    ? `<span title="${t("missions.overdueTitle")}" style="display:inline-block;margin-inline-start:0.5rem;padding:0.1rem 0.45rem;background:var(--danger-color);color:#fff;border-radius:4px;font-size:0.72rem;font-weight:700;vertical-align:middle;">${t("missions.overdueBadge")}</span>`
+    : "";
+  const ownerColor  = mission.owner ? getOwnerColor(mission.owner) : null;
+  const borderStyle = ownerColor ? `border-right: 4px solid ${ownerColor};` : "";
+
+  const allocatedCell = _missionProgressCell(allocatedDevices, reqCount, "var(--success-color)");
+  const standbyCell   = _missionProgressCell(standbyDevices,   reqCount, "var(--warning-color)");
+  const extraCell     = extraDevices > 0
+    ? `<td><span class="mission-extra-badge">+${extraDevices}</span></td>`
+    : `<td style="color:var(--gray-400)">-</td>`;
+
+  const row = document.createElement("tr");
+  if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
+  row.innerHTML = `
+    <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}</td>
+    <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
+    <td>${t("common.deviceCount", { count: reqCount })}</td>
+    ${allocatedCell}
+    ${standbyCell}
+    ${extraCell}
+    <td class="missions-actions-cell">${actions}</td>
+  `;
+  return row;
+}
+
+function _appendMissionSection(container, titleKey, missions, buildActions, emptyKey, extraStyle = "", subtitleKey = "") {
+  const row = document.createElement("div");
+  row.className = "missions-section-header-row";
+  if (extraStyle) row.style.cssText = extraStyle;
+  const header = document.createElement("h3");
+  header.textContent = t(titleKey);
+  row.appendChild(header);
+  if (subtitleKey) {
+    const divider = document.createElement("span");
+    divider.className = "missions-section-divider";
+    divider.textContent = "|";
+    row.appendChild(divider);
+    const sub = document.createElement("span");
+    sub.className = "missions-section-subtitle";
+    sub.innerHTML = `<span class="missions-info-badge">i</span>${escapeHTML(t(subtitleKey))}`;
+    row.appendChild(sub);
+  }
+  container.appendChild(row);
+
+  if (!missions || missions.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = t(emptyKey);
+    p.style.color = "var(--gray-500)";
+    container.appendChild(p);
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "data-table";
+  table.style.marginBottom = "1.5rem";
+  table.innerHTML = `
+    <thead><tr>
+      <th>${t("missions.col.name")}</th>
+      <th>${t("missions.col.owner")}</th>
+      <th>${t("missions.col.reqs")}</th>
+      <th>${t("missions.col.allocated")}</th>
+      <th>${t("missions.col.standby")}</th>
+      <th>${t("missions.col.extra")}</th>
+      <th>${t("missions.col.actions")}</th>
+    </tr></thead>
+    <tbody></tbody>`;
+
+  const tbody = table.querySelector("tbody");
+  missions.forEach((m) => tbody.appendChild(_buildMissionRow(m, buildActions(m))));
+  container.appendChild(table);
+}
+
 function renderMissionsTab() {
   const container = document.getElementById("missionsContent");
   container.innerHTML = "";
 
-  // ----- Active Missions Section -----
-  const activeHeader = document.createElement("h3");
-  activeHeader.textContent = t("missions.activeMissions");
-  container.appendChild(activeHeader);
+  const planned  = (window.appState.plannedMissions  || []).filter((m) => m.status === "planned");
+  const active   = (window.appState.plannedMissions  || []).filter((m) => m.status === "active");
+  const archived =  window.appState.archivedMissions || [];
 
-  if (
-    !window.appState.plannedMissions ||
-    window.appState.plannedMissions.length === 0
-  ) {
-    const noActive = document.createElement("p");
-    noActive.textContent = t("missions.noActive");
-    noActive.style.color = "var(--gray-500)";
-    container.appendChild(noActive);
+  // ----- Planned Missions (compact: no allocation columns, no delete) -----
+  const plannedRow = document.createElement("div");
+  plannedRow.className = "missions-section-header-row";
+  plannedRow.innerHTML = `<h3>${escapeHTML(t("missions.plannedMissions"))}</h3><span class="missions-section-divider">|</span><span class="missions-section-subtitle"><span class="missions-info-badge">i</span>${escapeHTML(t("missions.sub.planned"))}</span>`;
+  container.appendChild(plannedRow);
+
+  if (planned.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = t("missions.noPlanned");
+    p.style.color = "var(--gray-500)";
+    container.appendChild(p);
   } else {
-    const table = document.createElement("table");
-    table.className = "data-table";
-    table.style.marginBottom = "2rem";
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>${t("missions.col.name")}</th>
-          <th>${t("missions.col.owner")}</th>
-          <th>${t("missions.col.reqs")}</th>
-          <th>${t("missions.col.allocated")}</th>
-          <th>${t("missions.col.standby")}</th>
-          <th>${t("missions.col.extra")}</th>
-          <th>${t("missions.col.actions")}</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-
-    const tbody = table.querySelector("tbody");
-    window.appState.plannedMissions.forEach((mission) => {
-      const reqCount = mission.requirements ? mission.requirements.length : 0;
-
-      // Count properly allocated devices
-      const allocatedDevices = window.appState.radios.filter((r) =>
-        isAllocatedToMission(r, mission),
-      ).length;
-
-      // Count standby devices
-      const standbyDevices = window.appState.radios.filter(
-        (r) => r.standby_mission === mission.name && r.status === "Usable",
-      ).length;
-
-      // Count extra devices (has mission name but doesn't satisfy requirements)
-      const extraDevices = window.appState.radios.filter((r) =>
-        isExtraDeviceForMission(r, mission),
-      ).length;
-
-      const allocationText = `${allocatedDevices}/${reqCount}`;
-      const standbyText = `${standbyDevices}/${reqCount}`;
-      const isFullyAllocated = allocatedDevices >= reqCount;
-      const isFullyStandby = standbyDevices >= reqCount;
-
-      const isOverdue =
-        mission.time_end && new Date(mission.time_end) < new Date();
-      const overdueBadge = isOverdue
-        ? `<span title="${t("missions.overdueTitle")}" style="display:inline-block;margin-inline-start:0.5rem;padding:0.1rem 0.45rem;background:var(--danger-color);color:#fff;border-radius:4px;font-size:0.72rem;font-weight:700;vertical-align:middle;letter-spacing:0.02em;">${t("missions.overdueBadge")}</span>`
-        : "";
-
+    const plannedTable = document.createElement("table");
+    plannedTable.className = "data-table";
+    plannedTable.style.marginBottom = "1.5rem";
+    plannedTable.innerHTML = `
+      <thead><tr>
+        <th>${t("missions.col.name")}</th>
+        <th>${t("missions.col.owner")}</th>
+        <th>${t("missions.col.reqs")}</th>
+        <th>${t("missions.col.actions")}</th>
+      </tr></thead>
+      <tbody></tbody>`;
+    const plannedTbody = plannedTable.querySelector("tbody");
+    planned.forEach((m) => {
+      const reqCount    = m.requirements ? m.requirements.length : 0;
+      const ownerColor  = m.owner ? getOwnerColor(m.owner) : null;
+      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
       const row = document.createElement("tr");
-      if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
-      const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
-      const borderStyle = ownerColor
-        ? `border-right: 4px solid ${ownerColor};`
-        : "";
-
       row.innerHTML = `
-        <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}</td>
-        <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
+        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(m.name)}</strong></td>
+        <td>${escapeHTML(m.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
-        <td style="color: ${isFullyAllocated ? "var(--success-color)" : "inherit"}">${allocationText}</td>
-        <td style="color: ${isFullyStandby ? "var(--warning-color)" : "inherit"}">${standbyText}</td>
-        <td style="color: inherit">${extraDevices > 0 ? extraDevices : "-"}</td>
         <td class="missions-actions-cell">
-          <button class="btn btn-sm btn-primary" onclick="editMission('${mission.id}')" title="${t("missions.btn.titleEdit")}">${t("missions.btn.editMission")}</button>
-          <button class="btn btn-sm btn-success" style="background-color: var(--success-color); color: white;" onclick="startMission('${mission.id}')" title="${t("missions.btn.titleStart")}">${t("missions.btn.start")}</button>
-          <button class="btn btn-sm btn-info" style="background-color: #0ea5e9; color: white;" onclick="placeOnStandby('${mission.id}')" title="${t("missions.btn.titleStandby")}">${t("missions.btn.standby")}</button>
-          <button class="btn btn-sm btn-warning" onclick="endMission('${mission.id}')" title="${t("missions.btn.titleEnd")}">${t("missions.btn.end")}</button>
-        </td>
-      `;
-      tbody.appendChild(row);
+          <button class="btn btn-sm btn-primary user-edit-allowed" onclick="editMission('${m.id}')">${t("missions.btn.editMission")}</button>
+          <button class="btn btn-sm btn-success admin-only" style="background-color:var(--success-color);color:white;" onclick="finishMissionPlanning('${m.id}')">${t("missions.btn.finishPlanning")}</button>
+          <button class="btn btn-sm btn-secondary user-edit-allowed" onclick="archiveMission('${m.id}')">${t("missions.btn.archive")}</button>
+        </td>`;
+      plannedTbody.appendChild(row);
     });
-
-    container.appendChild(table);
+    container.appendChild(plannedTable);
   }
 
-  // ----- Archived Missions Section -----
-  const archivedHeader = document.createElement("h3");
-  archivedHeader.textContent = t("missions.archivedMissions");
-  archivedHeader.style.marginTop = "2rem";
-  container.appendChild(archivedHeader);
+  // ----- Active Missions — admin only -----
+  _appendMissionSection(container, "missions.activeMissions", active, (m) => `
+    <button class="btn btn-sm btn-primary admin-only" onclick="editMission('${m.id}')">${t("missions.btn.editMission")}</button>
+    <button class="btn btn-sm btn-success admin-only" style="background-color:var(--success-color);color:white;" onclick="allocateMission('${m.id}')">${t("missions.btn.allocate")}</button>
+    <button class="btn btn-sm btn-info admin-only" style="background-color:#0ea5e9;color:white;" onclick="allocateToStandby('${m.id}')">${t("missions.btn.allocateToStandby")}</button>
+    <button class="btn btn-sm btn-secondary admin-only" onclick="activateStandbyBtn('${m.id}')">${t("missions.btn.activateStandby")}</button>
+    <button class="btn btn-sm btn-warning admin-only" onclick="returnToPlanning('${m.id}')">${t("missions.btn.returnToPlanning")}</button>
+    <button class="btn btn-sm btn-danger admin-only" onclick="endMission('${m.id}')">${t("missions.btn.finishAndArchive")}</button>
+  `, "missions.noActive", "margin-top:1.5rem", "missions.sub.active");
 
-  if (
-    !window.appState.archivedMissions ||
-    window.appState.archivedMissions.length === 0
-  ) {
-    const noArchived = document.createElement("p");
-    noArchived.textContent = t("missions.noArchived");
-    noArchived.style.color = "var(--gray-500)";
-    container.appendChild(noArchived);
+  // ----- Archived Missions -----
+  const archivedRow = document.createElement("div");
+  archivedRow.className = "missions-section-header-row";
+  archivedRow.style.marginTop = "1.5rem";
+  archivedRow.innerHTML = `<h3>${escapeHTML(t("missions.archivedMissions"))}</h3><span class="missions-section-divider">|</span><span class="missions-section-subtitle"><span class="missions-info-badge">i</span>${escapeHTML(t("missions.sub.archived"))}</span>`;
+  container.appendChild(archivedRow);
+
+  if (archived.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = t("missions.noArchived");
+    p.style.color = "var(--gray-500)";
+    container.appendChild(p);
   } else {
     const table = document.createElement("table");
     table.className = "data-table";
     table.innerHTML = `
-      <thead>
-        <tr>
-          <th>${t("missions.col.name")}</th>
-          <th>${t("missions.col.owner")}</th>
-          <th>${t("missions.col.reqs")}</th>
-          <th>${t("missions.col.actions")}</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-
+      <thead><tr>
+        <th>${t("missions.col.name")}</th>
+        <th>${t("missions.col.owner")}</th>
+        <th>${t("missions.col.reqs")}</th>
+        <th>${t("missions.col.actions")}</th>
+      </tr></thead>
+      <tbody></tbody>`;
     const tbody = table.querySelector("tbody");
-    window.appState.archivedMissions.forEach((mission) => {
+    archived.forEach((mission) => {
       const reqCount = mission.requirements ? mission.requirements.length : 0;
+      const ownerColor  = mission.owner ? getOwnerColor(mission.owner) : null;
+      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
       const row = document.createElement("tr");
-      const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
-      const borderStyle = ownerColor
-        ? `border-right: 4px solid ${ownerColor};`
-        : "";
-
       row.innerHTML = `
-        <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong></td>
-        <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
+        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(mission.name)}</strong></td>
+        <td>${escapeHTML(mission.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
         <td class="missions-actions-cell">
-          <button class="btn btn-sm btn-secondary" onclick="restoreMission('${mission.id}')" title="${t("missions.btn.titleRestore")}">${t("missions.btn.restore")}</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteArchivedMission('${mission.id}')" title="${t("missions.btn.titleDelete")}">🗑 ${t("btn.delete")}</button>
-        </td>
-      `;
+          <button class="btn btn-sm btn-secondary user-edit-allowed" onclick="restoreMission('${mission.id}')">${t("missions.btn.returnToPlanning")}</button>
+          <button class="btn btn-sm btn-danger admin-only" onclick="deleteArchivedMission('${mission.id}')">🗑 ${t("btn.delete")}</button>
+        </td>`;
       tbody.appendChild(row);
     });
-
     container.appendChild(table);
   }
 }
@@ -274,7 +341,7 @@ function openMissionSelectForDevice(radioId, isStandby = false) {
 }
 
 async function startMission(missionId) {
-  if (guardViewMode()) return;
+  if (guardAdminOnly()) return;
   const mission = window.appState.plannedMissions.find(
     (m) => m.id === missionId,
   );
@@ -326,6 +393,13 @@ async function startMission(missionId) {
   }
 
   if (requirementsToFulfill.length === 0 && roleUpdates.length === 0) {
+    // All requirements already satisfied — still activate the mission status
+    try { await apiCall(`/planned_missions/${missionId}/activate`, "POST"); } catch (_) {}
+    await loadAllData();
+    await loadConfiguration();
+    populateSelects();
+    renderMissionsTab();
+    renderOverview();
     showNotification(t("error.missionFulfilled"), "info");
     return;
   }
@@ -412,20 +486,316 @@ async function startMission(missionId) {
     }
   }
 
+  // Activate mission status (assignments done client-side, status updated server-side)
+  try { await apiCall(`/planned_missions/${missionId}/activate`, "POST"); } catch (_) {}
+
   // Show popup for failed requirements if any
   if (failedRequirements.length > 0) {
     showFailedRequirementsModal(failedRequirements);
   }
 
   await loadAllData();
+  await loadConfiguration();
+  populateSelects();
   renderMissionsTab();
   renderOverview();
+}
+
+// ── Finish Mission Planning: planned → active (status only, no allocation) ──
+
+async function finishMissionPlanning(missionId) {
+  if (guardAdminOnly()) return;
+  try {
+    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
+    showNotification(t("notify.missionActivated"), "success");
+    await loadAllData();
+    await loadConfiguration();
+    populateSelects();
+    renderMissionsTab();
+  } catch (_) {}
+}
+
+// ── Return to Planning: active → planned (clears all assignments server-side) ──
+
+async function returnToPlanning(missionId) {
+  if (guardAdminOnly()) return;
+  if (!confirm(t("confirm.returnToPlanning"))) return;
+  try {
+    await apiCall(`/planned_missions/${missionId}/deactivate`, "POST");
+    showNotification(t("notify.missionDeactivated"), "success");
+    await loadAllData();
+    await loadConfiguration();
+    populateSelects();
+    renderMissionsTab();
+    renderOverview();
+  } catch (_) {}
+}
+
+// ── Activate Standby: internal helper used by both the button and Allocate ──
+// For each radio with standby_mission === mission.name, tries to promote to
+// Current on the same radio (if free) or another matching free radio.
+
+async function _activateStandbyInternal(mission) {
+  const missionName  = mission.name;
+  const missionOwner = mission.owner;
+
+  const standbyRadios = (window.appState.radios || []).filter(
+    (r) => r.standby_mission === missionName && r.status === "Usable",
+  );
+  if (standbyRadios.length === 0) return { promoted: 0, failed: 0 };
+
+  let promoted = 0;
+  let failed   = 0;
+  const usedIds = new Set();
+
+  for (const standby of standbyRadios) {
+    const band = standby.frequency_band || getFrequencyBandForDevice(standby.device_type);
+
+    // Option 1: promote on the same radio if ALL its current-state fields are free
+    if (_currentStateIsEmpty(standby)) {
+      try {
+        await apiCall(`/radios/${standby.id}`, "POST", {
+          ...standby,
+          mission_name:      missionName,
+          frequency:         standby.standby_frequency,
+          owner:             missionOwner || standby.standby_owner,
+          role:              standby.standby_role,
+          standby_mission:   null,
+          standby_frequency: null,
+          standby_owner:     null,
+          standby_role:      null,
+        });
+        promoted++;
+        usedIds.add(standby.id);
+        continue;
+      } catch (_) {}
+    }
+
+    // Option 2: find another fully free radio at the same site with the same band
+    const freeRadio = (window.appState.radios || []).find(
+      (r) =>
+        r.id !== standby.id &&
+        !usedIds.has(r.id) &&
+        _currentStateIsEmpty(r) &&
+        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) === band &&
+        r.site_id === standby.site_id,
+    );
+
+    if (freeRadio) {
+      try {
+        await apiCall(`/radios/${freeRadio.id}`, "POST", {
+          ...freeRadio,
+          mission_name: missionName,
+          frequency:    standby.standby_frequency,
+          owner:        missionOwner || standby.standby_owner,
+          role:         standby.standby_role,
+        });
+        await apiCall(`/radios/${standby.id}`, "POST", {
+          ...standby,
+          standby_mission:   null,
+          standby_frequency: null,
+          standby_owner:     null,
+          standby_role:      null,
+        });
+        promoted++;
+        usedIds.add(freeRadio.id);
+      } catch (_) { failed++; }
+    } else {
+      failed++;
+    }
+  }
+  return { promoted, failed };
+}
+
+// ── Activate Standby button ──
+
+async function activateStandbyBtn(missionId) {
+  if (guardAdminOnly()) return;
+  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+
+  const { promoted, failed } = await _activateStandbyInternal(mission);
+
+  if (promoted === 0 && failed === 0) {
+    showNotification(t("notify.noStandbyDevices"), "info");
+  } else {
+    if (promoted > 0) showNotification(t("notify.standbyActivated", { count: promoted, name: mission.name }), "success");
+    if (failed   > 0) showNotification(t("notify.standbyActivateFailed", { count: failed }), "warning");
+  }
+
+  await loadAllData();
+  await loadConfiguration();
+  populateSelects();
+  renderMissionsTab();
+  renderOverview();
+}
+
+// ── Allocate: Activate Standby first, then allocate remaining to Current ──
+
+async function allocateMission(missionId) {
+  if (guardAdminOnly()) return;
+  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+  if (!mission.requirements || mission.requirements.length === 0) {
+    showNotification(t("error.missionHasNoReqs"), "error"); return;
+  }
+
+  const missionName  = mission.name;
+  const missionOwner = mission.owner;
+
+  // Step 1: promote standby devices to current first
+  await _activateStandbyInternal(mission);
+  await loadAllData();
+
+  const freshMission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  if (!freshMission) return;
+
+  // Step 2: find which requirements are still unmet in Current
+  const allocatedRadios = window.appState.radios.filter((r) => isAllocatedToMission(r, freshMission));
+  const usedIds = new Set();
+  const toFulfill = [];
+
+  for (const req of freshMission.requirements) {
+    const match = allocatedRadios.find((r) => {
+      if (usedIds.has(r.id)) return false;
+      return radioSatisfiesRequirement(r, freshMission, req);
+    });
+    if (match) { usedIds.add(match.id); } else { toFulfill.push(req); }
+  }
+
+  if (toFulfill.length === 0) {
+    showNotification(t("error.missionFulfilled"), "info");
+    await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
+    return;
+  }
+
+  // Step 3: assign remaining requirements to free devices (Current field)
+  let available = window.appState.radios.filter((r) => isAvailableForMission(r));
+  const assignments = [];
+  const failedReqs  = [];
+
+  for (const req of toFulfill) {
+    const idx = available.findIndex((r) => {
+      if (!deviceMatchesBand(r, req.frequencyBand)) return false;
+      if (req.siteId && r.site_id !== req.siteId) return false;
+      if (req.sectorId) {
+        const site = window.appState.sites.find((s) => s.id === r.site_id);
+        if (!site || site.sector_id !== req.sectorId) return false;
+      }
+      return true;
+    });
+    if (idx !== -1) {
+      assignments.push({ radio: available[idx], requirement: req });
+      available.splice(idx, 1);
+    } else {
+      failedReqs.push(req);
+    }
+  }
+
+  if (assignments.length > 0) {
+    try {
+      for (const { radio, requirement } of assignments) {
+        await apiCall(`/radios/${radio.id}`, "POST", {
+          ...radio,
+          mission_name: missionName,
+          frequency:    requirement.frequency || radio.frequency,
+          owner:        missionOwner || radio.owner,
+          role:         requirement.role || null,
+        });
+      }
+      showNotification(t("notify.missionAllocated", { count: assignments.length, name: missionName }), "success");
+    } catch (error) {
+      showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
+    }
+  }
+
+  if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
+
+  await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
+}
+
+// ── Allocate to Standby: only assigns to devices with NO current allocation ──
+
+async function allocateToStandby(missionId) {
+  if (guardAdminOnly()) return;
+  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+  if (!mission.requirements || mission.requirements.length === 0) {
+    showNotification(t("error.missionHasNoReqs"), "error"); return;
+  }
+
+  const missionName  = mission.name;
+  const missionOwner = mission.owner;
+
+  // Determine which requirements are already satisfied (current or standby)
+  const currentRadios = window.appState.radios.filter((r) => r.mission_name === mission.name && r.status === "Usable");
+  const standbyRadios = window.appState.radios.filter((r) => r.standby_mission === mission.name && r.status === "Usable");
+  const usedCurrent   = new Set();
+  const usedStandby   = new Set();
+  const toFulfill     = [];
+
+  for (const req of mission.requirements) {
+    const matchCurrent = currentRadios.find((r) => { if (usedCurrent.has(r.id)) return false; return radioSatisfiesRequirement(r, mission, req); });
+    if (matchCurrent) { usedCurrent.add(matchCurrent.id); continue; }
+
+    const matchStandby = standbyRadios.find((r) => {
+      if (usedStandby.has(r.id)) return false;
+      const band = r.frequency_band || getFrequencyBandForDevice(r.device_type);
+      if (band !== req.frequencyBand) return false;
+      if (req.siteId && r.site_id !== req.siteId) return false;
+      if (req.sectorId) { const site = window.appState.sites.find((s) => s.id === r.site_id); if (!site || site.sector_id !== req.sectorId) return false; }
+      if (req.frequency && r.standby_frequency && Math.abs(r.standby_frequency - req.frequency) > 0.01) return false;
+      return true;
+    });
+    if (matchStandby) { usedStandby.add(matchStandby.id); continue; }
+
+    toFulfill.push(req);
+  }
+
+  if (toFulfill.length === 0) { showNotification(t("error.missionFulfilled"), "info"); return; }
+
+  // Only use devices with NO current allocation from any mission
+  let available = window.appState.radios.filter((r) => isAvailableForStandbyMission(r) && !r.mission_name);
+  const assignments = [];
+  const failedReqs  = [];
+
+  for (const req of toFulfill) {
+    const idx = available.findIndex((r) => {
+      if (!deviceMatchesBand(r, req.frequencyBand)) return false;
+      if (req.siteId && r.site_id !== req.siteId) return false;
+      if (req.sectorId) { const site = window.appState.sites.find((s) => s.id === r.site_id); if (!site || site.sector_id !== req.sectorId) return false; }
+      return true;
+    });
+    if (idx !== -1) { assignments.push({ radio: available[idx], requirement: req }); available.splice(idx, 1); }
+    else failedReqs.push(req);
+  }
+
+  if (assignments.length > 0) {
+    try {
+      for (const { radio, requirement } of assignments) {
+        await apiCall(`/radios/${radio.id}`, "POST", {
+          ...radio,
+          standby_mission:   missionName,
+          standby_owner:     missionOwner || radio.standby_owner,
+          standby_frequency: requirement.frequency || radio.standby_frequency,
+          standby_role:      requirement.role || null,
+        });
+      }
+      showNotification(t("notify.missionStandby", { count: assignments.length, name: missionName }), "success");
+    } catch (error) {
+      showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
+    }
+  }
+
+  if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
+
+  await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
 }
 
 // ----- Place Mission on Standby (similar to Start, but for standby state) -----
 
 async function placeOnStandby(missionId) {
-  if (guardViewMode()) return;
+  if (guardAdminOnly()) return;
   const mission = window.appState.plannedMissions.find(
     (m) => m.id === missionId,
   );
@@ -582,10 +952,37 @@ async function placeOnStandby(missionId) {
     showFailedRequirementsModal(failedRequirements);
   }
 
+  // Mark mission as active (standby = active status)
+  try {
+    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
+  } catch (_) {}
+
   await loadAllData();
   renderMissionsTab();
   renderOverview();
 }
+
+async function deletePlannedMission(missionId, missionName) {
+  if (guardViewMode()) return;
+  if (!confirm(t("confirm.deleteMission", { name: missionName }))) return;
+  try {
+    await apiCall(`/planned_missions/${missionId}`, "DELETE");
+    showNotification(t("notify.missionDeleted", { name: missionName }), "success");
+    await loadAllData();
+    await loadConfiguration();
+    populateSelects();
+    renderMissionsTab();
+  } catch (e) {
+    showNotification(t("notify.missionDeleteFailed"), "error");
+  }
+}
+
+window.deletePlannedMission   = deletePlannedMission;
+window.finishMissionPlanning  = finishMissionPlanning;
+window.returnToPlanning       = returnToPlanning;
+window.activateStandbyBtn     = activateStandbyBtn;
+window.allocateMission        = allocateMission;
+window.allocateToStandby      = allocateToStandby;
 
 function showFailedRequirementsModal(failedRequirements) {
   const modal = document.createElement("div");
@@ -654,7 +1051,7 @@ function closeFailedRequirementsModal() {
 }
 
 async function endMission(missionId) {
-  if (guardViewMode()) return;
+  if (guardAdminOnly()) return;
   const mission = window.appState.plannedMissions.find(
     (m) => m.id === missionId,
   );
@@ -738,7 +1135,7 @@ async function archiveMission(missionId) {
 }
 
 async function restoreMission(missionId) {
-  if (guardViewMode()) return;
+  if (guardAdminOnly()) return;
   if (!confirm(t("confirm.restoreMission"))) return;
   try {
     await apiCall(`/archived_missions/${missionId}/restore`, "POST");
@@ -754,7 +1151,7 @@ async function restoreMission(missionId) {
 }
 
 async function deleteArchivedMission(missionId) {
-  if (guardViewMode()) return;
+  if (guardAdminOnly()) return;
   if (!confirm(t("confirm.deleteArchived"))) return;
   try {
     await apiCall(`/archived_missions/${missionId}`, "DELETE");

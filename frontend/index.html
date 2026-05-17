@@ -82,6 +82,9 @@
         <button class="tab-button" data-tab="links" data-i18n="tab.links">
           Link Dictionary
         </button>
+        <button class="tab-button" data-tab="ownerfreqs" data-i18n="tab.ownerfreqs">
+          Owner Frequencies
+        </button>
         <button class="tab-button" data-tab="search" data-i18n="tab.search">
           Search
         </button>
@@ -215,7 +218,7 @@
         <div class="tab-header">
           <h2 data-i18n="missions.title">Missions Management</h2>
           <button
-            class="btn btn-primary view-mode-hide"
+            class="btn btn-primary user-edit-allowed"
             onclick="openPlanMissionModal()"
             data-i18n="missions.planMission"
           >
@@ -897,6 +900,18 @@
         </div>
         <div id="timelineContent">
           <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Owner Frequencies Tab -->
+      <div id="ownerfreqs" class="tab-content">
+        <div class="tab-header">
+          <h2 data-i18n="ownerfreqs.title">Owner Frequencies</h2>
+        </div>
+        <div class="missions-container">
+          <div id="ownerFreqsContent">
+            <!-- Populated by ownerfreqs.js -->
+          </div>
         </div>
       </div>
 
@@ -2734,6 +2749,7 @@
 
     <!-- Tabs -->
     <script src="js/tabs/links.js"></script>
+    <script src="js/tabs/ownerfreqs.js"></script>
     <script src="js/tabs/missions.js"></script>
     <script src="js/tabs/overview.js"></script>
     <script src="js/tabs/search.js"></script>

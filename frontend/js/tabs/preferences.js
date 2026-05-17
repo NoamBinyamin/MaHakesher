@@ -6,22 +6,28 @@ function _getAvailableBands() {
 
 let _addingOwner  = false;
 let _addingDevice = false;
+let _prefUsers    = []; // cached user list for the users section
+let _editingUsername = null; // username being role-edited
 
 // ── main render ─────────────────────────────────────────────────────────────
 
-function renderPreferencesTab() {
+async function renderPreferencesTab() {
   const container = document.getElementById('preferencesContent');
   if (!container) return;
+
+  try { _prefUsers = await apiGetUsers(); } catch (_) { _prefUsers = []; }
 
   container.innerHTML = `
     ${_renderLanguageSection()}
     <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
       <div style="flex:1;min-width:300px" id="prefOwnersSection"></div>
       <div style="flex:1;min-width:300px" id="prefDevicesSection"></div>
-    </div>`;
+    </div>
+    <div style="margin-top:1.25rem" id="prefUsersSection"></div>`;
 
   _renderOwnersSection();
   _renderDevicesSection();
+  _renderUsersSection();
 }
 
 // ── Language section ─────────────────────────────────────────────────────────
@@ -283,6 +289,94 @@ async function prefDeleteDevice(id, name) {
   }
 }
 
+// ── Users section ────────────────────────────────────────────────────────────
+
+const AVAILABLE_ROLES = ['admin', 'user'];
+
+function _renderUsersSection() {
+  const sec = document.getElementById('prefUsersSection');
+  if (!sec) return;
+
+  const roleOpts = AVAILABLE_ROLES.map(r =>
+    `<option value="${escapeHTML(r)}">${escapeHTML(r)}</option>`
+  ).join('');
+
+  const rows = _prefUsers.map(u => {
+    if (_editingUsername === u.username) {
+      const opts = AVAILABLE_ROLES.map(r =>
+        `<option value="${escapeHTML(r)}"${r === u.role ? ' selected' : ''}>${escapeHTML(r)}</option>`
+      ).join('');
+      return `
+        <tr class="pref-row pref-row-editing">
+          <td style="padding:0.5rem 0.75rem;font-weight:500">${escapeHTML(u.username)}</td>
+          <td style="padding:0.5rem 0.75rem">
+            <select id="editUserRole_${escapeHTML(u.username)}" class="pref-input" style="width:auto">${opts}</select>
+          </td>
+          <td style="padding:0.5rem 0.75rem;white-space:nowrap">
+            <button class="btn btn-sm btn-primary" onclick="prefSaveUserRole('${escapeHTML(u.username)}')">
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="prefCancelUserEdit()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </td>
+        </tr>`;
+    }
+    return `
+      <tr class="pref-row">
+        <td style="padding:0.5rem 0.75rem;font-weight:500">${escapeHTML(u.username)}</td>
+        <td style="padding:0.5rem 0.75rem">
+          <span class="pref-band-badge">${escapeHTML(u.role)}</span>
+        </td>
+        <td style="padding:0.5rem 0.75rem;white-space:nowrap">
+          <button class="btn btn-sm btn-secondary view-mode-hide" onclick="prefEditUserRole('${escapeHTML(u.username)}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  sec.innerHTML = `
+    <div class="pref-section-card">
+      <h3 class="pref-section-title"><i class="fa-solid fa-users-gear"></i> ${escapeHTML(t('pref.users'))}</h3>
+      <table class="pref-table">
+        <thead><tr>
+          <th>${escapeHTML(t('pref.col.username'))}</th>
+          <th>${escapeHTML(t('pref.col.role'))}</th>
+          <th>${escapeHTML(t('pref.col.actions'))}</th>
+        </tr></thead>
+        <tbody>${rows || `<tr><td colspan="3" style="padding:0.75rem;color:var(--gray-400);text-align:center">${escapeHTML(t('pref.noUsers'))}</td></tr>`}</tbody>
+      </table>
+    </div>`;
+}
+
+function prefEditUserRole(username) {
+  if (guardViewMode()) return;
+  _editingUsername = username;
+  _renderUsersSection();
+  document.getElementById(`editUserRole_${username}`)?.focus();
+}
+
+function prefCancelUserEdit() {
+  _editingUsername = null;
+  _renderUsersSection();
+}
+
+async function prefSaveUserRole(username) {
+  if (guardViewMode()) return;
+  const role = document.getElementById(`editUserRole_${username}`)?.value;
+  if (!role) return;
+  try {
+    await apiUpdateUserRole(username, role);
+    _editingUsername = null;
+    _prefUsers = await apiGetUsers();
+    showNotification(t('pref.notify.userRoleUpdated'), 'success');
+    _renderUsersSection();
+  } catch (e) {
+    showNotification(_translateServerError(e.message), 'error');
+  }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 // ---- Dark color suggestion ----
@@ -475,6 +569,9 @@ function _fullRefresh() {
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 window.renderPreferencesTab  = renderPreferencesTab;
+window.prefEditUserRole      = prefEditUserRole;
+window.prefCancelUserEdit    = prefCancelUserEdit;
+window.prefSaveUserRole      = prefSaveUserRole;
 window.prefSuggestDarkColor  = prefSuggestDarkColor;
 window.prefStartAddOwner     = prefStartAddOwner;
 window.prefCancelAddOwner    = prefCancelAddOwner;

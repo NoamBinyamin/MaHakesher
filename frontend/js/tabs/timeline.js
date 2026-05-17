@@ -124,7 +124,7 @@ function renderTimelineTab() {
   if (!container) return;
   container.innerHTML = "";
 
-  const missions = window.appState.plannedMissions || [];
+  const missions = (window.appState.plannedMissions || []).filter((m) => m.status === "active");
 
   if (missions.length === 0) {
     const p = document.createElement("p");

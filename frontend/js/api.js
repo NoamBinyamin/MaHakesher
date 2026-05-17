@@ -14,6 +14,11 @@ async function apiCall(endpoint, method = "GET", data = null) {
     const response = await fetch(window.API_BASE + endpoint, options);
 
     if (!response.ok) {
+      // Session expired — clear local auth state and prompt re-login
+      if (response.status === 401 && endpoint !== '/login' && endpoint !== '/me') {
+        localStorage.removeItem('mahakesher-token');
+        if (window._handleSessionExpired) window._handleSessionExpired();
+      }
       let errorMsg = `API Error: ${response.status}`;
       try {
         const errorData = await response.json();
@@ -82,9 +87,14 @@ async function apiMe() {
   return apiCall("/me");
 }
 
-window.apiLogin  = apiLogin;
-window.apiLogout = apiLogout;
-window.apiMe     = apiMe;
+async function apiGetUsers()              { return apiCall('/users'); }
+async function apiUpdateUserRole(username, role) { return apiCall(`/users/${encodeURIComponent(username)}`, 'POST', { role }); }
+
+window.apiLogin          = apiLogin;
+window.apiLogout         = apiLogout;
+window.apiMe             = apiMe;
+window.apiGetUsers       = apiGetUsers;
+window.apiUpdateUserRole = apiUpdateUserRole;
 
 // ==================== Config CRUD ====================
 

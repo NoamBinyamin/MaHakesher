@@ -1,25 +1,67 @@
 {
   "mappings": [
     {
-      "id": "link-8b691626",
+      "id": "link-c1f397ed",
       "link_name": "כובע",
       "frequency": 256,
       "frequency_band": "UHF",
       "owner": "בעלים שלא מסגיר"
     },
     {
-      "id": "link-df5fbbbb",
+      "id": "link-437ae3c0",
       "link_name": "מקל",
       "frequency": 132,
       "frequency_band": "HVHF",
-      "owner": "בעלים איכותי"
+      "owner": "בעלים שלא מסגיר"
     },
     {
-      "id": "link-1bf72375",
+      "id": "link-18289fb0",
       "link_name": "קסמים",
       "frequency": 35.85,
       "frequency_band": "LVHF",
-      "owner": "המדור החזק"
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-927f1c19",
+      "link_name": "חתיך",
+      "frequency": 294.5,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-7672d057",
+      "link_name": "מגניב",
+      "frequency": 135.5,
+      "frequency_band": "HVHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-2f838433",
+      "link_name": "מסעדה",
+      "frequency": 45.5,
+      "frequency_band": "LVHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-12ccdfe8",
+      "link_name": "קניבל",
+      "frequency": 289.8,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-0dfb3273",
+      "link_name": "ילדון",
+      "frequency": 130.5,
+      "frequency_band": "HVHF",
+      "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-f9f7892d",
+      "link_name": "סוכריה",
+      "frequency": 89.5,
+      "frequency_band": "LVHF",
+      "owner": "בעלים שלא מסגיר"
     }
   ]
 }

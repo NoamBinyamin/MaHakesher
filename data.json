@@ -32,7 +32,8 @@
       }
     ],
     "missions": [
-      "להציל את נועם"
+      "להציל את שולי",
+      "מצילים את ווילי"
     ],
     "owners": [
       {
@@ -52,6 +53,12 @@
         "name": "המדור החזק",
         "light": "#daffcc",
         "dark": "#1f7000"
+      },
+      {
+        "id": "owner-509ee47b",
+        "name": "המדור היותר חזק",
+        "light": "#fe9090",
+        "dark": "#700000"
       }
     ]
   },
@@ -91,6 +98,13 @@
         "name": "באר שבע",
         "coordinates_utm": "",
         "site_type": "Fixed"
+      },
+      {
+        "id": "site-7386869d",
+        "sector_id": "sector-b010130f",
+        "name": "תל אביב",
+        "coordinates_utm": "",
+        "site_type": "Mobile"
       }
     ],
     "radios": [
@@ -98,46 +112,49 @@
         "id": "radio-73683415",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 378.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 10",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-d8438905",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 377.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 11",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-541fdf14",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 376.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 12",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-dfaa46fa",
@@ -152,14 +169,14 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null
       },
       {
         "id": "radio-0d95a3d6",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר טוב",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
         "standby_frequency": null,
@@ -167,104 +184,109 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null
       },
       {
         "id": "radio-319f84c1",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר טוב",
         "frequency": null,
-        "owner": "",
-        "mission_name": null,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
         "role": null,
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null
       },
       {
         "id": "radio-6fde4339",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 52.5,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 16",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-956e50e7",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 54.3,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 17",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-595d7dee",
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 52.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 16",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-b90528d7",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 278.5,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 3",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-d1fd52cc",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 278.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 3",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-75645939",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
         "standby_frequency": null,
@@ -272,164 +294,174 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null
       },
       {
         "id": "radio-4ba71300",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 138.25,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 6",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-37fcbc1e",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 139.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 13",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-44a4b905",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 140.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 14",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-39e9fe74",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר טוב",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 138.25,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 6",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-7299abc8",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 88.5,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 9",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-a7c495fa",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 58.9,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 18",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-09feef9b",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 88.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 9",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-0c858cda",
         "site_id": "site-c24276b5",
         "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 58.9,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 18",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-560b3b79",
         "site_id": "site-748505e4",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 325.5,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 2",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-687ee740",
         "site_id": "site-748505e4",
         "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 325.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 2",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "UHF"
       },
       {
         "id": "radio-544c816d",
         "site_id": "site-748505e4",
         "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
-        "owner": "",
+        "owner": null,
         "mission_name": null,
         "role": null,
         "standby_frequency": null,
@@ -437,28 +469,185 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null
       },
       {
         "id": "radio-8c2cb40c",
         "site_id": "site-748505e4",
         "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 48.25,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 8",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": null,
+        "frequency_band": "LVHF"
       },
       {
         "id": "radio-20603e2b",
         "site_id": "site-748505e4",
         "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": 48.25,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 8",
+        "standby_mission": "מצילים את ווילי",
+        "status": "Usable",
+        "notes": null,
+        "frequency_band": "LVHF"
+      },
+      {
+        "id": "radio-fc0c0d5c",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null
+      },
+      {
+        "id": "radio-44e01607",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null
+      },
+      {
+        "id": "radio-a62712f7",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null
+      },
+      {
+        "id": "radio-97aa1f50",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null
+      },
+      {
+        "id": "radio-87f2472e",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": 35.85,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 7",
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null,
+        "frequency_band": "LVHF"
+      },
+      {
+        "id": "radio-ea0c47e1",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": 35.85,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 7",
+        "standby_mission": "מצילים את ווילי",
+        "status": "Usable",
+        "notes": null,
+        "frequency_band": "LVHF"
+      },
+      {
+        "id": "radio-363cec23",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": 48.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "חדש",
+        "standby_mission": "מצילים את ווילי",
+        "status": "Usable",
+        "notes": null,
+        "frequency_band": "LVHF"
+      },
+      {
+        "id": "radio-7970bc44",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": 256.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 1",
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": "",
+        "frequency_band": "UHF"
+      },
+      {
+        "id": "radio-33c6ec2c",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": 256.0,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 1",
+        "standby_mission": "מצילים את ווילי",
+        "status": "Usable",
+        "notes": "",
+        "frequency_band": "UHF"
+      },
+      {
+        "id": "radio-d845b2f6",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
         "owner": "",
         "mission_name": null,
         "role": null,
@@ -470,8 +659,23 @@
         "notes": ""
       },
       {
-        "id": "radio-fc0c0d5c",
-        "site_id": "site-748505e4",
+        "id": "radio-77155986",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-98c7d0a1",
+        "site_id": "site-7386869d",
         "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
         "owner": "",
@@ -485,9 +689,9 @@
         "notes": ""
       },
       {
-        "id": "radio-44e01607",
-        "site_id": "site-748505e4",
-        "device_type": "מכשיר שלא מסגיר",
+        "id": "radio-b7cc8149",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
         "owner": "",
         "mission_name": null,
@@ -500,9 +704,9 @@
         "notes": ""
       },
       {
-        "id": "radio-a62712f7",
-        "site_id": "site-748505e4",
-        "device_type": "מכשיר שלא מסגיר",
+        "id": "radio-5c2d59f3",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
         "owner": "",
         "mission_name": null,
@@ -515,9 +719,41 @@
         "notes": ""
       },
       {
-        "id": "radio-97aa1f50",
-        "site_id": "site-748505e4",
-        "device_type": "מכשיר שלא מסגיר",
+        "id": "radio-413b9b94",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר טוב",
+        "frequency": 132.0,
+        "owner": "בעלים איכותי",
+        "mission_name": "להציל את שולי",
+        "role": "בקרה 4",
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": "",
+        "frequency_band": "HVHF"
+      },
+      {
+        "id": "radio-c5ce41dc",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": 132.0,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "בקרה 4",
+        "standby_mission": "מצילים את ווילי",
+        "status": "Usable",
+        "notes": "",
+        "frequency_band": "HVHF"
+      },
+      {
+        "id": "radio-847c3873",
+        "site_id": "site-7386869d",
+        "device_type": "מכשיר טוב",
         "frequency": null,
         "owner": "",
         "mission_name": null,
@@ -532,11 +768,20 @@
     ],
     "planned_missions": [
       {
-        "id": "mission-edbfdc18",
-        "name": "להציל את נועם",
-        "owner": "בעלים שלא מסגיר",
-        "status": "Planned",
+        "id": "mission-2b065f19",
+        "name": "להציל את שולי",
+        "owner": "בעלים איכותי",
+        "status": "active",
         "requirements": [
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "UHF",
+            "frequency": 256,
+            "role": "בקרה 1"
+          },
           {
             "sectorId": "sector-f95115a4",
             "sectorName": "גזרת דרום",
@@ -556,6 +801,15 @@
             "role": "בקרה 3"
           },
           {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": "בקרה 4"
+          },
+          {
             "sectorId": "sector-374d66fb",
             "sectorName": "גזרת צפון",
             "siteId": "site-c24276b5",
@@ -563,6 +817,15 @@
             "frequencyBand": "HVHF",
             "frequency": 138.25,
             "role": "בקרה 6"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "LVHF",
+            "frequency": 35.85,
+            "role": "בקרה 7"
           },
           {
             "sectorId": "sector-f95115a4",
@@ -581,13 +844,300 @@
             "frequencyBand": "LVHF",
             "frequency": 88.5,
             "role": "בקרה 9"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 378,
+            "role": "בקרה 10"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 377,
+            "role": "בקרה 11"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 376,
+            "role": "בקרה 12"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 139,
+            "role": "בקרה 13"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 140,
+            "role": "בקרה 14"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 52.5,
+            "role": "בקרה 16"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 54.3,
+            "role": "בקרה 17"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 58.9,
+            "role": "בקרה 18"
           }
         ],
-        "created_at": "2026-05-16T17:07:13.773966",
-        "time_start": "2026-05-16T17:07",
-        "time_end": "2026-05-20T17:07"
+        "created_at": "2026-05-17T18:59:06.079949",
+        "time_start": "2026-05-13T18:58",
+        "time_end": "2026-05-19T18:59"
+      },
+      {
+        "id": "mission-65928a03",
+        "name": "מצילים את ווילי",
+        "owner": "המדור היותר חזק",
+        "status": "active",
+        "requirements": [
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "UHF",
+            "frequency": 256,
+            "role": "בקרה 1"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "UHF",
+            "frequency": 325.5,
+            "role": "בקרה 2"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "UHF",
+            "frequency": 278.5,
+            "role": "בקרה 3"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": "בקרה 4"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 138.25,
+            "role": "בקרה 6"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "LVHF",
+            "frequency": 35.85,
+            "role": "בקרה 7"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "LVHF",
+            "frequency": 48.25,
+            "role": "בקרה 8"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 88.5,
+            "role": "בקרה 9"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 378,
+            "role": "בקרה 10"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 377,
+            "role": "בקרה 11"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 376,
+            "role": "בקרה 12"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 139,
+            "role": "בקרה 13"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 140,
+            "role": "בקרה 14"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 52.5,
+            "role": "בקרה 16"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 54.3,
+            "role": "בקרה 17"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 58.9,
+            "role": "בקרה 18"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "LVHF",
+            "frequency": 48.5,
+            "role": "חדש"
+          }
+        ],
+        "created_at": "2026-05-17T18:51:24.976847",
+        "time_start": "2026-05-17T18:51",
+        "time_end": "2026-05-21T18:51"
+      },
+      {
+        "id": "mission-060c596d",
+        "name": "משימה בתכנון",
+        "owner": "בעלים איכותי",
+        "status": "planned",
+        "requirements": [
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": null
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 289.8,
+            "role": null
+          }
+        ],
+        "created_at": "2026-05-17T19:21:21.987338",
+        "time_start": null,
+        "time_end": null
       }
     ],
-    "archived_missions": []
+    "archived_missions": [
+      {
+        "id": "mission-9cb07921",
+        "name": "משימה לא מעניינת",
+        "owner": "המדור החזק",
+        "status": "planned",
+        "requirements": [
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 45.5,
+            "role": null
+          }
+        ],
+        "created_at": "2026-05-17T19:19:30.070344",
+        "time_start": null,
+        "time_end": null,
+        "archived_at": "2026-05-17T19:19:32.135053"
+      }
+    ]
   }
 }

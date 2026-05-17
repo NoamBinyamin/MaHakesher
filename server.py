@@ -11,7 +11,7 @@ import uuid
 import mimetypes
 import hashlib
 import secrets
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 from datetime import datetime
 
 # ==================== Configuration ====================
@@ -53,6 +53,24 @@ def migrate_config(data):
             if 'id' not in device:
                 device['id'] = generate_id('device')
                 changed = True
+
+    # Migrate mission statuses: normalize to lowercase, rebuild config.missions
+    # to only include names of active missions
+    planned = data.get('data', {}).get('planned_missions', [])
+    radios  = data.get('data', {}).get('radios', [])
+    active_names = {r.get('mission_name') for r in radios if r.get('mission_name')} | \
+                   {r.get('standby_mission') for r in radios if r.get('standby_mission')}
+    needs_mission_migration = any(
+        m.get('status') not in ('planned', 'active') for m in planned
+    )
+    if needs_mission_migration:
+        for m in planned:
+            if m.get('name') in active_names:
+                m['status'] = 'active'
+            else:
+                m['status'] = 'planned'
+        config['missions'] = [m['name'] for m in planned if m.get('status') == 'active']
+        changed = True
 
     return changed
 
@@ -220,6 +238,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_hierarchy()
         elif path == '/api/links':
             return self.handle_get_links()
+        elif path == '/api/users':
+            return self.handle_get_users()
         elif path == '/api/version':
             return self.handle_version()
         elif path == '/api/export':
@@ -257,8 +277,41 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not _post_session:
             return self.send_json_response(401, {'error': 'Authentication required'})
         self._request_user = _post_session['username']
+        self._request_role = _post_session.get('role', 'admin')
+        _is_admin = self._request_role == 'admin'
 
-        if path == '/api/config/owners':
+        def _admin_only():
+            if not _is_admin:
+                self.send_json_response(403, {'error': 'Admin access required'})
+                return True
+            return False
+
+        # 'user' role may only create/update planned missions (not start/end/archive)
+        if path == '/api/planned_missions':
+            return self.handle_create_planned_mission(post_data)
+        elif path.startswith('/api/planned_missions/'):
+            parts = path.split('/')
+            mission_id = parts[3]
+            if len(parts) == 5 and parts[4] == 'archive':
+                return self.handle_archive_mission(mission_id)  # user role allowed
+            elif len(parts) == 5 and parts[4] == 'activate':
+                if _admin_only(): return
+                return self.handle_activate_mission(mission_id)
+            elif len(parts) == 5 and parts[4] == 'deactivate':
+                if _admin_only(): return
+                return self.handle_deactivate_mission(mission_id)
+            elif len(parts) == 5 and parts[4] == 'start':
+                if _admin_only(): return
+                return self.handle_start_mission(mission_id)
+            elif len(parts) == 5 and parts[4] == 'end':
+                if _admin_only(): return
+                return self.handle_end_mission(mission_id, post_data)
+            else:
+                return self.handle_update_planned_mission(mission_id, post_data)
+        # Everything else is admin-only
+        elif _admin_only():
+            return
+        elif path == '/api/config/owners':
             return self.handle_create_owner(post_data)
         elif path.startswith('/api/config/owners/'):
             owner_id = path.split('/')[-1]
@@ -274,8 +327,6 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_create_site(post_data)
         elif path == '/api/radios':
             return self.handle_create_radio(post_data)
-        elif path == '/api/planned_missions':
-            return self.handle_create_planned_mission(post_data)
         elif path == '/api/links':
             return self.handle_create_link(post_data)
         elif path == '/api/import':
@@ -291,22 +342,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         elif path.startswith('/api/radios/'):
             radio_id = path.split('/')[-1]
             return self.handle_update_radio(radio_id, post_data)
-        elif path.startswith('/api/planned_missions/'):
-            parts = path.split('/')
-            mission_id = parts[3]
-            if len(parts) == 5 and parts[4] == 'archive':
-                return self.handle_archive_mission(mission_id)
-            elif len(parts) == 5 and parts[4] == 'start':
-                return self.handle_start_mission(mission_id)
-            elif len(parts) == 5 and parts[4] == 'end':
-                return self.handle_end_mission(mission_id, post_data)
-            else:
-                return self.handle_update_planned_mission(mission_id, post_data)
         elif path.startswith('/api/archived_missions/'):
             parts = path.split('/')
             mission_id = parts[3]
             if len(parts) == 4:
-                # /api/archived_missions/<id> - delete
                 return self.handle_delete_archived_mission(mission_id)
             elif len(parts) == 5 and parts[4] == 'restore':
                 return self.handle_restore_archived_mission(mission_id)
@@ -314,6 +353,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.handle_archive_archived_mission(mission_id)
             else:
                 return self.send_json_response(404, {'error': 'Not found'})
+        elif path.startswith('/api/users/'):
+            username = unquote(path.split('/')[-1])
+            return self.handle_update_user(username, post_data)
         elif path.startswith('/api/links/'):
             link_id = path.split('/')[-1]
             return self.handle_update_link(link_id, post_data)
@@ -335,6 +377,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not _del_session:
             return self.send_json_response(401, {'error': 'Authentication required'})
         self._request_user = _del_session['username']
+        self._request_role = _del_session.get('role', 'admin')
 
         if path.startswith('/api/config/owners/'):
             owner_id = path.split('/')[-1]
@@ -355,6 +398,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             mission_id = path.split('/')[-1]
             return self.handle_delete_planned_mission(mission_id)
         elif path.startswith('/api/archived_missions/'):
+            # user role cannot delete archived missions
+            if self._request_role != 'admin':
+                return self.send_json_response(403, {'error': 'Admin access required'})
             mission_id = path.split('/')[-1]
             return self.handle_delete_archived_mission(mission_id)
         elif path.startswith('/api/links/'):
@@ -399,6 +445,31 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         token = self.headers.get('X-Auth-Token', '')
         delete_session(token)
         return self.send_json_response(200, {'message': 'Logged out'})
+
+    def handle_get_users(self):
+        """GET /api/users - Return user list without password hashes (auth required)"""
+        if not get_session(self.headers.get('X-Auth-Token', '')):
+            return self.send_json_response(401, {'error': 'Authentication required'})
+        users = load_users()
+        return self.send_json_response(200, [
+            {'username': u['username'], 'role': u.get('role', 'admin')}
+            for u in users
+        ])
+
+    def handle_update_user(self, username, post_data):
+        """POST /api/users/<username> - Update a user's role"""
+        new_role = (post_data.get('role') or '').strip()
+        if not new_role:
+            return self.send_json_response(400, {'error': 'Role is required'})
+        users = load_users()
+        user = next((u for u in users if u['username'] == username), None)
+        if not user:
+            return self.send_json_response(404, {'error': 'User not found'})
+        old_role = user.get('role', 'admin')
+        user['role'] = new_role
+        save_users(users)
+        self._audit('update', 'user', details={'username': username, 'old_role': old_role, 'new_role': new_role})
+        return self.send_json_response(200, {'username': username, 'role': new_role})
 
     def handle_config(self):
         """GET /api/config"""
@@ -866,7 +937,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'id': generate_id('mission'),
             'name': post_data.get('name', ''),
             'owner': post_data.get('owner', ''),
-            'status': post_data.get('status', 'Planned'),
+            'status': 'planned',
             'requirements': post_data.get('requirements', []),
             'created_at': datetime.now().isoformat(),
             'time_start': post_data.get('time_start') or None,
@@ -874,17 +945,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         data['data']['planned_missions'].append(new_mission)
         self._audit('create', 'mission', new_mission['id'], {'name': new_mission['name'], 'owner': new_mission['owner']})
-
-        # Add the mission name to config.missions so it can be selected for devices
-        mission_name = new_mission['name']
-        if mission_name:
-            if 'config' not in data:
-                data['config'] = {}
-            if 'missions' not in data['config']:
-                data['config']['missions'] = []
-            if mission_name not in data['config']['missions']:
-                data['config']['missions'].append(mission_name)
-
+        # Do NOT add to config.missions yet — only active missions appear in radio dropdowns
         save_data(data)
         return self.send_json_response(201, new_mission)
         
@@ -902,14 +963,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 mission.update(post_data)
                 
                 if old_name and new_name and old_name != new_name:
-                    if 'config' in data and 'missions' in data['config']:
-                        try:
-                            idx = data['config']['missions'].index(old_name)
-                            data['config']['missions'][idx] = new_name
-                        except ValueError:
-                            if new_name not in data['config']['missions']:
-                                data['config']['missions'].append(new_name)
-                    
+                    # Only update config.missions if the mission is active
+                    if mission.get('status') == 'active':
+                        if 'config' in data and 'missions' in data['config']:
+                            try:
+                                idx = data['config']['missions'].index(old_name)
+                                data['config']['missions'][idx] = new_name
+                            except ValueError:
+                                if new_name not in data['config']['missions']:
+                                    data['config']['missions'].append(new_name)
                     for r in data.get('data', {}).get('radios', []):
                         if r.get('mission_name') == old_name:
                             r['mission_name'] = new_name
@@ -936,15 +998,13 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not mission_to_delete:
             return self.send_json_response(404, {'error': 'Mission not found'})
 
-        mission_name = mission_to_delete.get('name')
+        mission_name   = mission_to_delete.get('name')
+        mission_status = mission_to_delete.get('status', 'planned')
         data['data']['planned_missions'] = [m for m in data['data']['planned_missions'] if m['id'] != mission_id]
 
-        # Remove from config.missions if no other missions have this name
-        if mission_name and 'config' in data and 'missions' in data['config']:
-            other_planned = [m for m in data['data']['planned_missions'] if m.get('name') == mission_name]
-            other_archived = [m for m in data.get('data', {}).get('archived_missions', []) if m.get('name') == mission_name]
-            if not other_planned and not other_archived and mission_name in data['config']['missions']:
-                data['config']['missions'].remove(mission_name)
+        # Only remove from config.missions if the mission was active
+        if mission_status == 'active' and mission_name in data.get('config', {}).get('missions', []):
+            data['config']['missions'].remove(mission_name)
 
         save_data(data)
         self._audit('delete', 'mission', mission_id, {'name': mission_name})
@@ -977,6 +1037,11 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 radio['standby_owner'] = None
                 radio['standby_role'] = None
                 radio['standby_frequency'] = None
+
+        # Remove from config.missions (active mission is ending)
+        missions_cfg = data.get('config', {}).get('missions', [])
+        if mission_name in missions_cfg:
+            missions_cfg.remove(mission_name)
 
         # Move mission to archived_missions
         if 'archived_missions' not in data['data']:
@@ -1037,9 +1102,57 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if errors:
             return self.send_json_response(400, {'error': 'Requirements not satisfied', 'details': errors})
 
+        # Activate the mission
+        mission['status'] = 'active'
+        cfg_missions = data['config'].setdefault('missions', [])
+        if mission_name and mission_name not in cfg_missions:
+            cfg_missions.append(mission_name)
+
         save_data(data)
         self._audit('start_mission', 'mission', mission_id, {'name': mission_name})
         return self.send_json_response(200, {'message': 'Mission started', 'mission': mission})
+
+    def handle_deactivate_mission(self, mission_id):
+        """POST /api/planned_missions/<id>/deactivate - Return active mission to planning status"""
+        data = load_data()
+        mission = next((m for m in data['data'].get('planned_missions', []) if m['id'] == mission_id), None)
+        if not mission:
+            return self.send_json_response(404, {'error': 'Mission not found'})
+        mission_name = mission.get('name', '')
+        # Clear all current and standby radio assignments for this mission
+        for radio in data['data'].get('radios', []):
+            if radio.get('mission_name') == mission_name:
+                radio['mission_name'] = None
+                radio['owner']        = None
+                radio['role']         = None
+                radio['frequency']    = None
+            if radio.get('standby_mission') == mission_name:
+                radio['standby_mission']   = None
+                radio['standby_owner']     = None
+                radio['standby_role']      = None
+                radio['standby_frequency'] = None
+        mission['status'] = 'planned'
+        cfg = data['config'].get('missions', [])
+        if mission_name in cfg:
+            cfg.remove(mission_name)
+        save_data(data)
+        self._audit('deactivate', 'mission', mission_id, {'name': mission_name})
+        return self.send_json_response(200, {'message': 'Mission returned to planning', 'mission': mission})
+
+    def handle_activate_mission(self, mission_id):
+        """POST /api/planned_missions/<id>/activate - Mark mission as active (used by standby flow)"""
+        data = load_data()
+        mission = next((m for m in data['data'].get('planned_missions', []) if m['id'] == mission_id), None)
+        if not mission:
+            return self.send_json_response(404, {'error': 'Mission not found'})
+        mission['status'] = 'active'
+        mission_name = mission.get('name', '')
+        cfg_missions = data['config'].setdefault('missions', [])
+        if mission_name and mission_name not in cfg_missions:
+            cfg_missions.append(mission_name)
+        save_data(data)
+        self._audit('activate', 'mission', mission_id, {'name': mission_name})
+        return self.send_json_response(200, {'message': 'Mission activated', 'mission': mission})
 
     def handle_archive_mission(self, mission_id):
         """POST /api/planned_missions/<id>/archive - Move to archive without ending"""
@@ -1060,6 +1173,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         ]
         if allocated_devices:
             return self.send_json_response(400, {'error': 'Cannot archive mission with allocated devices. End the mission first.'})
+
+        # Remove from config.missions if it was active
+        if mission.get('status') == 'active':
+            cfg = data.get('config', {}).get('missions', [])
+            if mission_name in cfg:
+                cfg.remove(mission_name)
 
         if 'archived_missions' not in data['data']:
             data['data']['archived_missions'] = []
@@ -1084,9 +1203,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
         if 'planned_missions' not in data['data']:
             data['data']['planned_missions'] = []
-        # Remove archive-specific fields
+        # Remove archive-specific fields, restore to planned status
         mission.pop('archived_at', None)
         mission.pop('ended_at', None)
+        mission['status'] = 'planned'
         data['data']['planned_missions'].append(mission)
         data['data']['archived_missions'] = [m for m in data['data']['archived_missions'] if m['id'] != mission_id]
 
