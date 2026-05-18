@@ -33,7 +33,8 @@
     ],
     "missions": [
       "להציל את שולי",
-      "מצילים את ווילי"
+      "מצילים את ווילי",
+      "תול אש מזותנת"
     ],
     "owners": [
       {
@@ -916,6 +917,15 @@
             "frequencyBand": "LVHF",
             "frequency": 58.9,
             "role": "בקרה 18"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": "שתפ משהו"
           }
         ],
         "created_at": "2026-05-17T18:59:06.079949",
@@ -1123,6 +1133,161 @@
         "created_at": "2026-05-17T19:21:21.987338",
         "time_start": null,
         "time_end": null
+      },
+      {
+        "id": "mission-d161d79c",
+        "name": "תול אש מזותנת",
+        "owner": "המדור היותר חזק",
+        "status": "active",
+        "requirements": [
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "UHF",
+            "frequency": 256,
+            "role": "בקרה 1"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "UHF",
+            "frequency": 325.5,
+            "role": "בקרה 2"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "UHF",
+            "frequency": 278.5,
+            "role": "בקרה 3"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": "בקרה 4"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 138.25,
+            "role": "בקרה 6"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "LVHF",
+            "frequency": 35.85,
+            "role": "בקרה 7"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "LVHF",
+            "frequency": 48.25,
+            "role": "בקרה 8"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 88.5,
+            "role": "בקרה 9"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 378,
+            "role": "בקרה 10"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 377,
+            "role": "בקרה 11"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "UHF",
+            "frequency": 376,
+            "role": "בקרה 12"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 139,
+            "role": "בקרה 13"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 140,
+            "role": "בקרה 14"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 52.5,
+            "role": "בקרה 16"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "אתר חזק",
+            "frequencyBand": "LVHF",
+            "frequency": 54.3,
+            "role": "בקרה 17"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 58.9,
+            "role": "בקרה 18"
+          }
+        ],
+        "created_at": "2026-05-18T08:01:34.382778",
+        "time_start": "2026-05-19T08:01",
+        "time_end": "2026-05-27T08:01"
       }
     ],
     "archived_missions": [

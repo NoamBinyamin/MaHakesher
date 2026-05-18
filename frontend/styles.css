@@ -2173,6 +2173,82 @@ html.view-mode:not(.user-role) .missions-actions-cell {
   display: none !important;
 }
 
+/* ---- Icon-only mission action buttons with tooltip ---- */
+.mission-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s;
+  background: var(--gray-400);
+}
+
+.mission-btn.btn-primary  { background: var(--primary-color); }
+.mission-btn.btn-secondary { background: var(--gray-400); color: var(--gray-800); }
+.mission-btn.btn-warning  { background: var(--warning-color); }
+.mission-btn.btn-danger   { background: var(--danger-color); }
+
+.mission-btn:hover {
+  opacity: 0.88;
+  transform: scale(1.12);
+}
+
+/* Tooltip bubble */
+.mission-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Tooltip arrow */
+.mission-btn::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1e293b;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 200;
+}
+
+.mission-btn:hover::after,
+.mission-btn:hover::before {
+  opacity: 1;
+}
+
+.missions-actions-cell {
+  white-space: nowrap;
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
 .missions-section-header-row {
   display: flex;
   align-items: baseline;
@@ -2279,6 +2355,8 @@ html.view-mode:not(.user-role) .missions-actions-cell {
   margin-bottom: 0 !important;
   border-radius: 0 0 8px 8px;
   overflow: hidden;
+  table-layout: fixed;
+  word-break: break-word;
 }
 
 .ownerfreq-table tbody tr {
@@ -2301,16 +2379,25 @@ html.view-mode:not(.user-role) .missions-actions-cell {
 }
 
 .ownerfreq-missions-cell {
-  vertical-align: middle;
+  vertical-align: top;
+  padding-top: 0.6rem !important;
+  padding-bottom: 0.6rem !important;
+}
+
+/* Stacks missions vertically, one per row */
+.ownerfreq-missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .ownerfreq-mission-badge {
   display: inline-block;
-  padding: 0.15rem 0.55rem;
+  align-self: flex-start;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
-  margin: 0.15rem 0.2rem 0.15rem 0;
   white-space: nowrap;
 }
 

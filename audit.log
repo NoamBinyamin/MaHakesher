@@ -589,3 +589,7 @@
 {"timestamp": "2026-05-17T20:54:00.332137", "action": "update", "entity_type": "link", "entity_id": "link-18289fb0", "details": {"before": {"owner": "בעלים שלא מסגיר"}, "after": {"owner": "המדור החזק"}}, "changed_by": "נועם"}
 {"timestamp": "2026-05-17T22:34:35.224859", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-17T22:34:53.097458", "action": "update", "entity_type": "mission", "entity_id": "mission-65928a03", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-18T08:01:06.299510", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-18T08:01:34.382789", "action": "create", "entity_type": "mission", "entity_id": "mission-d161d79c", "details": {"name": "תול אש מזותנת", "owner": "המדור היותר חזק"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-18T08:01:37.880904", "action": "activate", "entity_type": "mission", "entity_id": "mission-d161d79c", "details": {"name": "תול אש מזותנת"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-18T08:14:43.810107", "action": "update", "entity_type": "mission", "entity_id": "mission-2b065f19", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}

@@ -35,20 +35,23 @@ function onOwnerFreqChange(ownerName) {
   _renderOwnerFreqTables(_ownerFreqSelected);
 }
 
-// For a given frequency value, return which non-archived missions have it
-// in their requirements, split by mission status: active vs. planned
+// Returns { active: [{mission, roles[]}, ...], planned: [{mission, roles[]}, ...] }
+// roles = all roles from requirements of that mission that match the frequency
 function _missionsForFrequency(frequency) {
   const active  = [];
   const planned = [];
 
   (window.appState.plannedMissions || []).forEach((m) => {
-    const reqs = m.requirements || [];
-    const hasFreq = reqs.some(
-      (req) => req.frequency != null &&
-               Math.abs(Number(req.frequency) - frequency) < 0.001
-    );
-    if (!hasFreq) return;
-    (m.status === "active" ? active : planned).push(m);
+    const matchingRoles = (m.requirements || [])
+      .filter((req) => req.frequency != null &&
+                       Math.abs(Number(req.frequency) - frequency) < 0.001)
+      .map((req) => req.role || null);
+
+    if (matchingRoles.length === 0) return;
+
+    // Deduplicate roles, drop nulls
+    const roles = [...new Set(matchingRoles.filter(Boolean))];
+    (m.status === "active" ? active : planned).push({ mission: m, roles });
   });
 
   return { active, planned };
@@ -64,16 +67,18 @@ function _contrastColor(hex) {
   const r = parseInt(full.slice(0, 2), 16);
   const g = parseInt(full.slice(2, 4), 16);
   const b = parseInt(full.slice(4, 6), 16);
-  // Perceived luminance (WCAG formula)
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.55 ? "#1e293b" : "white";
 }
 
-function _missionBadge(mission) {
+function _missionBadge({ mission, roles }) {
   const color = mission.owner ? getOwnerColor(mission.owner) : null;
   const bg    = color || "var(--gray-300)";
   const fg    = color ? _contrastColor(color) : "var(--gray-700)";
-  return `<span class="ownerfreq-mission-badge" style="background:${bg};color:${fg};">${escapeHTML(mission.name)}</span>`;
+  const label = roles.length
+    ? `${escapeHTML(mission.name)} - ${roles.map(escapeHTML).join(" | ")}`
+    : escapeHTML(mission.name);
+  return `<span class="ownerfreq-mission-badge" style="background:${bg};color:${fg};">${label}</span>`;
 }
 
 function _renderOwnerFreqTables(ownerName) {
@@ -131,8 +136,8 @@ function _renderOwnerFreqTables(ownerName) {
 
     const rows = freqs.map((l) => {
       const { active, planned } = _missionsForFrequency(l.frequency);
-      const activeHtml  = active.length  ? active.map(_missionBadge).join("")  : dash;
-      const plannedHtml = planned.length ? planned.map(_missionBadge).join("") : dash;
+      const activeHtml  = active.length  ? `<div class="ownerfreq-missions-list">${active.map(_missionBadge).join("")}</div>`  : dash;
+      const plannedHtml = planned.length ? `<div class="ownerfreq-missions-list">${planned.map(_missionBadge).join("")}</div>` : dash;
       return `
         <tr>
           <td><span class="ownerfreq-freq-badge">${l.frequency} MHz</span></td>
@@ -145,6 +150,12 @@ function _renderOwnerFreqTables(ownerName) {
     const table = document.createElement("table");
     table.className = "data-table ownerfreq-table";
     table.innerHTML = `
+      <colgroup>
+        <col style="width:9rem">
+        <col style="width:14rem">
+        <col style="width:35%">
+        <col style="width:35%">
+      </colgroup>
       <thead><tr>
         <th>${t("ownerfreqs.col.frequency")}</th>
         <th>${t("ownerfreqs.col.name")}</th>

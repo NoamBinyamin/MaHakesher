@@ -247,9 +247,9 @@ function renderMissionsTab() {
         <td>${escapeHTML(m.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
         <td class="missions-actions-cell">
-          <button class="btn btn-sm btn-primary user-edit-allowed" onclick="editMission('${m.id}')">${t("missions.btn.editMission")}</button>
-          <button class="btn btn-sm btn-success admin-only" style="background-color:var(--success-color);color:white;" onclick="finishMissionPlanning('${m.id}')">${t("missions.btn.finishPlanning")}</button>
-          <button class="btn btn-sm btn-secondary user-edit-allowed" onclick="archiveMission('${m.id}')">${t("missions.btn.archive")}</button>
+          <button class="mission-btn btn-primary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+          <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.finishPlanning"))}" onclick="finishMissionPlanning('${m.id}')"><i class="fa-solid fa-check"></i></button>
+          <button class="mission-btn btn-secondary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>
         </td>`;
       plannedTbody.appendChild(row);
     });
@@ -258,12 +258,12 @@ function renderMissionsTab() {
 
   // ----- Active Missions — admin only -----
   _appendMissionSection(container, "missions.activeMissions", active, (m) => `
-    <button class="btn btn-sm btn-primary admin-only" onclick="editMission('${m.id}')">${t("missions.btn.editMission")}</button>
-    <button class="btn btn-sm btn-success admin-only" style="background-color:var(--success-color);color:white;" onclick="allocateMission('${m.id}')">${t("missions.btn.allocate")}</button>
-    <button class="btn btn-sm btn-info admin-only" style="background-color:#0ea5e9;color:white;" onclick="allocateToStandby('${m.id}')">${t("missions.btn.allocateToStandby")}</button>
-    <button class="btn btn-sm btn-secondary admin-only" onclick="activateStandbyBtn('${m.id}')">${t("missions.btn.activateStandby")}</button>
-    <button class="btn btn-sm btn-warning admin-only" onclick="returnToPlanning('${m.id}')">${t("missions.btn.returnToPlanning")}</button>
-    <button class="btn btn-sm btn-danger admin-only" onclick="endMission('${m.id}')">${t("missions.btn.finishAndArchive")}</button>
+    <button class="mission-btn btn-primary admin-only" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+    <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.allocate"))}" onclick="allocateMission('${m.id}')"><i class="fa-solid fa-bolt"></i></button>
+    <button class="mission-btn admin-only" style="background:#0ea5e9;" data-tooltip="${escapeHTML(t("missions.btn.allocateToStandby"))}" onclick="allocateToStandby('${m.id}')"><i class="fa-solid fa-hourglass-half"></i></button>
+    <button class="mission-btn btn-secondary admin-only" data-tooltip="${escapeHTML(t("missions.btn.activateStandby"))}" onclick="activateStandbyBtn('${m.id}')"><i class="fa-solid fa-circle-play"></i></button>
+    <button class="mission-btn btn-warning admin-only" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="returnToPlanning('${m.id}')"><i class="fa-solid fa-rotate-left"></i></button>
+    <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("missions.btn.finishAndArchive"))}" onclick="endMission('${m.id}')"><i class="fa-solid fa-flag-checkered"></i></button>
   `, "missions.noActive", "margin-top:1.5rem", "missions.sub.active");
 
   // ----- Archived Missions -----
@@ -300,8 +300,8 @@ function renderMissionsTab() {
         <td>${escapeHTML(mission.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
         <td class="missions-actions-cell">
-          <button class="btn btn-sm btn-secondary user-edit-allowed" onclick="restoreMission('${mission.id}')">${t("missions.btn.returnToPlanning")}</button>
-          <button class="btn btn-sm btn-danger admin-only" onclick="deleteArchivedMission('${mission.id}')">🗑 ${t("btn.delete")}</button>
+          <button class="mission-btn btn-secondary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="restoreMission('${mission.id}')"><i class="fa-solid fa-rotate-right"></i></button>
+          <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("btn.delete"))}" onclick="deleteArchivedMission('${mission.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>`;
       tbody.appendChild(row);
     });
