@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaHakesher – Radio Network Management System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #4f8ef7;
+      --accent2: #7c3aed;
+      --bg-dark: #0d1117;
+      --bg-card: #161b22;
+      --bg-card2: #1c2333;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --border: #30363d;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --purple: #a371f7;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-dark);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Slide container ── */
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 80px;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity .45s ease, transform .45s ease;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ── Progress bar ── */
+    #progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .4s ease;
+      z-index: 100;
+    }
+
+    /* ── Nav controls ── */
+    .nav {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+    }
+    .nav button {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background .2s, border-color .2s;
+    }
+    .nav button:hover { background: var(--border); border-color: var(--accent); }
+    .nav button:disabled { opacity: .3; cursor: default; }
+    #counter {
+      color: var(--text-muted);
+      font-size: 13px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* ── Slide number ── */
+    .slide-num {
+      position: fixed;
+      top: 18px; right: 28px;
+      font-size: 12px;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    /* ──────────────────────────────────────
+       SLIDE LAYOUTS
+    ────────────────────────────────────── */
+
+    /* Title slide */
+    .slide-title {
+      background: radial-gradient(ellipse at 60% 40%, #1a2a4a 0%, var(--bg-dark) 70%);
+      text-align: center;
+    }
+    .slide-title .tag {
+      background: rgba(79,142,247,.15);
+      border: 1px solid rgba(79,142,247,.35);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      display: inline-block;
+    }
+    .slide-title h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .slide-title .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 560px;
+    }
+    .slide-title .hebrew {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: var(--accent);
+      direction: rtl;
+    }
+    .slide-title .meta {
+      margin-top: 40px;
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .slide-title .meta-item {
+      text-align: center;
+    }
+    .slide-title .meta-item .val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .slide-title .meta-item .lbl {
+      font-size: .75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Section header */
+    .slide-section {
+      background: radial-gradient(ellipse at 30% 60%, #1a1040 0%, var(--bg-dark) 70%);
+      text-align: center;
+    }
+    .slide-section .section-label {
+      font-size: .8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 16px;
+    }
+    .slide-section h2 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .slide-section p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 580px;
+    }
+
+    /* Content slides */
+    .slide-content {
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding-top: 70px;
+    }
+    .slide-content h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .slide-content .desc {
+      color: var(--text-muted);
+      font-size: .95rem;
+      margin-bottom: 32px;
+    }
+
+    /* Grid cards */
+    .grid {
+      display: grid;
+      gap: 16px;
+      width: 100%;
+    }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .card p {
+      font-size: .85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .card .heb {
+      font-size: .8rem;
+      color: var(--accent);
+      direction: rtl;
+      margin-top: 4px;
+    }
+    .card.accent-blue { border-color: rgba(79,142,247,.4); }
+    .card.accent-purple { border-color: rgba(163,113,247,.4); }
+    .card.accent-green { border-color: rgba(63,185,80,.4); }
+    .card.accent-yellow { border-color: rgba(210,153,34,.4); }
+    .card.accent-red { border-color: rgba(248,81,73,.4); }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .badge-blue { background: rgba(79,142,247,.15); color: var(--accent); }
+    .badge-green { background: rgba(63,185,80,.15); color: var(--green); }
+    .badge-yellow { background: rgba(210,153,34,.15); color: var(--yellow); }
+    .badge-red { background: rgba(248,81,73,.15); color: var(--red); }
+    .badge-purple { background: rgba(163,113,247,.15); color: var(--purple); }
+
+    /* Feature list */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .feature-list li .icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .feature-list li .text h4 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .feature-list li .text p {
+      font-size: .83rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Code block */
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .85rem;
+      line-height: 1.7;
+      width: 100%;
+    }
+    .code-block .kw { color: #ff7b72; }
+    .code-block .str { color: #a5d6ff; }
+    .code-block .cmt { color: var(--text-muted); }
+    .code-block .fn { color: #d2a8ff; }
+    .code-block .num { color: #79c0ff; }
+
+    /* Two-col layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+    .two-col-wide {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    /* Stack */
+    .stack-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    .stack-row .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .stack-row h4 { font-size: .9rem; font-weight: 600; color: #fff; }
+    .stack-row p { font-size: .8rem; color: var(--text-muted); }
+
+    /* Frequency band visual */
+    .freq-bar-wrap { width: 100%; }
+    .freq-band {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .freq-band h4 { font-size: .95rem; font-weight: 700; }
+    .freq-band p { font-size: .82rem; opacity: .85; }
+    .freq-band .range { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+    .freq-lvhf { background: linear-gradient(135deg, #1a3a1a, #2a5a2a); border: 1px solid #3fb950; }
+    .freq-hvhf { background: linear-gradient(135deg, #1a2a4a, #1a3a6a); border: 1px solid #4f8ef7; }
+    .freq-uhf  { background: linear-gradient(135deg, #3a1a4a, #5a2a6a); border: 1px solid #a371f7; }
+
+    /* Tab grid */
+    .tab-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+    .tab-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .tab-item .t-icon { font-size: 1.4rem; }
+    .tab-item h4 { font-size: .9rem; font-weight: 600; color: #fff; }
+    .tab-item p { font-size: .78rem; color: var(--text-muted); }
+    .tab-item .t-heb { font-size: .75rem; color: var(--accent); direction: rtl; }
+
+    /* Mission lifecycle */
+    .lifecycle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .lifecycle-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .lifecycle-step .ls-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .lifecycle-step h4 { font-size: .85rem; font-weight: 600; color: #fff; }
+    .lifecycle-step p { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+    .lifecycle-arrow {
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    .ls-planned { border-color: rgba(210,153,34,.5); }
+    .ls-active { border-color: rgba(79,142,247,.5); }
+    .ls-standby { border-color: rgba(163,113,247,.5); }
+    .ls-started { border-color: rgba(63,185,80,.5); }
+    .ls-ended { border-color: rgba(248,81,73,.5); }
+    .ls-archived { border-color: rgba(139,148,158,.5); }
+
+    /* Role chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+
+    /* Sector/site hierarchy visual */
+    .hier { width: 100%; }
+    .hier-sector {
+      background: var(--bg-card);
+      border: 1px solid rgba(79,142,247,.4);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    .hier-sector .s-name { font-size: .95rem; font-weight: 600; color: var(--accent); }
+    .hier-sites { margin-top: 8px; padding-left: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .hier-site {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 5px 12px;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .slide { padding: 40px 30px; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .two-col, .two-col-wide { grid-template-columns: 1fr; }
+      .tab-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Decorative bg glow */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .08;
+      pointer-events: none;
+    }
+    .glow-blue { width: 500px; height: 500px; background: var(--accent); top: -100px; right: -100px; }
+    .glow-purple { width: 400px; height: 400px; background: var(--accent2); bottom: -80px; left: -80px; }
+
+    /* Highlight box */
+    .highlight-box {
+      background: rgba(79,142,247,.07);
+      border: 1px solid rgba(79,142,247,.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      width: 100%;
+    }
+    .highlight-box p { font-size: .9rem; color: var(--text-muted); }
+    .highlight-box strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ─────────────── SLIDE 1: TITLE ─────────────── -->
+  <div class="slide slide-title active" data-index="0">
+    <div class="glow glow-blue"></div>
+    <div class="glow glow-purple"></div>
+    <div class="tag">Radio Network Management</div>
+    <h1>MaHakesher</h1>
+    <div class="subtitle">A comprehensive operations platform for managing two-way radio networks across sectors, sites, and missions.</div>
+    <div class="hebrew">מה הקשר — ניהול רשת קשר דו-כיוונית</div>
+    <div class="meta">
+      <div class="meta-item"><div class="val">9</div><div class="lbl">Feature Tabs</div></div>
+      <div class="meta-item"><div class="val">3</div><div class="lbl">Freq. Bands</div></div>
+      <div class="meta-item"><div class="val">0</div><div class="lbl">Dependencies</div></div>
+      <div class="meta-item"><div class="val">EN/HE</div><div class="lbl">Languages</div></div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 2: WHAT IS IT ─────────────── -->
+  <div class="slide slide-content" data-index="1">
+    <div class="glow glow-blue"></div>
+    <h2>What is MaHakesher?</h2>
+    <div class="desc">A purpose-built web application for coordinating radio infrastructure in operational environments.</div>
+    <ul class="feature-list">
+      <li>
+        <div class="icon">📡</div>
+        <div class="text">
+          <h4>Radio Network Coordination</h4>
+          <p>Manage the full hierarchy of radio devices across geographic sectors and physical sites — tracking frequencies, device types, and assignments in real time.</p>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🎯</div>
+        <div class="text">
+          <h4>Mission Management</h4>
+          <p>Plan, activate, and archive operational missions. Assign radio roles to each mission and track the complete lifecycle from planning through archival.</p>
+        </div>
+      </li>
+      <li>
+        <div class="icon">🔗</div>
+        <div class="text">
+          <h4>Frequency Link Dictionary</h4>
+          <p>Maintain a named mapping of frequencies to radio devices — a "link dictionary" that enables fast lookup and coordination across units.</p>
+        </div>
+      </li>
+      <li>
+        <div class="icon">📋</div>
+        <div class="text">
+          <h4>Full Audit Trail</h4>
+          <p>Every change to the system is logged with timestamp, user, and action — providing complete operational transparency and accountability.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ─────────────── SLIDE 3: CORE MODEL ─────────────── -->
+  <div class="slide slide-content" data-index="2">
+    <div class="glow glow-purple"></div>
+    <h2>Core Data Model</h2>
+    <div class="desc">Five interconnected entities form the backbone of the system.</div>
+    <div class="grid grid-3" style="margin-bottom:18px">
+      <div class="card accent-blue">
+        <div class="card-icon">🗺️</div>
+        <h3>Sectors</h3>
+        <p>Geographic or operational zones that group sites together.</p>
+        <div class="heb">גזרת צפון · גזרת מרכז · גזרת דרום</div>
+      </div>
+      <div class="card accent-green">
+        <div class="card-icon">📍</div>
+        <h3>Sites</h3>
+        <p>Physical locations (fixed or mobile) with coordinates, belonging to sectors.</p>
+        <div class="heb">אתר חזק · עפולה · תל אביב</div>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-icon">📻</div>
+        <h3>Radios</h3>
+        <p>Devices deployed at sites, each with a frequency, band, type, and owner.</p>
+        <div class="heb">UHF · HVHF · LVHF</div>
+      </div>
+      <div class="card accent-yellow">
+        <div class="card-icon">🎯</div>
+        <h3>Missions</h3>
+        <p>Operational tasks with defined radio requirements and role assignments.</p>
+        <div class="heb">להציל את שולי · ספיידרמן</div>
+      </div>
+      <div class="card accent-red">
+        <div class="card-icon">🔗</div>
+        <h3>Links</h3>
+        <p>Named frequency-to-radio mappings forming a coordination dictionary.</p>
+        <div class="heb">מילון קישורים</div>
+      </div>
+      <div class="card" style="border-color:rgba(255,255,255,.1)">
+        <div class="card-icon">🏷️</div>
+        <h3>Owners</h3>
+        <p>Organizations or divisions that own radio equipment, each with a distinct color code.</p>
+        <div class="heb">בעלים איכותי · המדור החזק</div>
+      </div>
+    </div>
+    <div class="hier">
+      <div class="hier-sector">
+        <div class="s-name">גזרת צפון — Northern Sector</div>
+        <div class="hier-sites">
+          <div class="hier-site">📍 אתר חזק</div>
+          <div class="hier-site">📍 עפולה</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 4: FREQUENCY BANDS ─────────────── -->
+  <div class="slide slide-content" data-index="3">
+    <div class="glow glow-blue"></div>
+    <h2>Frequency Management</h2>
+    <div class="desc">The system enforces three validated radio frequency bands with automatic range checking.</div>
+    <div class="freq-bar-wrap">
+      <div class="freq-band freq-lvhf">
+        <div>
+          <h4 style="color:#3fb950">LVHF — Low VHF</h4>
+          <p style="color:#b7e6bf">Low-frequency ground communications</p>
+        </div>
+        <div class="range" style="color:#3fb950">33.0 – 95.0 MHz</div>
+      </div>
+      <div class="freq-band freq-hvhf">
+        <div>
+          <h4 style="color:#4f8ef7">HVHF — High VHF</h4>
+          <p style="color:#b3d4ff">Mid-range airband communications</p>
+        </div>
+        <div class="range" style="color:#4f8ef7">120.0 – 140.0 MHz</div>
+      </div>
+      <div class="freq-band freq-uhf">
+        <div>
+          <h4 style="color:#a371f7">UHF — Ultra High Frequency</h4>
+          <p style="color:#d8c4ff">High-frequency tactical communications</p>
+        </div>
+        <div class="range" style="color:#a371f7">255.0 – 395.5 MHz</div>
+      </div>
+    </div>
+    <div style="margin-top:18px" class="highlight-box">
+      <p>Every radio assignment is validated against its band's range at the API level. Frequencies outside the valid range are <strong>rejected server-side</strong> before being stored — ensuring data integrity across the network.</p>
+    </div>
+    <div style="margin-top:14px">
+      <div class="chips">
+        <div class="chip">📻 Example: UHF 378.0 MHz</div>
+        <div class="chip">📻 HVHF 138.25 MHz</div>
+        <div class="chip">📻 LVHF 52.5 MHz</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 5: MISSION LIFECYCLE ─────────────── -->
+  <div class="slide slide-content" data-index="4">
+    <div class="glow glow-purple"></div>
+    <h2>Mission Lifecycle</h2>
+    <div class="desc">Missions follow a strict state machine from planning through archival, ensuring controlled transitions at each stage.</div>
+    <div class="lifecycle" style="margin-bottom:24px">
+      <div class="lifecycle-step ls-planned">
+        <div class="ls-icon">📝</div>
+        <h4>Planned</h4>
+        <p>תכנון</p>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step ls-standby">
+        <div class="ls-icon">⏳</div>
+        <h4>Standby</h4>
+        <p>כוננות</p>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step ls-active">
+        <div class="ls-icon">✅</div>
+        <h4>Active</h4>
+        <p>פעיל</p>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step ls-started">
+        <div class="ls-icon">▶️</div>
+        <h4>Started</h4>
+        <p>התחיל</p>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step ls-ended">
+        <div class="ls-icon">⏹️</div>
+        <h4>Ended</h4>
+        <p>הסתיים</p>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step ls-archived">
+        <div class="ls-icon">🗄️</div>
+        <h4>Archived</h4>
+        <p>ארכיון</p>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Radio Role Requirements</h3>
+        <p>Each mission defines required radio roles (e.g. "בקרה 10", "בקרה 6"). Radios are allocated to fill these roles before activation.</p>
+        <div class="chips" style="margin-top:10px">
+          <div class="chip">בקרה 10</div>
+          <div class="chip">בקרה 6</div>
+          <div class="chip">בקרה 16</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Allocation Actions</h3>
+        <p>Operators can allocate radios to missions, set standby status, activate, start, finish, and archive — all tracked in the audit log.</p>
+        <div class="chips" style="margin-top:10px">
+          <div class="chip badge-yellow">Allocate</div>
+          <div class="chip badge-blue">Activate</div>
+          <div class="chip badge-green">Start</div>
+          <div class="chip badge-red">Archive</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 6: 9 TABS ─────────────── -->
+  <div class="slide slide-content" data-index="5">
+    <div class="glow glow-blue"></div>
+    <h2>9 Feature Tabs</h2>
+    <div class="desc">Every aspect of radio network management is accessible through a dedicated, purpose-built tab.</div>
+    <div class="tab-grid">
+      <div class="tab-item">
+        <div class="t-icon">🗺️</div>
+        <div>
+          <h4>Overview</h4>
+          <p>Full deployment hierarchy with frequency & link modes</p>
+          <div class="t-heb">סקירה כללית</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">🎯</div>
+        <div>
+          <h4>Missions</h4>
+          <p>Create, manage, and allocate radio resources to missions</p>
+          <div class="t-heb">משימות</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">⏱️</div>
+        <div>
+          <h4>Timeline</h4>
+          <p>Visual timeline of mission durations and overlaps</p>
+          <div class="t-heb">ציר זמן</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">🔗</div>
+        <div>
+          <h4>Link Dictionary</h4>
+          <p>Named frequency-to-radio mappings for coordination</p>
+          <div class="t-heb">קישור תדרים</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">📊</div>
+        <div>
+          <h4>Owner Frequencies</h4>
+          <p>View radio spectrum usage grouped by owner</p>
+          <div class="t-heb">פלאקט עורקים</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">🔍</div>
+        <div>
+          <h4>Search</h4>
+          <p>Cross-entity search and filter across all data</p>
+          <div class="t-heb">חיפוש</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">📈</div>
+        <div>
+          <h4>Summary</h4>
+          <p>Statistics, charts, and operational summaries</p>
+          <div class="t-heb">סיכום</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">📜</div>
+        <div>
+          <h4>History</h4>
+          <p>Full audit log of every system change with timestamps</p>
+          <div class="t-heb">היסטוריה</div>
+        </div>
+      </div>
+      <div class="tab-item">
+        <div class="t-icon">⚙️</div>
+        <div>
+          <h4>Preferences</h4>
+          <p>System config — owners, device types, users (admin only)</p>
+          <div class="t-heb">העדפות</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 7: ACCESS CONTROL ─────────────── -->
+  <div class="slide slide-content" data-index="6">
+    <div class="glow glow-purple"></div>
+    <h2>Access Control & Security</h2>
+    <div class="desc">A two-tier role system keeps operations safe while enabling collaborative access.</div>
+    <div class="two-col" style="margin-bottom:18px">
+      <div class="card accent-blue">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="font-size:1.5rem">👑</span>
+          <h3 style="font-size:1.1rem">Admin</h3>
+          <span class="badge badge-blue">Full Access</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Manage sectors, sites, radios</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Configure owners & device types</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Manage all missions</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Manage users & roles</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Import / export data</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Access Preferences tab</li>
+        </ul>
+      </div>
+      <div class="card accent-green">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="font-size:1.5rem">👤</span>
+          <h3 style="font-size:1.1rem">User</h3>
+          <span class="badge badge-green">Limited Access</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ View all network data</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Create & manage missions</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ Search & filter</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">✅ View audit history</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">❌ Infrastructure changes</li>
+          <li style="font-size:.85rem;color:var(--text-muted)">❌ User management</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="stack-row">
+        <div class="dot" style="background:#4f8ef7"></div>
+        <div><h4>Session Tokens</h4><p>X-Auth-Token header authentication</p></div>
+      </div>
+      <div class="stack-row">
+        <div class="dot" style="background:#3fb950"></div>
+        <div><h4>Password Hashing</h4><p>SHA256 with random salt per user</p></div>
+      </div>
+      <div class="stack-row">
+        <div class="dot" style="background:#a371f7"></div>
+        <div><h4>View / Edit Modes</h4><p>Read-only by default, edit mode toggle</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 8: TECH STACK ─────────────── -->
+  <div class="slide slide-content" data-index="7">
+    <div class="glow glow-blue"></div>
+    <h2>Technology Stack</h2>
+    <div class="desc">Built lean — zero external dependencies, deployable anywhere Python runs.</div>
+    <div class="two-col">
+      <div>
+        <div class="stack-row">
+          <div class="dot" style="background:#3776ab"></div>
+          <div><h4>Python 3.11</h4><p>Backend server — stdlib only, no pip packages</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#4f8ef7"></div>
+          <div><h4>http.server + ThreadingMixIn</h4><p>Lightweight built-in HTTP server</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#f5a623"></div>
+          <div><h4>JSON File Storage</h4><p>data.json · mapping.json · users.json</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#3fb950"></div>
+          <div><h4>RESTful API</h4><p>25+ endpoints covering full CRUD operations</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#a371f7"></div>
+          <div><h4>Render Deployment</h4><p>render.yaml · Procfile · one-command start</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="stack-row">
+          <div class="dot" style="background:#e34c26"></div>
+          <div><h4>Vanilla HTML/CSS/JS</h4><p>No React, no Vue — pure modular ES6</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#f5a623"></div>
+          <div><h4>Modular JS Architecture</h4><p>9 tab modules + 5 modal handlers + utilities</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#4f8ef7"></div>
+          <div><h4>Custom i18n System</h4><p>English ↔ Hebrew with full RTL support</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#3fb950"></div>
+          <div><h4>Dark / Light Mode</h4><p>CSS variable theming, user preference stored</p></div>
+        </div>
+        <div class="stack-row">
+          <div class="dot" style="background:#ff7b72"></div>
+          <div><h4>Inline Editing</h4><p>In-place editing with unsaved-changes detection</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:14px">
+      <p>Start the entire system with a single command: <strong>python3 server.py</strong> — no build step, no install, no config required.</p>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 9: API ─────────────── -->
+  <div class="slide slide-content" data-index="8">
+    <div class="glow glow-purple"></div>
+    <h2>REST API</h2>
+    <div class="desc">A clean HTTP API powers all client operations — the same API the frontend uses is fully accessible externally.</div>
+    <div class="two-col-wide">
+      <div class="code-block">
+<span class="cmt"># Authentication</span>
+<span class="kw">POST</span>   <span class="str">/api/login</span>          <span class="cmt">→ session token</span>
+<span class="kw">POST</span>   <span class="str">/api/logout</span>
+
+<span class="cmt"># Network Infrastructure</span>
+<span class="kw">GET</span>    <span class="str">/api/hierarchy</span>      <span class="cmt">→ full sector tree</span>
+<span class="kw">GET</span>    <span class="str">/api/sectors</span>
+<span class="kw">POST</span>   <span class="str">/api/sectors</span>
+<span class="kw">DELETE</span> <span class="str">/api/sectors/{id}</span>
+<span class="kw">GET</span>    <span class="str">/api/sites</span>
+<span class="kw">GET</span>    <span class="str">/api/radios</span>
+
+<span class="cmt"># Missions</span>
+<span class="kw">GET</span>    <span class="str">/api/planned_missions</span>
+<span class="kw">POST</span>   <span class="str">/api/planned_missions</span>
+<span class="kw">POST</span>   <span class="str">/api/planned_missions/{id}</span>
+<span class="kw">GET</span>    <span class="str">/api/archived_missions</span>
+
+<span class="cmt"># Utilities</span>
+<span class="kw">GET</span>    <span class="str">/api/audit</span>          <span class="cmt">→ full change log</span>
+<span class="kw">GET</span>    <span class="str">/api/export</span>         <span class="cmt">→ data backup</span>
+<span class="kw">POST</span>   <span class="str">/api/import</span>
+<span class="kw">GET</span>    <span class="str">/api/links</span>
+<span class="kw">POST</span>   <span class="str">/api/batch/clear_site</span>
+      </div>
+      <div>
+        <div class="card accent-blue" style="margin-bottom:12px">
+          <h3>Auth Header</h3>
+          <p style="font-family:monospace;font-size:.82rem;margin-top:6px;color:var(--accent)">X-Auth-Token: &lt;token&gt;</p>
+          <p style="margin-top:8px">All write operations require authentication. Token is returned on login and stored in localStorage.</p>
+        </div>
+        <div class="card accent-green" style="margin-bottom:12px">
+          <h3>Data Format</h3>
+          <p>All requests and responses use <strong style="color:var(--green)">JSON</strong>. Error responses include a human-readable message.</p>
+        </div>
+        <div class="card accent-purple">
+          <h3>Schema Migration</h3>
+          <p>Server auto-migrates the data schema on startup — no manual migrations needed when deploying updates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 10: HIGHLIGHTS ─────────────── -->
+  <div class="slide slide-content" data-index="9">
+    <div class="glow glow-blue"></div>
+    <h2>Key Highlights</h2>
+    <div class="desc">What makes MaHakesher stand out as an operational tool.</div>
+    <div class="grid grid-2">
+      <div class="card accent-blue">
+        <div class="card-icon">🌍</div>
+        <h3>Bilingual — English & Hebrew</h3>
+        <p>Full RTL (right-to-left) support with a custom i18n engine. Every label, button, and message is available in both languages. Switch languages live without a page reload.</p>
+      </div>
+      <div class="card accent-green">
+        <div class="card-icon">📋</div>
+        <h3>Complete Audit Trail</h3>
+        <p>Every create, update, and delete is recorded with the acting user, timestamp, and changed values. Nothing is ever silently modified — full operational accountability.</p>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-icon">🔒</div>
+        <h3>View / Edit Mode Separation</h3>
+        <p>The interface is read-only by default. Operators explicitly enter edit mode to make changes — preventing accidental edits during active operations.</p>
+      </div>
+      <div class="card accent-yellow">
+        <div class="card-icon">🚀</div>
+        <h3>Zero Dependencies</h3>
+        <p>The entire backend runs on Python's standard library. No pip install, no node_modules, no build pipeline. Clone and run — instantly operational on any machine with Python 3.11.</p>
+      </div>
+      <div class="card accent-red">
+        <div class="card-icon">🎨</div>
+        <h3>Owner Color Coding</h3>
+        <p>Each radio owner gets a distinct color (light & dark theme variants). The entire UI uses these colors to make ownership instantly recognizable at a glance.</p>
+      </div>
+      <div class="card" style="border-color:rgba(255,255,255,.12)">
+        <div class="card-icon">💾</div>
+        <h3>Export / Import Backup</h3>
+        <p>Full data export to JSON and import from backup — enabling snapshots, environment cloning, and disaster recovery without any database tooling.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── SLIDE 11: CLOSING ─────────────── -->
+  <div class="slide slide-title" data-index="10">
+    <div class="glow glow-blue"></div>
+    <div class="glow glow-purple"></div>
+    <div class="tag">Summary</div>
+    <h1>MaHakesher</h1>
+    <div class="subtitle" style="margin-bottom:20px">A complete, self-contained radio network management platform built for operational clarity, bilingual usability, and zero-friction deployment.</div>
+    <div class="grid grid-3" style="max-width:700px;text-align:left">
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.6rem;margin-bottom:8px">📡</div>
+        <div style="font-size:.85rem;color:var(--text-muted)">Full radio network topology management</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.6rem;margin-bottom:8px">🎯</div>
+        <div style="font-size:.85rem;color:var(--text-muted)">End-to-end mission lifecycle tracking</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.6rem;margin-bottom:8px">🔒</div>
+        <div style="font-size:.85rem;color:var(--text-muted)">Secure, role-based, fully audited</div>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:30px">
+      <div class="meta-item"><div class="val" style="color:var(--green)">python3 server.py</div><div class="lbl">Start Command</div></div>
+      <div class="meta-item"><div class="val">:8000</div><div class="lbl">Default Port</div></div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+  <button id="btnPrev" onclick="navigate(-1)" disabled>← Prev</button>
+  <span id="counter"></span>
+  <button id="btnNext" onclick="navigate(1)">Next →</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => slides[current].classList.remove('exit'), 500);
+    current = n;
+    slides[current].classList.add('active');
+    update();
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  function update() {
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('slideNum').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btnPrev').disabled = current === 0;
+    document.getElementById('btnNext').disabled = current === total - 1;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+
+  // Touch/swipe support
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend',   e => {
+    const dx = tx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) navigate(dx > 0 ? 1 : -1);
+  });
+
+  update();
+</script>
+</body>
+</html>
