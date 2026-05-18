@@ -60,6 +60,7 @@ function renderLinksTab() {
       <td>${link.frequency}</td>
       <td>${escapeHTML(link.frequency_band) || "—"}</td>
       <td>${escapeHTML(link.owner) || "—"}</td>
+      <td>${link.generic_role ? `<span class="link-generic-role-badge">${escapeHTML(link.generic_role)}</span>` : "—"}</td>
       <td>
         <button class="btn btn-sm btn-edit" onclick="openEditLinkModal('${link.id}')">${t("links.edit")}</button>
       </td>
@@ -181,8 +182,11 @@ async function handleLinkExcelUpload(input) {
       const freqIdx = header.findIndex(
         (h) => h.includes("freq") || h.includes("mhz"),
       );
-      const bandIdx = header.findIndex((h) => h.includes("band"));
-      const ownerIdx = header.findIndex((h) => h.includes("owner"));
+      const bandIdx        = header.findIndex((h) => h.includes("band"));
+      const ownerIdx       = header.findIndex((h) => h.includes("owner"));
+      const genericRoleIdx = header.findIndex(
+        (h) => h.includes("generic") || (h.includes("role") && !h.includes("owner")),
+      );
 
       if (nameIdx === -1) {
         showNotification(t("notify.excelNoNameCol"), "error");
@@ -260,7 +264,8 @@ async function handleLinkExcelUpload(input) {
           continue;
         }
 
-        const owner = ownerIdx >= 0 ? String(row[ownerIdx] || "").trim() : "";
+        const owner       = ownerIdx       >= 0 ? String(row[ownerIdx]       || "").trim() : "";
+        const genericRole = genericRoleIdx >= 0 ? String(row[genericRoleIdx] || "").trim() : "";
 
         // Validate owner against known list (empty owner is allowed)
         if (owner) {
@@ -280,6 +285,7 @@ async function handleLinkExcelUpload(input) {
             frequency,
             frequency_band: frequencyBand,
             owner: owner || null,
+            generic_role: genericRole || null,
           });
           imported++;
           batchNames.add(nameLower);
@@ -354,13 +360,13 @@ function closeLinkImportErrorsModal() {
 
 function downloadLinkTemplate() {
   const template = [
-    ["Link Name", "Frequency", "Band", "Owner"],
-    ["NAME", "FREQUENCY", "FREQUENCY-BAND", "OWNER-NAME"],
+    ["Link Name", "Frequency", "Band", "Owner", "Generic Role"],
+    ["NAME", "FREQUENCY", "FREQUENCY-BAND", "OWNER-NAME", "ROLE (optional)"],
   ];
   const ws = XLSX.utils.aoa_to_sheet(template);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Links");
-  ws["!cols"] = [{ wch: 20 }, { wch: 14 }, { wch: 12 }, { wch: 20 }];
+  ws["!cols"] = [{ wch: 20 }, { wch: 14 }, { wch: 12 }, { wch: 20 }, { wch: 18 }];
   XLSX.writeFile(wb, "link_dictionary_template.xlsx");
 }
 

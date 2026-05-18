@@ -5,7 +5,8 @@
       "link_name": "כובע",
       "frequency": 256,
       "frequency_band": "UHF",
-      "owner": "בעלים איכותי"
+      "owner": "בעלים איכותי",
+      "generic_role": "משימה קבועה"
     },
     {
       "id": "link-437ae3c0",

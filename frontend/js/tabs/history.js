@@ -102,6 +102,7 @@ const FIELD_LABELS = {
   site_type:         t("history.field.siteType"),
   link_name:         t("history.field.linkName"),
   frequency_band:    t("history.field.band"),
+  generic_role:      t("history.field.genericRole"),
 };
 
 // ---- Entity lookup helpers ----
@@ -202,12 +203,14 @@ function describeTitle(entry) {
       if (entity_type === "device")           return t("history.delete.device", { name: details.name });
       return t("history.delete.other", { type: entity_type });
 
-    case "start_mission": return t("history.startMission", { name: details.name });
-    case "end_mission":   return t("history.endMission",   { name: details.name });
-    case "archive":       return t("history.archive",      { name: details.name });
-    case "restore":       return t("history.restore",      { name: details.name });
-    case "batch_clear":   return t("history.batchClear",   { count: details.devices_cleared ?? "all", site: lookupSiteName(entity_id) });
-    case "import":        return t("history.import",       { sectors: details.sectors, sites: details.sites, radios: details.radios });
+    case "start_mission": return t("history.startMission",  { name: details.name });
+    case "end_mission":   return t("history.endMission",    { name: details.name });
+    case "activate":      return t("history.activate",      { name: details.name });
+    case "deactivate":    return t("history.deactivate",    { name: details.name });
+    case "archive":       return t("history.archive",       { name: details.name });
+    case "restore":       return t("history.restore",       { name: details.name });
+    case "batch_clear":   return t("history.batchClear",    { count: details.devices_cleared ?? "all", site: lookupSiteName(entity_id) });
+    case "import":        return t("history.import",        { sectors: details.sectors, sites: details.sites, radios: details.radios });
     default:              return `${action} ${entity_type}`;
   }
 }

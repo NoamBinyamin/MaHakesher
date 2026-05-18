@@ -11,6 +11,7 @@ function openAddLinkModal() {
   document.getElementById("linkFrequency").value = "";
   document.getElementById("linkFrequencyBand").value = "";
   document.getElementById("linkOwner").value = "";
+  document.getElementById("linkGenericRole").value = "";
   if (window.populateSelects) window.populateSelects();
   document.getElementById("addLinkModal").classList.remove("hidden");
   disableBodyScroll();
@@ -27,6 +28,7 @@ async function saveNewLink() {
     frequency: parseFloat(document.getElementById("linkFrequency").value),
     frequency_band: document.getElementById("linkFrequencyBand").value || null,
     owner: document.getElementById("linkOwner").value,
+    generic_role: document.getElementById("linkGenericRole").value.trim() || null,
   };
 
   if (!linkData.link_name || !linkData.frequency || !linkData.frequency_band) {
@@ -70,6 +72,7 @@ function openEditLinkModal(linkId) {
   document.getElementById("editLinkFrequencyBand").value =
     link.frequency_band || (link.frequency ? getBandForFrequency(parseFloat(link.frequency)) : "") || "";
   document.getElementById("editLinkOwner").value = link.owner || "";
+  document.getElementById("editLinkGenericRole").value = link.generic_role || "";
   document.getElementById("editLinkModal").classList.remove("hidden");
   disableBodyScroll();
 }
@@ -86,6 +89,7 @@ async function saveEditLink() {
     frequency: parseFloat(document.getElementById("editLinkFrequency").value),
     frequency_band: document.getElementById("editLinkFrequencyBand").value || null,
     owner: document.getElementById("editLinkOwner").value,
+    generic_role: document.getElementById("editLinkGenericRole").value.trim() || null,
   };
 
   if (!linkData.link_name || !linkData.frequency || !linkData.frequency_band) {

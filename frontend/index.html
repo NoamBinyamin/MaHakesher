@@ -325,7 +325,15 @@
         </div>
 
         <div class="table-responsive">
-          <table class="data-table">
+          <table class="data-table" style="table-layout: fixed; word-break: break-word;">
+            <colgroup>
+              <col style="width: 22%">
+              <col style="width: 9rem">
+              <col style="width: 8rem">
+              <col style="width: 14%">
+              <col style="width: 14%">
+              <col style="width: 7rem">
+            </colgroup>
             <thead>
               <tr>
                 <th
@@ -356,6 +364,7 @@
                   <span data-i18n="links.col.owner">Owner</span>
                   <span id="sort-owner"></span>
                 </th>
+                <th data-i18n="links.col.genericRole">Generic Role</th>
                 <th data-i18n="links.col.actions">Actions</th>
               </tr>
             </thead>
@@ -1908,6 +1917,21 @@
               </option>
             </select>
           </div>
+          <div class="form-group">
+            <label for="linkGenericRole">
+              <i
+                class="fa-solid fa-briefcase"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.genericRole">Generic Role</span>
+            </label>
+            <input
+              type="text"
+              id="linkGenericRole"
+              data-i18n-placeholder="links.genericRolePlaceholder"
+              placeholder="e.g., Commander"
+            />
+          </div>
           <div class="modal-footer">
             <div></div>
             <div>
@@ -2032,6 +2056,21 @@
               </option>
             </select>
           </div>
+          <div class="form-group">
+            <label for="editLinkGenericRole">
+              <i
+                class="fa-solid fa-briefcase"
+                style="color: var(--primary-color); margin-right: 0.4rem"
+              ></i>
+              <span data-i18n="links.col.genericRole">Generic Role</span>
+            </label>
+            <input
+              type="text"
+              id="editLinkGenericRole"
+              data-i18n-placeholder="links.genericRolePlaceholder"
+              placeholder="e.g., Commander"
+            />
+          </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" onclick="deleteLink()">
               <i class="fa-solid fa-trash"></i>
@@ -2151,7 +2190,7 @@
                 </label>
                 <select
                   id="planMissionOwner"
-                  onchange="updatePlanMissionHeaderColor()"
+                  onchange="updatePlanMissionHeaderColor(); checkFreqOwnerMismatch()"
                 >
                   <option value="" data-i18n="planMission.ownerSelect">
                     Select an owner...
@@ -2283,14 +2322,10 @@
             <div
               id="reqFormBox"
               style="
-                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
                 border: 2px solid var(--info-color);
                 border-radius: var(--border-radius-sm);
                 padding: 1.25rem;
                 margin-bottom: 1.25rem;
-                transition:
-                  background 0.25s,
-                  border-color 0.25s;
               "
             >
               <p

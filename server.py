@@ -1255,7 +1255,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'link_name': post_data.get('link_name', ''),
             'frequency': post_data.get('frequency', 0.0),
             'frequency_band': post_data.get('frequency_band', None),
-            'owner': post_data.get('owner', '')
+            'owner': post_data.get('owner', ''),
+            'generic_role': post_data.get('generic_role', '') or ''
         }
         mapping['mappings'].append(new_link)
         save_mapping(mapping)
@@ -1268,10 +1269,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         post_data.pop('id', None)
         for link in mapping['mappings']:
             if link['id'] == link_id:
-                before = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner')}
+                before = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner', 'generic_role')}
                 link.update(post_data)
                 save_mapping(mapping)
-                after = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner')}
+                after = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner', 'generic_role')}
                 changed = [k for k in before if before[k] != after[k]]
                 self._audit('update', 'link', link_id, {
                     'before': {k: before[k] for k in changed},

@@ -510,16 +510,34 @@ function _renderGantt(container, missions) {
 // ── Unscheduled card ──────────────────────────────────────────────────────────
 
 function _tlCard(mission) {
-  const ownerColor = mission.owner ? getOwnerColor(mission.owner) : "var(--gray-200)";
+  const isDark     = document.documentElement.classList.contains("dark");
+  const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
+  const cardBg     = ownerColor || (isDark ? "#243044" : "var(--gray-100)");
   const reqCount   = mission.requirements ? mission.requirements.length : 0;
+
+  // Pick text color based on actual background luminance
+  let textMain, textMeta;
+  if (ownerColor && ownerColor.startsWith("#")) {
+    const h    = ownerColor.replace("#", "");
+    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    textMain = lum > 0.55 ? "#1e293b" : "#f1f5f9";
+    textMeta = lum > 0.55 ? "rgba(30,41,59,0.65)" : "rgba(241,245,249,0.75)";
+  } else {
+    textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
+    textMeta = isDark ? "#94a3b8" : "var(--gray-600)";
+  }
 
   const card = document.createElement("div");
   card.className = "timeline-card";
-  card.style.cssText = `background: ${ownerColor}; border: 1.5px solid rgba(0,0,0,0.1);`;
+  card.style.cssText = `background: ${cardBg}; border: 1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"};`;
   card.innerHTML = `
-    <div class="timeline-card-name">${escapeHTML(mission.name)}</div>
-    ${mission.owner ? `<div class="timeline-card-meta">👤 ${escapeHTML(mission.owner)}</div>` : ""}
-    <div class="timeline-card-meta">📡 ${reqCount}</div>
+    <div class="timeline-card-name" style="color:${textMain};">${escapeHTML(mission.name)}</div>
+    ${mission.owner ? `<div class="timeline-card-meta" style="color:${textMeta};">👤 ${escapeHTML(mission.owner)}</div>` : ""}
+    <div class="timeline-card-meta" style="color:${textMeta};">📡 ${reqCount}</div>
   `;
 
   card.addEventListener("mouseenter", (e) => _tlShowTooltip(mission, e));
