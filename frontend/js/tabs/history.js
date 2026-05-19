@@ -142,9 +142,10 @@ function parseDiff(entry) {
     const after  = details.after  || {};
     const fields = new Set([...Object.keys(before), ...Object.keys(after)]);
     return [...fields].map((f) => ({
-      field:  FIELD_LABELS[f] || f,
-      before: before[f] ?? null,
-      after:  after[f]  ?? null,
+      rawField: f,
+      field:    FIELD_LABELS[f] || f,
+      before:   before[f] ?? null,
+      after:    after[f]  ?? null,
     }));
   }
 
@@ -232,8 +233,24 @@ function translateValue(v) {
 
 // ---- Render one diff row ----
 
-function renderDiffRow(fieldLabel, beforeVal, afterVal) {
-  const fmt = (v) => (v == null ? '<span style="color:var(--gray-400);">—</span>' : `<span>${escapeHTML(translateValue(v))}</span>`);
+function renderDiffRow(fieldLabel, beforeVal, afterVal, rawField, entityId) {
+  const FREQ_FIELDS = new Set(["frequency", "standby_frequency"]);
+  const isFreq = FREQ_FIELDS.has(rawField);
+
+  let band = null;
+  if (isFreq && entityId) {
+    const radio = (window.appState.radios || []).find((r) => r.id === entityId);
+    band = radio?.frequency_band || null;
+  }
+
+  const fmt = (v) => {
+    if (v == null) return '<span style="color:var(--gray-400);">—</span>';
+    if (isFreq && v != null && !isNaN(Number(v))) {
+      return `<span>${escapeHTML(formatFrequency(v, band))}</span>`;
+    }
+    return `<span>${escapeHTML(translateValue(v))}</span>`;
+  };
+
   return `
     <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; padding: 1px 0;">
       <span style="color:var(--gray-400); min-width:6rem; flex-shrink:0;">${escapeHTML(fieldLabel)}</span>
@@ -275,7 +292,7 @@ function renderHistoryTab() {
 
     const diffHTML = diff.length
       ? `<div style="margin-top:6px; padding: 6px 8px; background:var(--gray-50); border-radius:6px; border:1px solid var(--gray-200);">
-           ${diff.map((d) => renderDiffRow(d.field, d.before, d.after)).join("")}
+           ${diff.map((d) => renderDiffRow(d.field, d.before, d.after, d.rawField, entry.entity_id)).join("")}
          </div>`
       : "";
 

@@ -99,7 +99,7 @@ function showFreqLinkSuggestions() {
       onmousedown="selectFreqLinkSuggestion(${l.frequency})"
     >
       <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
-      <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${l.frequency} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
+      <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${formatFrequency(l.frequency, l.frequency_band)} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
     </div>`
     )
     .join("");
@@ -336,6 +336,15 @@ function setSortOrder(value) {
   renderRequirementsList();
 }
 
+function removeAllRequirements() {
+  if (missionRequirements.length === 0) return;
+  if (!confirm(t("confirm.removeAllReqs"))) return;
+  missionRequirements = [];
+  markModalDirty("planMissionModal");
+  renderRequirementsList();
+  renderExtraDevices();
+}
+
 function editMissionRequirement(originalIndex) {
   const req = missionRequirements[originalIndex];
   if (!req) return;
@@ -367,6 +376,10 @@ function editMissionRequirement(originalIndex) {
 function renderRequirementsList() {
   const container = document.getElementById("plannedRequirementsList");
   container.innerHTML = "";
+
+  // Show/hide the "Remove All" button based on whether there are requirements
+  const removeAllBtn = document.getElementById("removeAllReqsBtn");
+  if (removeAllBtn) removeAllBtn.style.display = missionRequirements.length > 0 ? "inline-block" : "none";
 
   if (missionRequirements.length === 0) {
     container.innerHTML =
@@ -462,6 +475,7 @@ function renderRequirementsList() {
         <th style="padding: 12px 16px; border: none;">${t("planMission.reqCol.band")}</th>
         <th style="padding: 12px 16px; border: none;">${t("planMission.reqCol.location")}</th>
         <th style="padding: 12px 16px; border: none;">${t("planMission.reqCol.frequency")}</th>
+        <th style="padding: 12px 16px; border: none;">${t("planMission.reqCol.linkName")}</th>
         <th style="padding: 12px 16px; border: none;">${t("planMission.reqCol.role")}</th>
         <th style="padding: 12px 16px; border: none; text-align: center;">${t("planMission.reqCol.actions")}</th>
       </tr>
@@ -511,7 +525,8 @@ function renderRequirementsList() {
     row.innerHTML = `
       <td style="padding: 12px 16px; ${textStyle}${ownerBorder}">${req.frequencyBand}</td>
       <td style="padding: 12px 16px; ${locStyle}">${locationText}</td>
-      <td style="padding: 12px 16px; ${freqStyle}">${req.frequency ? req.frequency + " MHz" : "-"}</td>
+      <td style="padding: 12px 16px; ${freqStyle}">${req.frequency ? formatFrequency(req.frequency, req.frequencyBand) + " MHz" : "-"}</td>
+      <td style="padding: 12px 16px; ${textStyle}">${freqLink ? escapeHTML(freqLink.link_name) : "—"}</td>
       <td style="padding: 12px 16px; ${textStyle}">${req.role || "-"}</td>
       <td style="padding: 12px 16px; text-align: center; white-space: nowrap;">
         <button type="button" onclick="editMissionRequirement(${originalIndex})" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#94a3b8'" title="${t('planMission.req.titleEdit')}">
@@ -638,5 +653,6 @@ window.selectFreqLinkSuggestion = selectFreqLinkSuggestion;
 window.showRoleSuggestions = showRoleSuggestions;
 window.hideRoleSuggestions = hideRoleSuggestions;
 window.selectRoleSuggestion = selectRoleSuggestion;
+window.removeAllRequirements = removeAllRequirements;
 window.checkFreqOwnerMismatch = checkFreqOwnerMismatch;
 window.updatePlanMissionHeaderColor = updatePlanMissionHeaderColor;

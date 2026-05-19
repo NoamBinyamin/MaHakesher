@@ -57,7 +57,7 @@ function renderLinksTab() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td style="${borderStyle}">${escapeHTML(link.link_name)}</td>
-      <td>${link.frequency}</td>
+      <td>${formatFrequency(link.frequency, link.frequency_band)}</td>
       <td>${escapeHTML(link.frequency_band) || "—"}</td>
       <td>${escapeHTML(link.owner) || "—"}</td>
       <td>${link.generic_role ? `<span class="link-generic-role-badge">${escapeHTML(link.generic_role)}</span>` : "—"}</td>
@@ -121,14 +121,14 @@ function lookupLink() {
         <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
         <i class="fa-solid fa-arrow-left" style="color: var(--gray-400); font-size: 0.75rem;"></i>
         ${bandTag(l)}
-        <span style="color: var(--gray-600); font-size: 0.9rem;">${l.frequency} MHz</span>
+        <span style="color: var(--gray-600); font-size: 0.9rem;">${formatFrequency(l.frequency, l.frequency_band)} MHz</span>
       </div>`,
     ),
     ...freqMatches.map(
       (l) => `
       <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: var(--gray-50); border-radius: 8px; margin-bottom: 0.5rem;">
         <i class="fa-solid fa-wave-square" style="color: var(--info-color); width: 16px;"></i>
-        <span style="color: var(--gray-600); font-size: 0.9rem;">${l.frequency} MHz</span>
+        <span style="color: var(--gray-600); font-size: 0.9rem;">${formatFrequency(l.frequency, l.frequency_band)} MHz</span>
         <i class="fa-solid fa-arrow-left" style="color: var(--gray-400); font-size: 0.75rem;"></i>
         ${bandTag(l)}
         <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
@@ -302,7 +302,7 @@ async function handleLinkExcelUpload(input) {
       if (errors.length > 0) {
         _showLinkImportErrors(errors, imported);
       } else if (imported > 0) {
-        showNotification(`Imported ${imported} link(s) from Excel`, "success");
+        showNotification(t("notify.linksImported", { count: imported }), "success");
       } else {
         showNotification(t("notify.noValidLinks"), "warning");
       }

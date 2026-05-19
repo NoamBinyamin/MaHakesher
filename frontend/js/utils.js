@@ -149,3 +149,71 @@ function enableBodyScroll() {
 
 window.disableBodyScroll = disableBodyScroll;
 window.enableBodyScroll = enableBodyScroll;
+
+// ==================== Frequency Formatting ====================
+
+function formatFrequency(freq, bandName) {
+  if (freq === null || freq === undefined || freq === "" || freq === "-") return "-";
+  const num = Number(freq);
+  if (isNaN(num)) return String(freq);
+  const band = ((window.appState?.config?.frequency_bands) || {})[bandName];
+  const decimals = (band && typeof band.decimals === "number") ? band.decimals : 3;
+  return num.toFixed(decimals);
+}
+
+window.formatFrequency = formatFrequency;
+
+// ==================== Undo Toast ====================
+
+let _undoTimer    = null;
+let _undoToastEl  = null;
+let _undoPendingFn = null;
+
+function showUndoToast(message, onUndo, duration = 5000) {
+  // Dismiss any existing toast immediately
+  _dismissUndoToast(false);
+
+  _undoPendingFn = onUndo;
+
+  const toast = document.createElement("div");
+  toast.className = "undo-toast";
+  toast.innerHTML = `
+    <span class="undo-toast-msg">${escapeHTML(message)}</span>
+    <button class="undo-toast-btn" onclick="window._triggerUndo()">${t("btn.undo")}</button>
+    <button class="undo-toast-close" onclick="window._dismissUndoToast(false)">&times;</button>
+    <div class="undo-toast-progress">
+      <div class="undo-toast-bar" style="animation-duration:${duration}ms"></div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  _undoToastEl = toast;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add("visible"));
+  });
+
+  _undoTimer = setTimeout(() => _dismissUndoToast(false), duration);
+}
+
+function _triggerUndo() {
+  if (_undoPendingFn) {
+    _undoPendingFn();
+    _undoPendingFn = null;
+  }
+  _dismissUndoToast(false);
+}
+
+function _dismissUndoToast(runUndo = false) {
+  if (_undoTimer) { clearTimeout(_undoTimer); _undoTimer = null; }
+  if (runUndo && _undoPendingFn) { _undoPendingFn(); _undoPendingFn = null; }
+  if (_undoToastEl) {
+    _undoToastEl.classList.remove("visible");
+    const el = _undoToastEl;
+    _undoToastEl = null;
+    setTimeout(() => el.remove(), 320);
+  }
+}
+
+window.showUndoToast     = showUndoToast;
+window._triggerUndo      = _triggerUndo;
+window._dismissUndoToast = _dismissUndoToast;

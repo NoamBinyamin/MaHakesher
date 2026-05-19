@@ -140,7 +140,7 @@ function _renderOwnerFreqTables(ownerName) {
       const plannedHtml = planned.length ? `<div class="ownerfreq-missions-list">${planned.map(_missionBadge).join("")}</div>` : dash;
       return `
         <tr>
-          <td><span class="ownerfreq-freq-badge">${l.frequency} MHz</span></td>
+          <td><span class="ownerfreq-freq-badge">${formatFrequency(l.frequency, band)} MHz</span></td>
           <td>${escapeHTML(l.link_name)}</td>
           <td class="ownerfreq-missions-cell">${activeHtml}</td>
           <td class="ownerfreq-missions-cell">${plannedHtml}</td>

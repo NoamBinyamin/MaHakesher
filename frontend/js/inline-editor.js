@@ -40,7 +40,7 @@ function validateInlineFrequency(value, radio) {
   if (!value || value === "") return { valid: true, value: null };
 
   const frequency = parseFloat(value);
-  if (isNaN(frequency)) return { valid: false, error: "Invalid number" };
+  if (isNaN(frequency)) return { valid: false, error: t("inline.invalidNumber") };
 
   const band = getFrequencyBandForDevice(radio.device_type);
   if (!band) return { valid: true, value: frequency };
@@ -386,7 +386,7 @@ function saveInlineEdit(cell, radioId, columnIndex, input, radio) {
       if (missionOwner && missionOwner !== newValue) {
         showInlineError(
           cell,
-          `Mission owner must be "${missionOwner}", not "${newValue}"`,
+          t("inline.missionOwnerMismatch", { owner: missionOwner, selected: newValue }),
         );
         input.focus();
         return;

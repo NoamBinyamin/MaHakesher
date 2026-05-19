@@ -1,45 +1,176 @@
 // ==================== Overview Rendering (Unified Table) ====================
 
-function getFreqLabel(freq) {
+function getFreqLabel(freq, band) {
   if (!freq || freq === "-") return freq || "-";
-  if (window.overviewFreqMode !== "link") return freq;
-  const links = window.appState.links || [];
-  const match = links.find((l) => Math.abs(Number(l.frequency) - Number(freq)) < 0.001);
-  return match ? match.link_name : freq;
+  if (window.overviewFreqMode === "link") {
+    const links = window.appState.links || [];
+    const match = links.find((l) => Math.abs(Number(l.frequency) - Number(freq)) < 0.001);
+    if (match) return match.link_name;
+  }
+  return formatFrequency(freq, band);
 }
 
 window.setOverviewFreqMode = function (mode) {
   window.overviewFreqMode = mode;
-  const freqBtn = document.getElementById("overviewFreqModeBtn");
-  const linkBtn = document.getElementById("overviewLinkModeBtn");
-  if (freqBtn && linkBtn) {
-    if (mode === "frequency") {
-      freqBtn.className = "btn btn-primary";
-      linkBtn.className = "btn btn-secondary";
-    } else {
-      freqBtn.className = "btn btn-secondary";
-      linkBtn.className = "btn btn-primary";
-    }
-  }
+  _syncFreqModeButtons(mode);
   renderOverview();
 };
+
+function _syncFreqModeButtons(mode) {
+  const isFreq = mode === "frequency";
+  // Tab-header buttons
+  const freqBtn = document.getElementById("overviewFreqModeBtn");
+  const linkBtn = document.getElementById("overviewLinkModeBtn");
+  if (freqBtn) freqBtn.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
+  if (linkBtn) linkBtn.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
+  // Floating pill buttons
+  const pillFreq = document.getElementById("overviewModePillFreq");
+  const pillLink = document.getElementById("overviewModePillLink");
+  if (pillFreq) pillFreq.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
+  if (pillLink) pillLink.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
+}
+
+// Show the floating pill when the tab-header buttons scroll out of view
+(function _initOverviewPill() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const pill    = document.getElementById("overviewModePill");
+    const target  = document.getElementById("overviewFreqModeBtn");
+    if (!pill || !target || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const onOverview = document.getElementById("overview")?.classList.contains("active");
+        if (entry.isIntersecting || !onOverview) {
+          pill.classList.remove("visible");
+          pill.setAttribute("aria-hidden", "true");
+        } else {
+          pill.classList.add("visible");
+          pill.setAttribute("aria-hidden", "false");
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(target);
+
+    // Also hide when switching away from the overview tab
+    document.querySelectorAll(".tab-button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.getAttribute("data-tab") !== "overview") {
+          pill.classList.remove("visible");
+        }
+      });
+    });
+  });
+})();
+
+// Collapse state — survives re-renders
+const _collapsedSectors = new Set();
+const _collapsedSites   = new Set();
+
+function toggleSectorCollapse(sectorId) {
+  const isNowCollapsed = !_collapsedSectors.has(sectorId);
+  if (isNowCollapsed) {
+    _collapsedSectors.add(sectorId);
+    document.querySelectorAll(`[data-parent-sector="${sectorId}"]`).forEach((r) => {
+      r.style.display = "none";
+    });
+  } else {
+    _collapsedSectors.delete(sectorId);
+    // When expanding a sector, respect per-site collapse
+    document.querySelectorAll(`[data-parent-sector="${sectorId}"]`).forEach((r) => {
+      const ps = r.dataset.parentSite;
+      r.style.display = (ps && _collapsedSites.has(ps)) ? "none" : "";
+    });
+  }
+  const row = document.querySelector(`.sector-row[data-sector-id="${sectorId}"]`);
+  if (row) row.classList.toggle("sector-is-collapsed", isNowCollapsed);
+  _updateCollapseAllBtn();
+}
+
+function toggleSiteCollapse(siteId) {
+  const siteRow = document.querySelector(`.site-row[data-site-id="${siteId}"]`);
+  const parentSector = siteRow?.dataset.parentSector;
+  const isNowCollapsed = !_collapsedSites.has(siteId);
+  if (isNowCollapsed) {
+    _collapsedSites.add(siteId);
+    document.querySelectorAll(`[data-parent-site="${siteId}"]`).forEach((r) => {
+      r.style.display = "none";
+    });
+  } else {
+    _collapsedSites.delete(siteId);
+    // Only show radio rows if the parent sector is not collapsed
+    if (!parentSector || !_collapsedSectors.has(parentSector)) {
+      document.querySelectorAll(`[data-parent-site="${siteId}"]`).forEach((r) => {
+        r.style.display = "";
+      });
+    }
+  }
+  if (siteRow) siteRow.classList.toggle("site-is-collapsed", isNowCollapsed);
+  _updateCollapseAllBtn();
+}
+
+function collapseExpandAll() {
+  const sectors = window.appState.hierarchy || [];
+  const anyExpanded = sectors.some((s) => !_collapsedSectors.has(s.id)) ||
+    sectors.some((s) => s.sites.some((site) => !_collapsedSites.has(site.id)));
+
+  if (anyExpanded) {
+    sectors.forEach((s) => {
+      _collapsedSectors.add(s.id);
+      s.sites.forEach((site) => _collapsedSites.add(site.id));
+    });
+    document.querySelectorAll("[data-parent-sector]").forEach((r) => r.style.display = "none");
+    document.querySelectorAll(".sector-row").forEach((r) => r.classList.add("sector-is-collapsed"));
+    document.querySelectorAll(".site-row").forEach((r) => r.classList.add("site-is-collapsed"));
+  } else {
+    _collapsedSectors.clear();
+    _collapsedSites.clear();
+    document.querySelectorAll("[data-parent-sector]").forEach((r) => r.style.display = "");
+    document.querySelectorAll(".sector-row").forEach((r) => r.classList.remove("sector-is-collapsed"));
+    document.querySelectorAll(".site-row").forEach((r) => r.classList.remove("site-is-collapsed"));
+  }
+  _updateCollapseAllBtn();
+}
+
+function _updateCollapseAllBtn() {
+  const btn = document.getElementById("collapseAllBtn");
+  if (!btn) return;
+  const sectors = window.appState.hierarchy || [];
+  const allCollapsed = sectors.length > 0 &&
+    sectors.every((s) => _collapsedSectors.has(s.id));
+  btn.innerHTML = allCollapsed
+    ? `<i class="fa-solid fa-expand"></i> ${t("overview.expandAll")}`
+    : `<i class="fa-solid fa-compress"></i> ${t("overview.collapseAll")}`;
+}
+
+window.toggleSectorCollapse = toggleSectorCollapse;
+window.toggleSiteCollapse   = toggleSiteCollapse;
+window.collapseExpandAll    = collapseExpandAll;
 
 function renderOverview() {
   const tbody = document.getElementById("overviewTableBody");
   tbody.innerHTML = "";
 
   window.appState.hierarchy.forEach((sector) => {
+    const isCollapsed = _collapsedSectors.has(sector.id);
+
     // Sector separator row
     const sectorRow = document.createElement("tr");
-    sectorRow.className = "sector-row";
+    sectorRow.className = "sector-row" + (isCollapsed ? " sector-is-collapsed" : "");
+    sectorRow.dataset.sectorId = sector.id;
 
     sectorRow.innerHTML = `
       <td colspan="13" style="padding: 0;">
-        <div class="sector-cell">
-          <strong>${escapeHTML(sector.name)}</strong>
-          <div class="sector-row-actions">
-            <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); openSectorModal('${sector.id}')">${t("overview.editSector")}</button>
-            <button class="btn btn-sm btn-add" onclick="event.stopPropagation(); openAddSiteModalForSector('${sector.id}')">${t("overview.addSite")}</button>
+        <div style="display: flex; align-items: stretch;">
+          <div class="sector-collapse-border" onclick="toggleSectorCollapse('${sector.id}')">
+            <i class="fa-solid fa-chevron-down sector-chevron"></i>
+          </div>
+          <div class="sector-cell" style="flex: 1;">
+            <strong>${escapeHTML(sector.name)}</strong>
+            <div class="sector-row-actions">
+              <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); openSectorModal('${sector.id}')">${t("overview.editSector")}</button>
+              <button class="btn btn-sm btn-add" onclick="event.stopPropagation(); openAddSiteModalForSector('${sector.id}')">${t("overview.addSite")}</button>
+            </div>
           </div>
         </div>
       </td>
@@ -50,21 +181,30 @@ function renderOverview() {
     // Render sites and radios within this sector
     sector.sites.forEach((site) => {
       // Site separator row
+      const isSiteCollapsed = _collapsedSites.has(site.id);
       const siteRow = document.createElement("tr");
-      siteRow.className = "site-row";
+      siteRow.className = "site-row" + (isSiteCollapsed ? " site-is-collapsed" : "");
+      siteRow.dataset.parentSector = sector.id;
+      siteRow.dataset.siteId = site.id;
+      if (isCollapsed) siteRow.style.display = "none";
 
       siteRow.innerHTML = `
         <td colspan="13" style="padding: 0;">
-          <div class="site-cell">
-            <strong style="margin-right: 2rem;">
-              ${escapeHTML(site.name)}
-              <span style="display:inline-block;font-size:0.7rem;font-weight:600;padding:0.1rem 0.45rem;border-radius:9999px;margin-right:0.4rem;vertical-align:middle;background:${site.site_type === 'Mobile' ? 'rgba(234,179,8,0.18)' : 'rgba(99,102,241,0.15)'};color:${site.site_type === 'Mobile' ? '#a16207' : '#4f46e5'};">${site.site_type === 'Mobile' ? t('site.typeMobile') : t('site.typeFixed')}</span>
-              (${t("common.devicesCount", { count: site.radios.length })})
-            </strong>
-            <div class="site-row-actions">
-              <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); openSiteModal('${site.id}')">${t("site.editTitle")}</button>
-              <button class="btn btn-sm btn-add" onclick="event.stopPropagation(); openAddRadioModalForSite('${site.id}')">${t("overview.addDevice")}</button>
-              <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); clearAllDevicesAtSite('${site.id}', '${escapeHTML(site.name)}')" title="${t("overview.clearAll")}">${t("overview.clearAll")}</button>
+          <div style="display: flex; align-items: stretch;">
+            <div class="site-collapse-border" onclick="toggleSiteCollapse('${site.id}')">
+              <i class="fa-solid fa-chevron-down site-chevron"></i>
+            </div>
+            <div class="site-cell" style="flex: 1;">
+              <strong style="margin-right: 2rem;">
+                ${escapeHTML(site.name)}
+                <span style="display:inline-block;font-size:0.7rem;font-weight:600;padding:0.1rem 0.45rem;border-radius:9999px;margin-right:0.4rem;vertical-align:middle;background:${site.site_type === 'Mobile' ? 'rgba(234,179,8,0.18)' : 'rgba(99,102,241,0.15)'};color:${site.site_type === 'Mobile' ? '#a16207' : '#4f46e5'};">${site.site_type === 'Mobile' ? t('site.typeMobile') : t('site.typeFixed')}</span>
+                (${t("common.devicesCount", { count: site.radios.length })})
+              </strong>
+              <div class="site-row-actions">
+                <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); openSiteModal('${site.id}')">${t("site.editTitle")}</button>
+                <button class="btn btn-sm btn-add" onclick="event.stopPropagation(); openAddRadioModalForSite('${site.id}')">${t("overview.addDevice")}</button>
+                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); clearAllDevicesAtSite('${site.id}', '${escapeHTML(site.name)}')" title="${t("overview.clearAll")}">${t("overview.clearAll")}</button>
+              </div>
             </div>
           </div>
         </td>
@@ -96,6 +236,9 @@ function renderOverview() {
       sortedRadios.forEach((radio) => {
         const row = document.createElement("tr");
         row.className = "radio-row";
+        row.dataset.parentSector = sector.id;
+        row.dataset.parentSite   = site.id;
+        if (isCollapsed || isSiteCollapsed) row.style.display = "none";
 
         const statusClass =
           radio.status === "Usable" ? "status-usable" : "status-unusable";
@@ -146,21 +289,21 @@ function renderOverview() {
         row.innerHTML = `
           <td style="padding-right: 4rem; word-wrap: break-word;" data-col="1">${escapeHTML(radio.frequency_band)}</td>
           <td style="word-wrap: break-word;" data-col="2">${escapeHTML(radio.device_type)}</td>
-          <td style="word-wrap: break-word; ${freqCellStyle}" data-col="3" ondblclick="openInlineEditor(this, '${radio.id}', 3)">${escapeHTML(String(getFreqLabel(radio.frequency)))}</td>
+          <td style="word-wrap: break-word; ${freqCellStyle}" data-col="3" ondblclick="openInlineEditor(this, '${radio.id}', 3)">${escapeHTML(String(getFreqLabel(radio.frequency, radio.frequency_band)))}</td>
           <td style="word-wrap: break-word; ${ownerCellStyle}" data-col="4" ondblclick="openInlineEditor(this, '${radio.id}', 4)">${escapeHTML(radio.owner) || "-"}</td>
           <td style="word-wrap: break-word; ${missionCellStyle}" data-col="5" ondblclick="openInlineEditor(this, '${radio.id}', 5)">${escapeHTML(radio.mission_name) || "-"}</td>
           <td style="word-wrap: break-word; ${missionCellStyle}" data-col="6" ondblclick="openInlineEditor(this, '${radio.id}', 6)">${escapeHTML(radio.role) || "-"}</td>
-          <td style="word-wrap: break-word; ${standbyFreqCellStyle}" data-col="7" ondblclick="openInlineEditor(this, '${radio.id}', 7)">${escapeHTML(String(getFreqLabel(radio.standby_frequency)))}</td>
+          <td style="word-wrap: break-word; ${standbyFreqCellStyle}" data-col="7" ondblclick="openInlineEditor(this, '${radio.id}', 7)">${escapeHTML(String(getFreqLabel(radio.standby_frequency, radio.frequency_band)))}</td>
           <td style="word-wrap: break-word; ${standbyOwnerCellStyle}" data-col="8" ondblclick="openInlineEditor(this, '${radio.id}', 8)">${escapeHTML(radio.standby_owner) || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}" data-col="9" ondblclick="openInlineEditor(this, '${radio.id}', 9)">${escapeHTML(radio.standby_mission) || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}" data-col="10" ondblclick="openInlineEditor(this, '${radio.id}', 10)">${escapeHTML(radio.standby_role) || "-"}</td>
           <td style="word-wrap: break-word;" data-col="11" ondblclick="openInlineEditor(this, '${radio.id}', 11)"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
           <td style="word-wrap: break-word;" data-col="12" ondblclick="openInlineEditor(this, '${radio.id}', 12)">${escapeHTML(radio.notes) || "-"}</td>
-          <td class="col-actions" style="word-wrap: break-word; white-space: nowrap;">
-            <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
-              <button class="btn btn-sm btn-edit" title="${t('overview.btn.swapStates')}" onclick="switchDeviceStates('${radio.id}')">🔄</button>
-              <button class="btn btn-sm btn-edit" title="${t('overview.btn.edit')}" onclick="openRadioModal('${radio.id}')">✏️</button>
-              <button class="btn btn-sm btn-danger" title="${t('overview.btn.clear')}" onclick="clearDevice('${radio.id}')">📃</button>
+          <td class="col-actions" style="word-wrap: break-word; white-space: nowrap; text-align: center;">
+            <div style="display: inline-flex; gap: 0.3rem; flex-wrap: nowrap; align-items: center; justify-content: center;">
+              <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t('overview.btn.swapStates'))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>
+              <button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t('overview.btn.edit'))}" onclick="openRadioModal('${radio.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="mission-btn btn-danger" data-tooltip="${escapeHTML(t('overview.btn.clear'))}" onclick="clearDevice('${radio.id}')"><i class="fa-solid fa-eraser"></i></button>
             </div>
           </td>
         `;
@@ -169,6 +312,8 @@ function renderOverview() {
       });
     });
   });
+
+  _updateCollapseAllBtn();
 }
 
 // Export for inline onclick handlers
@@ -238,7 +383,14 @@ async function clearDevice(radioId) {
   const radio = window.appState.radios.find((r) => r.id === radioId);
   if (!radio) return;
 
-  if (!confirm(t("confirm.clearDevice"))) return;
+  // Do nothing if all clearable fields are already empty
+  const hasData = radio.frequency || radio.owner || radio.mission_name || radio.role ||
+    radio.standby_frequency || radio.standby_owner || radio.standby_mission ||
+    radio.standby_role || radio.notes;
+  if (!hasData) return;
+
+  // Snapshot the state before clearing so we can restore it on Undo
+  const snapshot = { ...radio };
 
   try {
     await apiCall(`/radios/${radioId}`, "POST", {
@@ -253,11 +405,26 @@ async function clearDevice(radioId) {
       standby_role: null,
       notes: null,
     });
-    showNotification(t("notify.deviceCleared"), "success");
     await loadAllData();
     renderOverview();
     if (window.renderMissionsTab) renderMissionsTab();
     if (window.performSearch) performSearch();
+
+    showUndoToast(
+      t("notify.deviceCleared"),
+      async () => {
+        try {
+          await apiCall(`/radios/${radioId}`, "POST", snapshot);
+          await loadAllData();
+          renderOverview();
+          if (window.renderMissionsTab) renderMissionsTab();
+          if (window.performSearch) performSearch();
+          showNotification(t("notify.undone"), "success");
+        } catch (_) {
+          showNotification(t("notify.undoFailed"), "error");
+        }
+      }
+    );
   } catch (error) {
     showNotification(t("notify.deviceClearFailed"), "error");
   }

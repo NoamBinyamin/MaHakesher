@@ -72,6 +72,12 @@ def migrate_config(data):
         config['missions'] = [m['name'] for m in planned if m.get('status') == 'active']
         changed = True
 
+    # Migrate frequency bands: add "decimals" field if missing
+    for band_cfg in config.get('frequency_bands', {}).values():
+        if 'decimals' not in band_cfg:
+            band_cfg['decimals'] = 3
+            changed = True
+
     return changed
 
 def _radio_types_lookup(config):
@@ -86,9 +92,9 @@ def _make_default_data():
     return {
         "config": {
             "frequency_bands": {
-                "UHF":  {"min": 255.0, "max": 395.5},
-                "HVHF": {"min": 120.0, "max": 140.0},
-                "LVHF": {"min": 33.0,  "max": 95.0},
+                "UHF":  {"min": 255.0, "max": 395.5, "decimals": 3},
+                "HVHF": {"min": 120.0, "max": 140.0, "decimals": 3},
+                "LVHF": {"min": 33.0,  "max": 95.0,  "decimals": 3},
             },
             "radio_types": [],
             "missions": [],
@@ -333,6 +339,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_import(post_data)
         elif path == '/api/batch/clear_site':
             return self.handle_batch_clear_site(post_data)
+        elif path == '/api/batch/update_radios':
+            return self.handle_batch_update_radios(post_data)
         elif path.startswith('/api/sectors/'):
             sector_id = path.split('/')[-1]
             return self.handle_update_sector(sector_id, post_data)
@@ -1315,6 +1323,49 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         save_data(data)
         self._audit('batch_clear', 'site', site_id, {'devices_cleared': cleared})
         return self.send_json_response(200, {'message': f'{cleared} device(s) cleared', 'cleared': cleared})
+
+    def handle_batch_update_radios(self, post_data):
+        """POST /api/batch/update_radios - Update multiple radios in one file write"""
+        updates = post_data.get('updates', [])
+        if not updates:
+            return self.send_json_response(400, {'error': 'updates list is required'})
+
+        _tracked = ('frequency', 'owner', 'mission_name', 'role', 'status',
+                    'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role')
+
+        data = load_data()
+        radios_by_id = {r['id']: r for r in data['data'].get('radios', [])}
+        results = []
+
+        for update in updates:
+            radio_id = update.get('id')
+            if not radio_id or radio_id not in radios_by_id:
+                continue
+            radio = radios_by_id[radio_id]
+            payload = {k: v for k, v in update.items() if k != 'id'}
+
+            # Coerce frequency fields
+            for freq_key in ('frequency', 'standby_frequency'):
+                if freq_key in payload:
+                    raw = payload[freq_key]
+                    try:
+                        payload[freq_key] = float(raw) if raw is not None else None
+                    except (ValueError, TypeError):
+                        payload[freq_key] = None
+
+            before = {k: radio.get(k) for k in _tracked}
+            radio.update(payload)
+            after = {k: radio.get(k) for k in _tracked}
+            changed = [k for k in _tracked if before[k] != after[k]]
+            if changed:
+                self._audit('update', 'radio', radio_id, {
+                    'before': {k: before[k] for k in changed},
+                    'after':  {k: after[k]  for k in changed},
+                })
+            results.append(radio)
+
+        save_data(data)
+        return self.send_json_response(200, {'updated': len(results), 'radios': results})
 
     # ==================== Audit Log ====================
 

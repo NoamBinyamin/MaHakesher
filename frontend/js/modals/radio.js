@@ -296,7 +296,7 @@ function showRadioFreqSuggestions(inputId, dropdownId) {
         onmousedown="selectRadioFreqSuggestion(${l.frequency}, '${inputId}', '${dropdownId}')"
       >
         <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
-        <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${l.frequency} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
+        <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${formatFrequency(l.frequency, l.frequency_band)} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
       </div>`
     )
     .join("");

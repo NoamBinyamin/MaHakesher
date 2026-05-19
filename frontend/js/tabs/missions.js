@@ -1,5 +1,11 @@
 // ==================== Missions Tab ====================
 
+// Animations play on first load and after a data refresh — not on every re-render
+let _missionsAnimatePending = true;
+
+function markMissionsForAnimation() { _missionsAnimatePending = true; }
+window.markMissionsForAnimation = markMissionsForAnimation;
+
 // ----- Helper: Check if a radio satisfies a mission requirement -----
 function radioSatisfiesRequirement(radio, mission, requirement) {
   // Check frequency band match
@@ -112,15 +118,18 @@ function _missionProgressCell(count, total, colorVar) {
   const isFull = count >= total;
   const labelColor = isFull ? colorVar : "inherit";
   let barHtml;
+  // Shimmer fires after the last segment finishes: (capped-1)*45ms delay + 180ms anim ≈ +50ms buffer
+  const shimmerDelay = isFull ? `${(capped - 1) * 45 + 230}ms` : "0ms";
   if (total <= 10) {
     const segs = Array.from({ length: total }, (_, i) => {
       const filled = i < capped;
-      return `<span class="prog-seg${filled ? " filled" : ""}"${filled ? ` style="background:${colorVar}"` : ""}></span>`;
+      const delay  = filled ? `animation-delay:${i * 45}ms` : "";
+      return `<span class="prog-seg${filled ? " filled" : ""}" style="${filled ? `background:${colorVar};` : ""}${delay}"></span>`;
     }).join("");
-    barHtml = `<div class="prog-segs">${segs}</div>`;
+    barHtml = `<div class="prog-segs${isFull ? " prog-full" : ""}" style="--shimmer-delay:${shimmerDelay}">${segs}</div>`;
   } else {
     const pct = Math.min(Math.round((count / total) * 100), 100);
-    barHtml = `<div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${colorVar}"></div></div>`;
+    barHtml = `<div class="prog-track"><div class="prog-fill${isFull ? " prog-full" : ""}" style="width:${pct}%;background:${colorVar};--shimmer-delay:${shimmerDelay}"></div></div>`;
   }
   // Show actual count in label even if it exceeds total, so user knows extras exist
   return `<td><div class="mission-prog-cell"><span class="mission-prog-label" style="color:${labelColor}">${count}/${total}</span>${barHtml}</div></td>`;
@@ -144,8 +153,15 @@ function _buildMissionRow(mission, actions) {
     ? `<td><span class="mission-extra-badge">+${extraDevices}</span></td>`
     : `<td style="color:var(--gray-400)">-</td>`;
 
+  const isFullyAllocated = reqCount > 0 && allocatedDevices >= reqCount;
+  // Shimmer delay matches when the last filled segment finishes animating
+  const rowShimmerDelay = `${(Math.min(allocatedDevices, reqCount) - 1) * 45 + 230}ms`;
   const row = document.createElement("tr");
   if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
+  if (isFullyAllocated) {
+    row.classList.add("mission-row-complete");
+    row.style.setProperty("--shimmer-delay", rowShimmerDelay);
+  }
   row.innerHTML = `
     <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}</td>
     <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
@@ -158,7 +174,7 @@ function _buildMissionRow(mission, actions) {
   return row;
 }
 
-function _appendMissionSection(container, titleKey, missions, buildActions, emptyKey, extraStyle = "", subtitleKey = "") {
+function _appendMissionSection(container, titleKey, missions, buildActions, emptyKey, extraStyle = "", subtitleKey = "", showHelp = false) {
   const row = document.createElement("div");
   row.className = "missions-section-header-row";
   if (extraStyle) row.style.cssText = extraStyle;
@@ -174,6 +190,14 @@ function _appendMissionSection(container, titleKey, missions, buildActions, empt
     sub.className = "missions-section-subtitle";
     sub.innerHTML = `<span class="missions-info-badge">i</span>${escapeHTML(t(subtitleKey))}`;
     row.appendChild(sub);
+  }
+  if (showHelp) {
+    const helpBtn = document.createElement("button");
+    helpBtn.className = "missions-help-btn admin-only";
+    helpBtn.title = t("missions.help.tooltip");
+    helpBtn.innerHTML = `<i class="fa-solid fa-circle-question"></i>`;
+    helpBtn.onclick = openMissionAllocHelp;
+    row.appendChild(helpBtn);
   }
   container.appendChild(row);
 
@@ -208,6 +232,21 @@ function _appendMissionSection(container, titleKey, missions, buildActions, empt
 function renderMissionsTab() {
   const container = document.getElementById("missionsContent");
   container.innerHTML = "";
+
+  // Suppress progress-bar animations when data hasn't changed.
+  // When animating: remove the lock, then re-add it after all animations finish
+  // so tab switches don't restart them (CSS animations replay on display:none→block).
+  if (_missionsAnimatePending) {
+    container.classList.remove("missions-no-anim");
+    _missionsAnimatePending = false;
+    // Row glow is the longest: delay (~640ms) + duration (1600ms) = ~2250ms
+    setTimeout(() => {
+      const el = document.getElementById("missionsContent");
+      if (el) el.classList.add("missions-no-anim");
+    }, 2500);
+  } else {
+    container.classList.add("missions-no-anim");
+  }
 
   const planned  = (window.appState.plannedMissions  || []).filter((m) => m.status === "planned");
   const active   = (window.appState.plannedMissions  || []).filter((m) => m.status === "active");
@@ -264,7 +303,7 @@ function renderMissionsTab() {
     <button class="mission-btn btn-secondary admin-only" data-tooltip="${escapeHTML(t("missions.btn.activateStandby"))}" onclick="activateStandbyBtn('${m.id}')"><i class="fa-solid fa-circle-play"></i></button>
     <button class="mission-btn btn-warning admin-only" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="returnToPlanning('${m.id}')"><i class="fa-solid fa-rotate-left"></i></button>
     <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("missions.btn.finishAndArchive"))}" onclick="endMission('${m.id}')"><i class="fa-solid fa-flag-checkered"></i></button>
-  `, "missions.noActive", "margin-top:1.5rem", "missions.sub.active");
+  `, "missions.noActive", "margin-top:1.5rem", "missions.sub.active", true);
 
   // ----- Archived Missions -----
   const archivedRow = document.createElement("div");
@@ -546,29 +585,28 @@ async function _activateStandbyInternal(mission) {
 
   let promoted = 0;
   let failed   = 0;
-  const usedIds = new Set();
+  const usedIds   = new Set();
+  const batchUpdates = [];
 
   for (const standby of standbyRadios) {
     const band = standby.frequency_band || getFrequencyBandForDevice(standby.device_type);
 
     // Option 1: promote on the same radio if ALL its current-state fields are free
     if (_currentStateIsEmpty(standby)) {
-      try {
-        await apiCall(`/radios/${standby.id}`, "POST", {
-          ...standby,
-          mission_name:      missionName,
-          frequency:         standby.standby_frequency,
-          owner:             missionOwner || standby.standby_owner,
-          role:              standby.standby_role,
-          standby_mission:   null,
-          standby_frequency: null,
-          standby_owner:     null,
-          standby_role:      null,
-        });
-        promoted++;
-        usedIds.add(standby.id);
-        continue;
-      } catch (_) {}
+      batchUpdates.push({
+        ...standby,
+        mission_name:      missionName,
+        frequency:         standby.standby_frequency,
+        owner:             missionOwner || standby.standby_owner,
+        role:              standby.standby_role,
+        standby_mission:   null,
+        standby_frequency: null,
+        standby_owner:     null,
+        standby_role:      null,
+      });
+      promoted++;
+      usedIds.add(standby.id);
+      continue;
     }
 
     // Option 2: find another fully free radio at the same site with the same band
@@ -582,28 +620,36 @@ async function _activateStandbyInternal(mission) {
     );
 
     if (freeRadio) {
-      try {
-        await apiCall(`/radios/${freeRadio.id}`, "POST", {
-          ...freeRadio,
-          mission_name: missionName,
-          frequency:    standby.standby_frequency,
-          owner:        missionOwner || standby.standby_owner,
-          role:         standby.standby_role,
-        });
-        await apiCall(`/radios/${standby.id}`, "POST", {
-          ...standby,
-          standby_mission:   null,
-          standby_frequency: null,
-          standby_owner:     null,
-          standby_role:      null,
-        });
-        promoted++;
-        usedIds.add(freeRadio.id);
-      } catch (_) { failed++; }
+      batchUpdates.push({
+        ...freeRadio,
+        mission_name: missionName,
+        frequency:    standby.standby_frequency,
+        owner:        missionOwner || standby.standby_owner,
+        role:         standby.standby_role,
+      });
+      batchUpdates.push({
+        ...standby,
+        standby_mission:   null,
+        standby_frequency: null,
+        standby_owner:     null,
+        standby_role:      null,
+      });
+      promoted++;
+      usedIds.add(freeRadio.id);
     } else {
       failed++;
     }
   }
+
+  if (batchUpdates.length > 0) {
+    try {
+      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
+    } catch (_) {
+      failed += promoted;
+      promoted = 0;
+    }
+  }
+
   return { promoted, failed };
 }
 
@@ -694,15 +740,15 @@ async function allocateMission(missionId) {
 
   if (assignments.length > 0) {
     try {
-      for (const { radio, requirement } of assignments) {
-        await apiCall(`/radios/${radio.id}`, "POST", {
+      await apiCall("/batch/update_radios", "POST", {
+        updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
           mission_name: missionName,
           frequency:    requirement.frequency || radio.frequency,
           owner:        missionOwner || radio.owner,
           role:         requirement.role || null,
-        });
-      }
+        })),
+      });
       showNotification(t("notify.missionAllocated", { count: assignments.length, name: missionName }), "success");
     } catch (error) {
       showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
@@ -772,15 +818,15 @@ async function allocateToStandby(missionId) {
 
   if (assignments.length > 0) {
     try {
-      for (const { radio, requirement } of assignments) {
-        await apiCall(`/radios/${radio.id}`, "POST", {
+      await apiCall("/batch/update_radios", "POST", {
+        updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
           standby_mission:   missionName,
           standby_owner:     missionOwner || radio.standby_owner,
           standby_frequency: requirement.frequency || radio.standby_frequency,
           standby_role:      requirement.role || null,
-        });
-      }
+        })),
+      });
       showNotification(t("notify.missionStandby", { count: assignments.length, name: missionName }), "success");
     } catch (error) {
       showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
@@ -876,10 +922,12 @@ async function placeOnStandby(missionId) {
     return;
   }
 
-  // Get available radios for standby allocation
-  let availableRadios = window.appState.radios.filter((r) =>
-    isAvailableForStandbyMission(r),
-  );
+  // Get available radios for standby allocation.
+  // Sort so devices with no current mission come first — they get priority over
+  // devices that already carry an active mission in their current-state slot.
+  let availableRadios = window.appState.radios
+    .filter((r) => isAvailableForStandbyMission(r))
+    .sort((a, b) => (a.mission_name ? 1 : 0) - (b.mission_name ? 1 : 0));
 
   const assignments = [];
   const failedRequirements = [];
@@ -1003,7 +1051,7 @@ function showFailedRequirementsModal(failedRequirements) {
       <tr>
         <td>${req.frequencyBand}</td>
         <td>${locationText}</td>
-        <td>${req.frequency ? req.frequency + " MHz" : "-"}</td>
+        <td>${req.frequency ? formatFrequency(req.frequency, req.frequencyBand) + " MHz" : "-"}</td>
       </tr>
     `;
   });
@@ -1397,6 +1445,91 @@ async function savePlannedMission() {
 }
 
 // Export for inline onclick handlers
+function openMissionAllocHelp() {
+  const existing = document.getElementById("missionAllocHelpModal");
+  if (existing) existing.remove();
+
+  const sections = [
+    {
+      icon: "fa-bolt",
+      color: "var(--success-color)",
+      title: t("missions.help.allocate.title"),
+      steps: [
+        t("missions.help.allocate.step1"),
+        t("missions.help.allocate.step2"),
+        t("missions.help.allocate.step3"),
+        t("missions.help.allocate.step4"),
+      ],
+    },
+    {
+      icon: "fa-hourglass-half",
+      color: "#0ea5e9",
+      title: t("missions.help.standby.title"),
+      steps: [
+        t("missions.help.standby.step1"),
+        t("missions.help.standby.step2"),
+        t("missions.help.standby.step3"),
+        t("missions.help.standby.priority"),
+      ],
+    },
+    {
+      icon: "fa-circle-play",
+      color: "var(--gray-500)",
+      title: t("missions.help.activate.title"),
+      steps: [
+        t("missions.help.activate.step1"),
+        t("missions.help.activate.step2"),
+        t("missions.help.activate.step3"),
+        t("missions.help.activate.step4"),
+      ],
+    },
+  ];
+
+  const sectionsHtml = sections.map((s) => `
+    <div class="alloc-help-section">
+      <div class="alloc-help-section-title">
+        <span class="alloc-help-icon" style="background:${s.color};"><i class="fa-solid ${s.icon}"></i></span>
+        <strong>${escapeHTML(s.title)}</strong>
+      </div>
+      <ul class="alloc-help-list">
+        ${s.steps.map((step) => `<li>${escapeHTML(step)}</li>`).join("")}
+      </ul>
+    </div>`).join("");
+
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "missionAllocHelpModal";
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>
+          <i class="fa-solid fa-circle-question" style="color:var(--primary-color);margin-left:0.5rem;"></i>
+          ${escapeHTML(t("missions.help.title"))}
+        </h3>
+        <button class="modal-close" onclick="closeMissionAllocHelp()">&times;</button>
+      </div>
+      <div class="modal-form" style="gap:1.25rem;">
+        ${sectionsHtml}
+      </div>
+      <div class="modal-footer">
+        <div></div>
+        <div><button class="btn btn-primary" onclick="closeMissionAllocHelp()">${t("btn.ok")}</button></div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeMissionAllocHelp(); });
+  disableBodyScroll();
+}
+
+function closeMissionAllocHelp() {
+  const modal = document.getElementById("missionAllocHelpModal");
+  if (modal) modal.remove();
+  enableBodyScroll();
+}
+
+window.openMissionAllocHelp = openMissionAllocHelp;
+window.closeMissionAllocHelp = closeMissionAllocHelp;
 window.renderMissionsTab = renderMissionsTab;
 window.startMission = startMission;
 window.placeOnStandby = placeOnStandby;
@@ -1567,10 +1700,7 @@ async function handleMissionExcelUpload(input) {
       if (errors.length > 0) {
         showExcelImportErrorsModal(errors, imported);
       } else if (imported > 0) {
-        showNotification(
-          `Imported ${imported} requirement(s) from Excel`,
-          "success",
-        );
+        showNotification(t("notify.reqsImported", { count: imported }), "success");
       } else {
         showNotification(t("notify.noValidReqs"), "error");
       }

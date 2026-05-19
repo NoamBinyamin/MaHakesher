@@ -3,7 +3,7 @@
     {
       "id": "link-c1f397ed",
       "link_name": "כובע",
-      "frequency": 256,
+      "frequency": 256.35,
       "frequency_band": "UHF",
       "owner": "בעלים איכותי",
       "generic_role": "משימה קבועה"
@@ -63,6 +63,286 @@
       "frequency": 89.5,
       "frequency_band": "LVHF",
       "owner": "בעלים שלא מסגיר"
+    },
+    {
+      "id": "link-55eb3ee3",
+      "link_name": "חץ",
+      "frequency": 260.1,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-c090b5af",
+      "link_name": "חנית",
+      "frequency": 122.3,
+      "frequency_band": "HVHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-cabc865c",
+      "link_name": "מגן",
+      "frequency": 40.5,
+      "frequency_band": "LVHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-da345f00",
+      "link_name": "חרב",
+      "frequency": 280.2,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-34bda987",
+      "link_name": "קשת",
+      "frequency": 135,
+      "frequency_band": "HVHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-439f4450",
+      "link_name": "כידון",
+      "frequency": 90.1,
+      "frequency_band": "LVHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-e2bb2ec3",
+      "link_name": "רומח",
+      "frequency": 300.5,
+      "frequency_band": "UHF",
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": ""
+    },
+    {
+      "id": "link-4f93e1dd",
+      "link_name": "שחף",
+      "frequency": 270,
+      "frequency_band": "UHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-84f227a1",
+      "link_name": "נשר",
+      "frequency": 128.5,
+      "frequency_band": "HVHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-07673bb7",
+      "link_name": "נץ",
+      "frequency": 50.25,
+      "frequency_band": "LVHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-7fd54c2e",
+      "link_name": "איה",
+      "frequency": 310.8,
+      "frequency_band": "UHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-773be260",
+      "link_name": "עיט",
+      "frequency": 138.9,
+      "frequency_band": "HVHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-2dd5e77f",
+      "link_name": "בז",
+      "frequency": 85.4,
+      "frequency_band": "LVHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-08167f75",
+      "link_name": "ינשוף",
+      "frequency": 380,
+      "frequency_band": "UHF",
+      "owner": "מקושקשים ומבולבלים",
+      "generic_role": ""
+    },
+    {
+      "id": "link-d8dd8815",
+      "link_name": "אלון",
+      "frequency": 350.2,
+      "frequency_band": "UHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-8b6576dc",
+      "link_name": "ארז",
+      "frequency": 121.1,
+      "frequency_band": "HVHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-f366619e",
+      "link_name": "ברוש",
+      "frequency": 35.5,
+      "frequency_band": "LVHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-8e5cc67f",
+      "link_name": "צאלון",
+      "frequency": 290,
+      "frequency_band": "UHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-2601ee9a",
+      "link_name": "דקל",
+      "frequency": 133.3,
+      "frequency_band": "HVHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-47c29180",
+      "link_name": "זית",
+      "frequency": 60.6,
+      "frequency_band": "LVHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-b9856b9a",
+      "link_name": "שיטה",
+      "frequency": 395,
+      "frequency_band": "UHF",
+      "owner": "המדור היותר חזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-d6750c5f",
+      "link_name": "ברק",
+      "frequency": 330.4,
+      "frequency_band": "UHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-0356f5dc",
+      "link_name": "רעם",
+      "frequency": 125,
+      "frequency_band": "HVHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-73370ad4",
+      "link_name": "סופה",
+      "frequency": 75.2,
+      "frequency_band": "LVHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-905e1bb7",
+      "link_name": "סערה",
+      "frequency": 256,
+      "frequency_band": "UHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-a0820a8d",
+      "link_name": "מטר",
+      "frequency": 139.5,
+      "frequency_band": "HVHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-c5f1c97a",
+      "link_name": "שלג",
+      "frequency": 45,
+      "frequency_band": "LVHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-13c633c8",
+      "link_name": "טל",
+      "frequency": 315.6,
+      "frequency_band": "UHF",
+      "owner": "המדור החזק",
+      "generic_role": ""
+    },
+    {
+      "id": "link-1b8aae4d",
+      "link_name": "אודם",
+      "frequency": 360.5,
+      "frequency_band": "UHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-6a4ff834",
+      "link_name": "ספיר",
+      "frequency": 129.9,
+      "frequency_band": "HVHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-0f39d3f9",
+      "link_name": "ברקת",
+      "frequency": 88.8,
+      "frequency_band": "LVHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-19fef6c7",
+      "link_name": "יהלום",
+      "frequency": 288.8,
+      "frequency_band": "UHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-349e7ef8",
+      "link_name": "פנינה",
+      "frequency": 136.6,
+      "frequency_band": "HVHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-fca8d4ee",
+      "link_name": "ענבר",
+      "frequency": 55.5,
+      "frequency_band": "LVHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
+    },
+    {
+      "id": "link-df60ef1d",
+      "link_name": "לשם",
+      "frequency": 340.4,
+      "frequency_band": "UHF",
+      "owner": "בעלים איכותי",
+      "generic_role": ""
     }
   ]
 }

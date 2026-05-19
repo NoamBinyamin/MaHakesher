@@ -131,6 +131,14 @@
               </button>
             </div>
             <button
+              id="collapseAllBtn"
+              class="btn btn-secondary"
+              onclick="collapseExpandAll()"
+            >
+              <i class="fa-solid fa-compress"></i>
+              <span data-i18n="overview.collapseAll">Collapse All</span>
+            </button>
+            <button
               class="btn btn-primary view-mode-hide"
               onclick="openAddSectorModal()"
               data-i18n="overview.addSector"
@@ -156,9 +164,9 @@
               <col style="width: 12%" />
               <col style="width: 10%" />
               <col style="width: 8%" />
-              <col style="width: 3%" />
+              <col style="width: 7rem" />
               <col style="width: 4%" />
-              <col style="width: 5%" />
+              <col style="width: 9.5rem" />
             </colgroup>
             <thead>
               <tr class="global-header">
@@ -2607,6 +2615,29 @@
                     Location
                   </option>
                 </select>
+                <button
+                  type="button"
+                  id="removeAllReqsBtn"
+                  onclick="removeAllRequirements()"
+                  style="
+                    display: none;
+                    background: none;
+                    border: 1px solid var(--danger-color);
+                    color: var(--danger-color);
+                    border-radius: 6px;
+                    padding: 3px 10px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.15s, color 0.15s;
+                    white-space: nowrap;
+                  "
+                  onmouseover="this.style.background='var(--danger-color)';this.style.color='white'"
+                  onmouseout="this.style.background='none';this.style.color='var(--danger-color)'"
+                  data-i18n="planMission.removeAllReqs"
+                >
+                  Remove All
+                </button>
               </div>
             </div>
             <div
@@ -2816,5 +2847,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="app.js"></script>
+
+    <!-- Floating freq/link mode pill (overview tab) -->
+    <div id="overviewModePill" aria-hidden="true">
+      <button id="overviewModePillFreq" class="btn btn-primary"
+        onclick="setOverviewFreqMode('frequency')"
+        data-i18n="overview.modeFrequency">
+        <i class="fa-solid fa-wave-square"></i> Frequency
+      </button>
+      <button id="overviewModePillLink" class="btn btn-secondary"
+        onclick="setOverviewFreqMode('link')"
+        data-i18n="overview.modeLink">
+        <i class="fa-solid fa-link"></i> Link
+      </button>
+    </div>
   </body>
 </html>

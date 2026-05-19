@@ -438,6 +438,7 @@ async function _pollForChanges() {
       await loadLinks();
       populateSelects();
       renderOverview();
+      if (window.markMissionsForAnimation) markMissionsForAnimation();
       renderMissionsTab();
       renderLinksTab();
       renderSummaryTab();
@@ -518,6 +519,7 @@ async function _keyboardForceRefresh() {
     await loadLinks();
     populateSelects();
     renderOverview();
+    if (window.markMissionsForAnimation) markMissionsForAnimation();
     renderMissionsTab();
     renderLinksTab();
     renderSummaryTab();

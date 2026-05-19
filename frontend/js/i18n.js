@@ -114,6 +114,7 @@ const TRANSLATIONS = {
     // ── Common buttons ────────────────────────────────────────
     "btn.save": "Save",
     "btn.cancel": "Cancel",
+    "btn.undo": "Undo",
     "btn.delete": "Delete",
     "btn.edit": "Edit",
     "btn.add": "Add",
@@ -127,6 +128,8 @@ const TRANSLATIONS = {
     // ── Overview ──────────────────────────────────────────────
     "overview.title": "Deployment Overview",
     "overview.addSector": "Add Sector",
+    "overview.collapseAll": "Collapse All",
+    "overview.expandAll": "Expand All",
     "overview.editSector": "Edit Sector",
     "overview.addSite": "Add Site",
     "overview.addDevice": "Add Device",
@@ -160,6 +163,38 @@ const TRANSLATIONS = {
     "missions.activeMissions": "Active Missions",
     "missions.sub.active":
       "Planning is complete — requirements are now placed on standby or assigned directly to devices.",
+    "missions.help.tooltip": "Explain allocation functions",
+    "missions.help.title": "Allocation Functions Guide",
+    "missions.help.allocate.title":
+      "Allocate — Fill requirements into current state",
+    "missions.help.allocate.step1":
+      "Pre-step: Any devices already queued as standby for this mission are promoted to current state first (same logic as Activate Standby).",
+    "missions.help.allocate.step2":
+      "Matching: For each remaining unmet requirement, searches for an available device with the same frequency band. If the requirement specifies a site or sector, the device must be located there.",
+    "missions.help.allocate.step3":
+      "On match: sets the device's current-state fields — mission name, mission owner, frequency (from the requirement if provided), and role (from the requirement if provided).",
+    "missions.help.allocate.step4":
+      "On failure: any requirements that could not be matched are shown in a summary modal so you can act on them manually.",
+    "missions.help.standby.title":
+      "Allocate to Standby — Reserve backup devices",
+    "missions.help.standby.step1":
+      "Skips requirements that are already covered — either by a device assigned to this mission in current state, or by one already on standby for it.",
+    "missions.help.standby.step2":
+      "Matching: for each remaining requirement, searches for a device with the same band and site/sector (if specified) whose standby slot is empty.",
+    "missions.help.standby.step3":
+      "On match: sets the device's standby-state fields — standby mission, owner, frequency, and role — leaving current state completely untouched.",
+    "missions.help.standby.priority":
+      "Priority: devices with no current mission assignment are tried first, then devices already carrying another active mission.",
+    "missions.help.activate.title":
+      "Activate Standby — Promote standby devices to current",
+    "missions.help.activate.step1":
+      "Scans all devices that have this mission set as their standby mission. Requirements are not re-evaluated — only explicitly queued standby devices are processed.",
+    "missions.help.activate.step2":
+      "Option A (same device): if the device's own current-state slot is completely empty (no mission, owner, role, or frequency), standby values are moved directly into current state and standby is cleared.",
+    "missions.help.activate.step3":
+      "Option B (different device): if the device is occupied in current state, the system finds another fully free device at the same site with the same frequency band, assigns the mission to it, and clears the original device's standby slot.",
+    "missions.help.activate.step4":
+      "If neither option is possible for a device, that standby device is counted as failed and a warning notification is shown.",
     "missions.archivedMissions": "Archived Missions",
     "missions.sub.archived":
       "Completed missions. Can be restored to planning at any time.",
@@ -219,6 +254,8 @@ const TRANSLATIONS = {
     "planMission.sortState": "State",
     "planMission.sortFreq": _en.frequency,
     "planMission.sortLocation": _en.location,
+    "planMission.removeAllReqs": "Remove All",
+    "confirm.removeAllReqs": "Remove all requirements? This cannot be undone.",
     "planMission.noReqs": "No requirements added yet.",
     "planMission.extraDevices": "Extra Devices (Not in Requirements)",
     "planMission.noExtra": "No extra devices.",
@@ -228,6 +265,7 @@ const TRANSLATIONS = {
     "planMission.reqCol.band": _en.freqBand,
     "planMission.reqCol.location": "Station / Sector",
     "planMission.reqCol.frequency": _en.frequency,
+    "planMission.reqCol.linkName": _en.linkName,
     "planMission.reqCol.role": _en.role,
     "planMission.reqCol.actions": _en.actions,
     "planMission.req.titleEdit": "Edit",
@@ -346,9 +384,9 @@ const TRANSLATIONS = {
     "history.delete.device": 'Deleted device "{name}"',
     "history.delete.other": "Deleted {type}",
     "history.startMission": 'Started mission "{name}"',
-    "history.endMission":   'Ended mission "{name}"',
-    "history.activate":     'Mission "{name}" moved to active',
-    "history.deactivate":   'Mission "{name}" returned to planning',
+    "history.endMission": 'Ended mission "{name}"',
+    "history.activate": 'Mission "{name}" moved to active',
+    "history.deactivate": 'Mission "{name}" returned to planning',
     "history.archive": 'Archived mission "{name}"',
     "history.restore": 'Restored mission "{name}"',
     "history.batchClear": "Cleared {count} devices at {site}",
@@ -417,6 +455,8 @@ const TRANSLATIONS = {
     "notify.deviceUpdateFailed": "Failed to update device",
     "notify.deviceCleared": "Device cleared",
     "notify.deviceClearFailed": "Failed to clear device",
+    "notify.undone": "Action undone",
+    "notify.undoFailed": "Could not undo — data may have changed",
     "notify.statesSwapped": "Device states swapped",
     "notify.statesSwapFailed": "Failed to swap device states",
     "notify.siteCleared": '{count} device(s) cleared at "{name}"',
@@ -470,8 +510,10 @@ const TRANSLATIONS = {
     "notify.linkDeleteFailed": "Failed to delete link",
     "notify.linksImported": "Imported {count} link(s) from Excel",
     "notify.noValidLinks": "No valid links found in file",
+    "notify.linksImported": "Imported {count} link(s) from Excel",
     "notify.reqsImported": "Imported {count} requirement(s) from Excel",
     "notify.noValidReqs": "No valid requirements found in file",
+    "notify.reqsImported": "Imported {count} requirement(s) from Excel",
     "notify.excelEmpty": "Excel file is empty or has no data rows",
     "excel.importTitle": "Import Errors",
     "excel.linkImportTitle": "Import Completed with Warnings",
@@ -620,6 +662,9 @@ const TRANSLATIONS = {
     // ── Validators ────────────────────────────────────────────
     "validator.validRange": "Valid range: {min} - {max}",
     "inline.freqConflict": "Frequency {frequency} already in use by: {types}",
+    "inline.invalidNumber": "Invalid number",
+    "inline.missionOwnerMismatch":
+      'Mission owner must be "{owner}", not "{selected}"',
 
     // ── Additional notifications ──────────────────────────────
     "notify.excelNoNameCol": "Could not find a 'Link Name' column in the file",
@@ -770,6 +815,7 @@ const TRANSLATIONS = {
     // ── Common buttons ────────────────────────────────────────
     "btn.save": "שמירה",
     "btn.cancel": "ביטול",
+    "btn.undo": "בטל",
     "btn.delete": "מחיקה",
     "btn.edit": "עריכה",
     "btn.add": "הוספה",
@@ -783,6 +829,8 @@ const TRANSLATIONS = {
     // ── Overview ──────────────────────────────────────────────
     "overview.title": "פריסת מכשירים",
     "overview.addSector": "הוספת גזרה",
+    "overview.collapseAll": "כווץ הכל",
+    "overview.expandAll": "הרחב הכל",
     "overview.editSector": "עריכת גזרה",
     "overview.addSite": "הוספת אתר",
     "overview.addDevice": "הוספת מכשיר",
@@ -815,6 +863,36 @@ const TRANSLATIONS = {
     "missions.activeMissions": "משימות פעילות",
     "missions.sub.active":
       "משימות שסיימו את שלב התכנון - מכאן ניתן להקצות לפעילות מבצעית",
+    "missions.help.tooltip": "הסבר על פונקציות ההקצאה",
+    "missions.help.title": "מדריך פונקציות הקצאה",
+    "missions.help.allocate.title": "הקצה משימה",
+    "missions.help.allocate.step1":
+      "כל מכשיר שכבר בכוננות למשימה זו מועלה תחילה למצב פעיל (זהה לפעולת 'הפעל כוננות').",
+    "missions.help.allocate.step2":
+      "מפעיל חיפוש לכל דרישה ברשימת הדרישות של המשימה, ומקצה מכשיר זמין לפי התדר והאתר בדרישה.",
+    "missions.help.allocate.step3":
+      "מגדיר את שדות המצב הפעיל של המכשיר בהתאם לדרישה — שם המשימה, הבעלים, תדר והתפקיד.",
+    "missions.help.allocate.step4":
+      "דרישות שלא ניתן היה למלא מוצגות בחלון סיכום לטיפול ידני.",
+    "missions.help.standby.title": "הקצה לכוננות",
+    "missions.help.standby.step1":
+      "מדלג על דרישות שכבר מכוסות — כאלה שמוקצות למכשירים במצב פעיל או כאלה שכבר בכוננות למשימה זו.",
+    "missions.help.standby.step2":
+      "בדומה להקצאה, מחפש מכשיר לפי רשימת הדרישות במשימה להקצאה, למצב הכוננות של המכשירים.",
+    "missions.help.standby.step3":
+      "מגדיר את שדות הכוננות של המכשיר — שם המשימה, בעלים, תדר ותפקיד — מבלי להשפיע על מצב המכשיר הנוכחי.",
+    "missions.help.standby.priority":
+      "מכשירים ללא משימה פעילה מקבלים עדיפות, לאחר מכן מכשירים המשובצים כבר למשימה אחרת.",
+    "missions.help.activate.title":
+      "הפעל כוננות — העלאת מכשירי כוננות למצב פעיל",
+    "missions.help.activate.step1":
+      "סורק את כל המכשירים שמשימת הכוננות שלהם היא משימה זו.",
+    "missions.help.activate.step2":
+      "אם המצב הפעיל של המכשיר ריק לחלוטין — משימת הכוננות מועברת באותו המכשיר למצב הפעיל.",
+    "missions.help.activate.step3":
+      "אם המכשיר תפוס במצב הפעיל — המערכת מחפשת מכשיר פנוי לחלוטין באותו אתר ובאותו תחום תדר, ומעבירה את משימת הכוננות למכשיר הפנוי.",
+    "missions.help.activate.step4":
+      "אם אין מכשיר זמין להקצאה, הוא יופיע ברשימת סיכום לטיפול ידני.",
     "missions.archivedMissions": "משימות בארכיון",
     "missions.sub.archived": "משימות שהסתיימו - ניתן לשחזרן לתכנון בכל עת.",
     "missions.noPlanned": "לא קיימות משימות בתכנון.",
@@ -872,6 +950,8 @@ const TRANSLATIONS = {
     "planMission.sortState": "מצב הקצאה",
     "planMission.sortFreq": _he.frequency,
     "planMission.sortLocation": _he.location,
+    "planMission.removeAllReqs": "הסר הכל",
+    "confirm.removeAllReqs": "להסיר את כל הדרישות? פעולה זו אינה הפיכה.",
     "planMission.noReqs": "לא נוספו דרישות למשימה זו.",
     "planMission.extraDevices": "מכשירים נוספים (לא מופיעים בדרישות)",
     "planMission.noExtra": "ללא מכשירים נוספים.",
@@ -881,6 +961,7 @@ const TRANSLATIONS = {
     "planMission.reqCol.band": _he.freqBand,
     "planMission.reqCol.location": "אתר / גזרה",
     "planMission.reqCol.frequency": _he.frequency,
+    "planMission.reqCol.linkName": _he.linkName,
     "planMission.reqCol.role": _he.role,
     "planMission.reqCol.actions": _he.actions,
     "planMission.req.titleEdit": "עריכה",
@@ -997,9 +1078,9 @@ const TRANSLATIONS = {
     "history.delete.device": 'נמחק מכשיר "{name}"',
     "history.delete.other": "נמחק {type}",
     "history.startMission": 'הופעלה משימה "{name}"',
-    "history.endMission":   'המשימה "{name}" סומנה כהסתיימה ועברה לארכיון',
-    "history.activate":     'המשימה "{name}" הועברה לסטטוס פעילה',
-    "history.deactivate":   'המשימה "{name}" הוחזרה לתכנון',
+    "history.endMission": 'המשימה "{name}" סומנה כהסתיימה ועברה לארכיון',
+    "history.activate": 'המשימה "{name}" הועברה לסטטוס פעילה',
+    "history.deactivate": 'המשימה "{name}" הוחזרה לתכנון',
     "history.archive": 'הועברה לארכיון המשימה "{name}"',
     "history.restore": 'המשימה "{name}" שוחזרה מהארכיון',
     "history.batchClear": "נוקו {count} מכשירים ב-{site}",
@@ -1069,6 +1150,8 @@ const TRANSLATIONS = {
     "notify.deviceUpdateFailed": "כשלון בעדכון פרטי המכשיר",
     "notify.deviceCleared": "פרטי המכשיר נוקו",
     "notify.deviceClearFailed": "כשלון בניקוי פרטי המכשיר",
+    "notify.undone": "הפעולה בוטלה",
+    "notify.undoFailed": "לא ניתן לבטל — הנתונים השתנו",
     "notify.statesSwapped": "הצרחה בוצעה בהצלחה",
     "notify.statesSwapFailed": "כשלון בביצוע הצרחה",
     "notify.siteCleared": '{count} מכשירים נוקו באתר "{name}"',
@@ -1121,8 +1204,10 @@ const TRANSLATIONS = {
     "notify.linkDeleteFailed": "כשלון במחיקת קישור",
     "notify.linksImported": "יובאו {count} קישורים מ-Excel",
     "notify.noValidLinks": "לא נמצאו קישורים תקינים בקובץ",
+    "notify.linksImported": "יובאו {count} קישורים מאקסל",
     "notify.reqsImported": "יובאו {count} דרישות למשימה מה-Excel",
     "notify.noValidReqs": "לא נמצאו דרישות מתאימות בקובץ",
+    "notify.reqsImported": "יובאו {count} דרישות מאקסל",
     "notify.excelEmpty": "הקובץ ריק או שאין בו מידע בפורמט המתאים",
     "excel.importTitle": "שגיאות ייבוא",
     "excel.linkImportTitle": "הייבוא הושלם עם אזהרות",
@@ -1266,6 +1351,9 @@ const TRANSLATIONS = {
     // ── Validators ────────────────────────────────────────────
     "validator.validRange": "תחום תדר אפשרי: {min} - {max}",
     "inline.freqConflict": "תדר {frequency} כבר בשימוש על ידי: {types}",
+    "inline.invalidNumber": "מספר לא תקין",
+    "inline.missionOwnerMismatch":
+      'בעל המשימה חייב להיות "{owner}" ולא "{selected}"',
 
     // ── Additional notifications ──────────────────────────────
     "notify.excelNoNameCol": "לא נמצאה עמודת שם עורק בקובץ",
