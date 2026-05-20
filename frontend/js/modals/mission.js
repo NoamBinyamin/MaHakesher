@@ -56,7 +56,9 @@ function toggleLocationType() {
 function updatePlanMissionHeaderColor() {
   const header = document.getElementById("planMissionModalHeader");
   if (!header) return;
-  const owner = (document.getElementById("planMissionOwner")?.value || "").trim();
+  const owner = (
+    document.getElementById("planMissionOwner")?.value || ""
+  ).trim();
   if (owner) {
     header.style.background = getOwnerColor(owner);
   } else {
@@ -77,11 +79,14 @@ function showFreqLinkSuggestions() {
   if (!input || !dropdown) return;
 
   const query = input.value.trim();
-  if (!query) { dropdown.style.display = "none"; return; }
+  if (!query) {
+    dropdown.style.display = "none";
+    return;
+  }
 
   const lq = query.toLowerCase();
   const matches = (window.appState.links || []).filter((l) =>
-    l.link_name.toLowerCase().includes(lq)
+    l.link_name.toLowerCase().includes(lq),
   );
 
   if (matches.length === 0) {
@@ -100,7 +105,7 @@ function showFreqLinkSuggestions() {
     >
       <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
       <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${formatFrequency(l.frequency, l.frequency_band)} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
-    </div>`
+    </div>`,
     )
     .join("");
 
@@ -132,30 +137,41 @@ function showRoleSuggestions() {
   if (!dropdown) return;
 
   const freqVal = parseFloat(document.getElementById("reqFrequency")?.value);
-  if (isNaN(freqVal)) { dropdown.style.display = "none"; return; }
+  if (isNaN(freqVal)) {
+    dropdown.style.display = "none";
+    return;
+  }
 
   const rolesFromReqs = missionRequirements
-    .filter((req) => req.frequency != null &&
-                     Math.abs(req.frequency - freqVal) < 0.001 &&
-                     req.role)
+    .filter(
+      (req) =>
+        req.frequency != null &&
+        Math.abs(req.frequency - freqVal) < 0.001 &&
+        req.role,
+    )
     .map((req) => req.role);
 
   const matchedLink = (window.appState.links || []).find(
-    (l) => l.frequency != null && Math.abs(Number(l.frequency) - freqVal) < 0.001
+    (l) =>
+      l.frequency != null && Math.abs(Number(l.frequency) - freqVal) < 0.001,
   );
   const genericRole = matchedLink?.generic_role || null;
 
-  const roles = [...new Set([
-    ...(genericRole ? [genericRole] : []),
-    ...rolesFromReqs,
-  ])];
+  const roles = [
+    ...new Set([...(genericRole ? [genericRole] : []), ...rolesFromReqs]),
+  ];
 
-  if (roles.length === 0) { dropdown.style.display = "none"; return; }
+  if (roles.length === 0) {
+    dropdown.style.display = "none";
+    return;
+  }
 
   const dark = document.documentElement.classList.contains("dark");
   dropdown.style.background = dark ? "#1e293b" : "white";
 
-  dropdown.innerHTML = roles.map((role) => `
+  dropdown.innerHTML = roles
+    .map(
+      (role) => `
     <div
       style="padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--gray-200); font-size: 0.875rem; cursor: pointer;"
       onmousedown="selectRoleSuggestion('${escapeHTML(role)}')"
@@ -164,7 +180,9 @@ function showRoleSuggestions() {
     >
       <i class="fa-solid fa-briefcase" style="color: var(--info-color); width: 16px; flex-shrink: 0;"></i>
       <span style="color: var(--gray-900);">${escapeHTML(role)}</span>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 
   dropdown.style.display = "block";
 }
@@ -178,7 +196,10 @@ function hideRoleSuggestions() {
 }
 
 function selectRoleSuggestion(role) {
-  if (_roleHideTimer) { clearTimeout(_roleHideTimer); _roleHideTimer = null; }
+  if (_roleHideTimer) {
+    clearTimeout(_roleHideTimer);
+    _roleHideTimer = null;
+  }
   const input = document.getElementById("reqRole");
   if (input) input.value = role;
   const dropdown = document.getElementById("reqRoleSuggestions");
@@ -190,7 +211,9 @@ function checkFreqOwnerMismatch() {
   if (!box) return;
 
   const freqVal = parseFloat(document.getElementById("reqFrequency").value);
-  const missionOwner = (document.getElementById("planMissionOwner")?.value || "").trim();
+  const missionOwner = (
+    document.getElementById("planMissionOwner")?.value || ""
+  ).trim();
 
   if (isNaN(freqVal) || !missionOwner) {
     _resetReqFormBox(box);
@@ -198,7 +221,7 @@ function checkFreqOwnerMismatch() {
   }
 
   const link = (window.appState.links || []).find(
-    (l) => Math.abs(Number(l.frequency) - freqVal) < 0.001
+    (l) => Math.abs(Number(l.frequency) - freqVal) < 0.001,
   );
 
   if (link && link.owner && link.owner !== missionOwner) {
@@ -219,7 +242,8 @@ function openPlanMissionModal() {
   editingMissionId = null; // Reset editing state
   document.getElementById("missionCreatedAtGroup").style.display = "none";
   document.getElementById("missionCreatedAt").value = "";
-  document.getElementById("missionInfoGrid").style.gridTemplateColumns = "1fr 1fr";
+  document.getElementById("missionInfoGrid").style.gridTemplateColumns =
+    "1fr 1fr";
   const planMissionName = document.getElementById("planMissionName");
   const planMissionOwner = document.getElementById("planMissionOwner");
   const reqSector = document.getElementById("reqSector");
@@ -253,7 +277,8 @@ function openPlanMissionModal() {
   // Reset modal title to "Plan a New Mission"
   const modalTitle = document.querySelector("#planMissionModal h3");
   if (modalTitle) {
-    modalTitle.childNodes[modalTitle.childNodes.length - 1].textContent = " " + t("planMission.title");
+    modalTitle.childNodes[modalTitle.childNodes.length - 1].textContent =
+      " " + t("planMission.title");
   }
 
   renderRequirementsList();
@@ -296,7 +321,11 @@ function addMissionRequirement() {
     const limits = window.appState.config.frequency_bands[frequencyBand];
     if (limits && (freqVal < limits.min || freqVal > limits.max)) {
       showNotification(
-        t("error.freqOutOfRange", { min: limits.min, max: limits.max, band: frequencyBand }),
+        t("error.freqOutOfRange", {
+          min: limits.min,
+          max: limits.max,
+          band: frequencyBand,
+        }),
         "error",
       );
       return;
@@ -351,12 +380,18 @@ function editMissionRequirement(originalIndex) {
 
   if (req.siteId) {
     const toggle = document.getElementById("reqLocationToggle");
-    if (toggle) { toggle.checked = true; toggleLocationType(); }
+    if (toggle) {
+      toggle.checked = true;
+      toggleLocationType();
+    }
     const siteEl = document.getElementById("reqSite");
     if (siteEl) siteEl.value = req.siteId;
   } else if (req.sectorId) {
     const toggle = document.getElementById("reqLocationToggle");
-    if (toggle) { toggle.checked = false; toggleLocationType(); }
+    if (toggle) {
+      toggle.checked = false;
+      toggleLocationType();
+    }
     const sectorEl = document.getElementById("reqSector");
     if (sectorEl) sectorEl.value = req.sectorId;
   }
@@ -379,11 +414,12 @@ function renderRequirementsList() {
 
   // Show/hide the "Remove All" button based on whether there are requirements
   const removeAllBtn = document.getElementById("removeAllReqsBtn");
-  if (removeAllBtn) removeAllBtn.style.display = missionRequirements.length > 0 ? "inline-block" : "none";
+  if (removeAllBtn)
+    removeAllBtn.style.display =
+      missionRequirements.length > 0 ? "inline-block" : "none";
 
   if (missionRequirements.length === 0) {
-    container.innerHTML =
-      `<p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 16px;">${t("planMission.noReqs")}</p>`;
+    container.innerHTML = `<p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 16px;">${t("planMission.noReqs")}</p>`;
     return;
   }
 
@@ -403,7 +439,8 @@ function renderRequirementsList() {
         isAllocatedToMission(r, currentMission),
       );
       standbyRadios = window.appState.radios.filter(
-        (r) => r.standby_mission === currentMission.name && r.status === "Usable",
+        (r) =>
+          r.standby_mission === currentMission.name && r.status === "Usable",
       );
     }
   }
@@ -431,7 +468,8 @@ function renderRequirementsList() {
 
     const matchingStandby = standbyRadios.find((r) => {
       if (preUsedStandbyIds.has(r.id)) return false;
-      const radioBand = r.frequency_band || getFrequencyBandForDevice(r.device_type);
+      const radioBand =
+        r.frequency_band || getFrequencyBandForDevice(r.device_type);
       if (radioBand !== req.frequencyBand) return false;
       if (req.siteId && r.site_id !== req.siteId) return false;
       if (req.sectorId) {
@@ -493,9 +531,13 @@ function renderRequirementsList() {
     const row = document.createElement("tr");
     row.className = "req-row";
     const freqLink = req.frequency
-      ? (window.appState.links || []).find((l) => Math.abs(Number(l.frequency) - req.frequency) < 0.001)
+      ? (window.appState.links || []).find(
+          (l) => Math.abs(Number(l.frequency) - req.frequency) < 0.001,
+        )
       : null;
-    const linkOwnerColor = freqLink?.owner ? getOwnerColor(freqLink.owner) : "#6b7280";
+    const linkOwnerColor = freqLink?.owner
+      ? getOwnerColor(freqLink.owner)
+      : "#6b7280";
     const ownerBorder = `border-right: 4px solid ${linkOwnerColor};`;
     row.style.cssText = `border-bottom: 1px solid var(--gray-200);`;
 
@@ -529,10 +571,10 @@ function renderRequirementsList() {
       <td style="padding: 12px 16px; ${textStyle}">${freqLink ? escapeHTML(freqLink.link_name) : "—"}</td>
       <td style="padding: 12px 16px; ${textStyle}">${req.role || "-"}</td>
       <td style="padding: 12px 16px; text-align: center; white-space: nowrap;">
-        <button type="button" onclick="editMissionRequirement(${originalIndex})" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#94a3b8'" title="${t('planMission.req.titleEdit')}">
+        <button type="button" onclick="editMissionRequirement(${originalIndex})" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#94a3b8'" title="${t("planMission.req.titleEdit")}">
           <i class="fa-regular fa-pen-to-square"></i>
         </button>
-        <button type="button" onclick="removeMissionRequirement(${originalIndex})" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#94a3b8'" title="${t('planMission.req.titleRemove')}">
+        <button type="button" onclick="removeMissionRequirement(${originalIndex})" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#94a3b8'" title="${t("planMission.req.titleRemove")}">
           <i class="fa-regular fa-trash-can"></i>
         </button>
       </td>
@@ -567,8 +609,7 @@ function renderExtraDevices() {
   );
 
   if (extraRadios.length === 0) {
-    container.innerHTML =
-      `<p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 16px;">${t("planMission.noExtra")}</p>`;
+    container.innerHTML = `<p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 16px;">${t("planMission.noExtra")}</p>`;
     section.style.display = "none";
     return;
   }

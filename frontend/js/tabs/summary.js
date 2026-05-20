@@ -11,9 +11,18 @@ function renderCharts() {
 
   const radios = window.appState.radios;
 
-  if (_chartHealth) { _chartHealth.destroy(); _chartHealth = null; }
-  if (_chartMission) { _chartMission.destroy(); _chartMission = null; }
-  if (_chartBands) { _chartBands.destroy(); _chartBands = null; }
+  if (_chartHealth) {
+    _chartHealth.destroy();
+    _chartHealth = null;
+  }
+  if (_chartMission) {
+    _chartMission.destroy();
+    _chartMission = null;
+  }
+  if (_chartBands) {
+    _chartBands.destroy();
+    _chartBands = null;
+  }
 
   const usable = radios.filter((r) => r.status === "Usable").length;
   const unusable = radios.filter((r) => r.status === "Unusable").length;
@@ -24,43 +33,77 @@ function renderCharts() {
       type: "doughnut",
       data: {
         labels: [t("summary.chart.usable"), t("summary.chart.unusable")],
-        datasets: [{ data: [usable, unusable], backgroundColor: ["#059669", "#dc2626"], borderWidth: 0 }],
+        datasets: [
+          {
+            data: [usable, unusable],
+            backgroundColor: ["#059669", "#dc2626"],
+            borderWidth: 0,
+          },
+        ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } },
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 12 } } },
+        },
         cutout: "65%",
       },
     });
   }
 
-  const active = radios.filter((r) => r.status === "Usable" && r.mission_name).length;
-  const standby = radios.filter((r) => r.status === "Usable" && r.standby_mission && !r.mission_name).length;
-  const free = radios.filter((r) => r.status === "Usable" && !r.mission_name && !r.standby_mission).length;
+  const active = radios.filter(
+    (r) => r.status === "Usable" && r.mission_name,
+  ).length;
+  const standby = radios.filter(
+    (r) => r.status === "Usable" && r.standby_mission && !r.mission_name,
+  ).length;
+  const free = radios.filter(
+    (r) => r.status === "Usable" && !r.mission_name && !r.standby_mission,
+  ).length;
 
   const missionCtx = document.getElementById("chartMissionCoverage");
   if (missionCtx) {
     _chartMission = new Chart(missionCtx, {
       type: "doughnut",
       data: {
-        labels: [t("summary.chart.active"), t("summary.chart.standby"), t("summary.chart.free"), t("summary.chart.unusable")],
-        datasets: [{ data: [active, standby, free, unusable], backgroundColor: ["#2563eb", "#d97706", "#059669", "#dc2626"], borderWidth: 0 }],
+        labels: [
+          t("summary.chart.active"),
+          t("summary.chart.standby"),
+          t("summary.chart.free"),
+          t("summary.chart.unusable"),
+        ],
+        datasets: [
+          {
+            data: [active, standby, free, unusable],
+            backgroundColor: ["#2563eb", "#d97706", "#059669", "#dc2626"],
+            borderWidth: 0,
+          },
+        ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } },
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 12 } } },
+        },
         cutout: "65%",
       },
     });
   }
 
-  const allBands = [...new Set(radios.map((r) => r.frequency_band))].filter(Boolean).sort();
-  const freePerBand = [], occupiedPerBand = [], unusablePerBand = [];
+  const allBands = [...new Set(radios.map((r) => r.frequency_band))]
+    .filter(Boolean)
+    .sort();
+  const freePerBand = [],
+    occupiedPerBand = [],
+    unusablePerBand = [];
 
   allBands.forEach((band) => {
     const bandRadios = radios.filter((r) => r.frequency_band === band);
     const u = bandRadios.filter((r) => r.status === "Unusable").length;
-    const o = bandRadios.filter((r) => r.status === "Usable" && (r.frequency || r.mission_name || r.owner)).length;
+    const o = bandRadios.filter(
+      (r) =>
+        r.status === "Usable" && (r.frequency || r.mission_name || r.owner),
+    ).length;
     const f = bandRadios.length - u - o;
     freePerBand.push(f);
     occupiedPerBand.push(o);
@@ -74,18 +117,39 @@ function renderCharts() {
       data: {
         labels: allBands,
         datasets: [
-          { label: t("summary.chart.free"),     data: freePerBand,     backgroundColor: "#059669", borderRadius: 4 },
-          { label: t("summary.col.occupied"),   data: occupiedPerBand, backgroundColor: "#2563eb", borderRadius: 4 },
-          { label: t("summary.chart.unusable"), data: unusablePerBand, backgroundColor: "#dc2626", borderRadius: 4 },
+          {
+            label: t("summary.chart.free"),
+            data: freePerBand,
+            backgroundColor: "#059669",
+            borderRadius: 4,
+          },
+          {
+            label: t("summary.col.occupied"),
+            data: occupiedPerBand,
+            backgroundColor: "#2563eb",
+            borderRadius: 4,
+          },
+          {
+            label: t("summary.chart.unusable"),
+            data: unusablePerBand,
+            backgroundColor: "#dc2626",
+            borderRadius: 4,
+          },
         ],
       },
       options: {
         responsive: true,
         scales: {
           x: { stacked: true, grid: { display: false } },
-          y: { stacked: true, ticks: { stepSize: 1 }, grid: { color: "#f4f4f5" } },
+          y: {
+            stacked: true,
+            ticks: { stepSize: 1 },
+            grid: { color: "#f4f4f5" },
+          },
         },
-        plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } },
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 12 } } },
+        },
       },
     });
   }

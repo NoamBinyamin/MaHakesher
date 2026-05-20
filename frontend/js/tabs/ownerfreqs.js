@@ -9,7 +9,10 @@ function renderOwnerFreqsTab() {
   const owners = window.appState.config.owners || [];
 
   // Preserve previous selection if the owner still exists
-  if (_ownerFreqSelected && !owners.find((o) => o.name === _ownerFreqSelected)) {
+  if (
+    _ownerFreqSelected &&
+    !owners.find((o) => o.name === _ownerFreqSelected)
+  ) {
     _ownerFreqSelected = null;
   }
 
@@ -38,13 +41,16 @@ function onOwnerFreqChange(ownerName) {
 // Returns { active: [{mission, roles[]}, ...], planned: [{mission, roles[]}, ...] }
 // roles = all roles from requirements of that mission that match the frequency
 function _missionsForFrequency(frequency) {
-  const active  = [];
+  const active = [];
   const planned = [];
 
   (window.appState.plannedMissions || []).forEach((m) => {
     const matchingRoles = (m.requirements || [])
-      .filter((req) => req.frequency != null &&
-                       Math.abs(Number(req.frequency) - frequency) < 0.001)
+      .filter(
+        (req) =>
+          req.frequency != null &&
+          Math.abs(Number(req.frequency) - frequency) < 0.001,
+      )
       .map((req) => req.role || null);
 
     if (matchingRoles.length === 0) return;
@@ -59,8 +65,8 @@ function _missionsForFrequency(frequency) {
 
 function _missionBadge({ mission, roles }) {
   const color = mission.owner ? getOwnerColor(mission.owner) : null;
-  const bg    = color || "var(--gray-300)";
-  const fg    = color ? contrastColor(color) : "var(--gray-700)";
+  const bg = color || "var(--gray-300)";
+  const fg = color ? contrastColor(color) : "var(--gray-700)";
   const label = roles.length
     ? `${escapeHTML(mission.name)} - ${roles.map(escapeHTML).join(" | ")}`
     : escapeHTML(mission.name);
@@ -106,7 +112,9 @@ function _renderOwnerFreqTables(ownerName) {
   const dash = `<span style="color:var(--gray-400)">—</span>`;
 
   bands.forEach((band) => {
-    const freqs = byBand[band].slice().sort((a, b) => a.frequency - b.frequency);
+    const freqs = byBand[band]
+      .slice()
+      .sort((a, b) => a.frequency - b.frequency);
 
     const section = document.createElement("div");
     section.className = "ownerfreq-band-section";
@@ -120,18 +128,24 @@ function _renderOwnerFreqTables(ownerName) {
     `;
     section.appendChild(headerRow);
 
-    const rows = freqs.map((l) => {
-      const { active, planned } = _missionsForFrequency(l.frequency);
-      const activeHtml  = active.length  ? `<div class="ownerfreq-missions-list">${active.map(_missionBadge).join("")}</div>`  : dash;
-      const plannedHtml = planned.length ? `<div class="ownerfreq-missions-list">${planned.map(_missionBadge).join("")}</div>` : dash;
-      return `
+    const rows = freqs
+      .map((l) => {
+        const { active, planned } = _missionsForFrequency(l.frequency);
+        const activeHtml = active.length
+          ? `<div class="ownerfreq-missions-list">${active.map(_missionBadge).join("")}</div>`
+          : dash;
+        const plannedHtml = planned.length
+          ? `<div class="ownerfreq-missions-list">${planned.map(_missionBadge).join("")}</div>`
+          : dash;
+        return `
         <tr>
           <td><span class="ownerfreq-freq-badge">${formatFrequency(l.frequency, band)} MHz</span></td>
           <td>${escapeHTML(l.link_name)}</td>
           <td class="ownerfreq-missions-cell">${activeHtml}</td>
           <td class="ownerfreq-missions-cell">${plannedHtml}</td>
         </tr>`;
-    }).join("");
+      })
+      .join("");
 
     const table = document.createElement("table");
     table.className = "data-table ownerfreq-table";
@@ -155,4 +169,4 @@ function _renderOwnerFreqTables(ownerName) {
 }
 
 window.renderOwnerFreqsTab = renderOwnerFreqsTab;
-window.onOwnerFreqChange   = onOwnerFreqChange;
+window.onOwnerFreqChange = onOwnerFreqChange;

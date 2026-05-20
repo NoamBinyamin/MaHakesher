@@ -1085,3 +1085,5 @@
 {"timestamp": "2026-05-20T09:13:30.048476", "action": "create", "entity_type": "radio", "entity_id": "radio-5a311519", "details": {"device_type": "מכשיר טוב", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "נועם"}
 {"timestamp": "2026-05-20T09:13:30.070326", "action": "create", "entity_type": "radio", "entity_id": "radio-abd96b48", "details": {"device_type": "מכשיר טוב", "site_id": "site-748505e4", "site_name": "באר שבע"}, "changed_by": "נועם"}
 {"timestamp": "2026-05-20T09:13:34.550086", "action": "update", "entity_type": "radio", "entity_id": "radio-ff48c5f4", "details": {"before": {"frequency": null, "owner": "", "mission_name": null, "role": null}, "after": {"frequency": 136.6, "owner": "בעלים איכותי", "mission_name": "חתונת השנה", "role": "סיור רכוב"}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-20T09:35:59.981288", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-20T09:36:02.519037", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}

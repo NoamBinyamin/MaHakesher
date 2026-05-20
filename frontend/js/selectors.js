@@ -9,7 +9,10 @@ function getActiveMissionNames() {
 // Unified function to get active missions as options HTML
 function getActiveMissionOptionsHTML() {
   return (window.appState.plannedMissions || [])
-    .map((m) => `<option value="${escapeHTML(m.name)}">${escapeHTML(m.name)}</option>`)
+    .map(
+      (m) =>
+        `<option value="${escapeHTML(m.name)}">${escapeHTML(m.name)}</option>`,
+    )
     .join("");
 }
 
@@ -30,8 +33,9 @@ function populateSelects() {
     ? rt
     : Object.entries(rt).map(([name, band]) => ({ name, band }));
   const deviceOptions = devices
-    .map(({ name, band }) =>
-      `<option value="${escapeHTML(name)}">${escapeHTML(name)}${band ? ` (${escapeHTML(band)})` : ''}</option>`
+    .map(
+      ({ name, band }) =>
+        `<option value="${escapeHTML(name)}">${escapeHTML(name)}${band ? ` (${escapeHTML(band)})` : ""}</option>`,
     )
     .join("");
   deviceSelects.forEach((select) => {
@@ -48,8 +52,10 @@ function populateSelects() {
     const placeholder = select.querySelector('option[value=""]');
     const currentValue = select.value;
     const newOptions = placeholder
-      ? `<option value="">${t("select.allMissions")}</option>` + activeMissionOptions
-      : `<option value="">${t("select.noMission")}</option>` + activeMissionOptions;
+      ? `<option value="">${t("select.allMissions")}</option>` +
+        activeMissionOptions
+      : `<option value="">${t("select.noMission")}</option>` +
+        activeMissionOptions;
     select.innerHTML = newOptions;
     if (currentValue) select.value = currentValue;
   });
@@ -58,7 +64,8 @@ function populateSelects() {
   const standbyMissionSelect = document.getElementById("radioStandbyMission");
   if (standbyMissionSelect) {
     standbyMissionSelect.innerHTML =
-      `<option value="">${t("select.noMission")}</option>` + activeMissionOptions;
+      `<option value="">${t("select.noMission")}</option>` +
+      activeMissionOptions;
   }
 
   // Populate owner selects
@@ -67,7 +74,10 @@ function populateSelects() {
   );
   const ownerOptions =
     (window.appState.config.owners || [])
-      .map(({ name }) => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`)
+      .map(
+        ({ name }) =>
+          `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`,
+      )
       .join("") || "";
   ownerSelects.forEach((select) => {
     const placeholder = select.querySelector('option[value=""]');
@@ -81,7 +91,10 @@ function populateSelects() {
   // Populate sectors for mission planning
   const sectorSelects = document.querySelectorAll("#reqSector");
   const sectorOptions = window.appState.sectors
-    .map((sector) => `<option value="${escapeHTML(sector.id)}">${escapeHTML(sector.name)}</option>`)
+    .map(
+      (sector) =>
+        `<option value="${escapeHTML(sector.id)}">${escapeHTML(sector.name)}</option>`,
+    )
     .join("");
   sectorSelects.forEach((select) => {
     select.innerHTML =
@@ -91,13 +104,15 @@ function populateSelects() {
   // Populate sites for add radio and mission planning
   const siteSelects = document.querySelectorAll("#addRadioSite, #reqSite");
   const siteOptions = window.appState.sites
-    .map((site) => `<option value="${escapeHTML(site.id)}">${escapeHTML(site.name)}</option>`)
+    .map(
+      (site) =>
+        `<option value="${escapeHTML(site.id)}">${escapeHTML(site.name)}</option>`,
+    )
     .join("");
   siteSelects.forEach((select) => {
     select.innerHTML =
       `<option value="">${t("select.site")}</option>` + siteOptions;
   });
-
 }
 
 function populateMissionSelects() {
@@ -108,13 +123,15 @@ function populateMissionSelects() {
   const radioMissionSelect = document.getElementById("radioMission");
   if (radioMissionSelect) {
     radioMissionSelect.innerHTML =
-      `<option value="">${t("select.noMission")}</option>` + activeMissionOptions;
+      `<option value="">${t("select.noMission")}</option>` +
+      activeMissionOptions;
   }
 
   const standbyMissionSelect = document.getElementById("radioStandbyMission");
   if (standbyMissionSelect) {
     standbyMissionSelect.innerHTML =
-      `<option value="">${t("select.noMission")}</option>` + activeMissionOptions;
+      `<option value="">${t("select.noMission")}</option>` +
+      activeMissionOptions;
   }
 }
 

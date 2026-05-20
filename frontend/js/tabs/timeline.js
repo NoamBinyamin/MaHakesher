@@ -1,13 +1,13 @@
 // ==================== Timeline Tab ====================
 
-const _TL_DAY_MS  = 86400000;
-const _TL_ROW_H   = 64;
-const _TL_AXIS_H  = 42;
+const _TL_DAY_MS = 86400000;
+const _TL_ROW_H = 64;
+const _TL_AXIS_H = 42;
 const _TL_LABEL_W = 220;
 
 function _tlDayWidth(numDays) {
-  if (numDays <= 3)  return 280;
-  if (numDays <= 7)  return 200;
+  if (numDays <= 3) return 280;
+  if (numDays <= 7) return 200;
   if (numDays <= 14) return 150;
   if (numDays <= 30) return 110;
   if (numDays <= 90) return 75;
@@ -49,15 +49,20 @@ function _tlFormatTime(iso) {
 function _tlShowTooltip(mission, e) {
   const tip = _tlGetTooltip();
   const isDark = document.documentElement.classList.contains("dark");
-  const bg       = isDark ? "#1e2d45"                  : "#ffffff";
-  const border   = isDark ? "rgba(255,255,255,0.12)"   : "var(--gray-200)";
-  const textMain = isDark ? "#e2e8f0"                  : "var(--gray-800)";
-  const textSub  = isDark ? "#94a3b8"                  : "var(--gray-500)";
-  const shadow   = isDark ? "0 4px 20px rgba(0,0,0,0.5)" : "0 4px 16px rgba(0,0,0,0.15)";
+  const bg = isDark ? "#1e2d45" : "#ffffff";
+  const border = isDark ? "rgba(255,255,255,0.12)" : "var(--gray-200)";
+  const textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
+  const textSub = isDark ? "#94a3b8" : "var(--gray-500)";
+  const shadow = isDark
+    ? "0 4px 20px rgba(0,0,0,0.5)"
+    : "0 4px 16px rgba(0,0,0,0.15)";
 
-  const reqCount   = mission.requirements ? mission.requirements.length : 0;
-  const ownerColor = mission.owner ? getOwnerColor(mission.owner)
-                                   : (isDark ? "rgba(255,255,255,0.2)" : "var(--gray-300)");
+  const reqCount = mission.requirements ? mission.requirements.length : 0;
+  const ownerColor = mission.owner
+    ? getOwnerColor(mission.owner)
+    : isDark
+      ? "rgba(255,255,255,0.2)"
+      : "var(--gray-300)";
 
   tip.style.cssText = `
     position: fixed;
@@ -105,11 +110,11 @@ function _tlMoveTooltip(e) {
   let y = e.clientY - margin;
   const tipW = tip.offsetWidth || 270;
   const tipH = tip.offsetHeight || 130;
-  if (x + tipW > window.innerWidth - 8)  x = e.clientX - tipW - margin;
+  if (x + tipW > window.innerWidth - 8) x = e.clientX - tipW - margin;
   if (y + tipH > window.innerHeight - 8) y = e.clientY - tipH - margin;
   if (y < 8) y = 8;
   tip.style.left = `${x}px`;
-  tip.style.top  = `${y}px`;
+  tip.style.top = `${y}px`;
 }
 
 function _tlHideTooltip() {
@@ -124,7 +129,9 @@ function renderTimelineTab() {
   if (!container) return;
   container.innerHTML = "";
 
-  const missions = (window.appState.plannedMissions || []).filter((m) => m.status === "active");
+  const missions = (window.appState.plannedMissions || []).filter(
+    (m) => m.status === "active",
+  );
 
   if (missions.length === 0) {
     const p = document.createElement("p");
@@ -135,12 +142,16 @@ function renderTimelineTab() {
   }
 
   const scheduled = missions.filter(
-    (m) => m.time_start && m.time_end &&
-      new Date(m.time_start).getTime() < new Date(m.time_end).getTime()
+    (m) =>
+      m.time_start &&
+      m.time_end &&
+      new Date(m.time_start).getTime() < new Date(m.time_end).getTime(),
   );
   const unscheduled = missions.filter(
-    (m) => !m.time_start || !m.time_end ||
-      new Date(m.time_start).getTime() >= new Date(m.time_end).getTime()
+    (m) =>
+      !m.time_start ||
+      !m.time_end ||
+      new Date(m.time_start).getTime() >= new Date(m.time_end).getTime(),
   );
 
   if (scheduled.length > 0) {
@@ -148,7 +159,8 @@ function renderTimelineTab() {
   } else {
     const p = document.createElement("p");
     p.textContent = t("timeline.noScheduled");
-    p.style.cssText = "color: var(--gray-500); font-size: 0.9rem; padding: 1rem 0 1.5rem 0;";
+    p.style.cssText =
+      "color: var(--gray-500); font-size: 0.9rem; padding: 1rem 0 1.5rem 0;";
     container.appendChild(p);
   }
 
@@ -158,7 +170,8 @@ function renderTimelineTab() {
 
     const hdr = document.createElement("h3");
     hdr.textContent = t("timeline.unscheduled");
-    hdr.style.cssText = "margin: 0 0 1rem 0; font-size: 1rem; font-weight: 700; color: var(--gray-700);";
+    hdr.style.cssText =
+      "margin: 0 0 1rem 0; font-size: 1rem; font-weight: 700; color: var(--gray-700);";
     sec.appendChild(hdr);
 
     const grid = document.createElement("div");
@@ -175,22 +188,26 @@ function _renderGantt(container, missions) {
   // ── Dark mode palette ─────────────────────────────────────────────────────
   const isDark = document.documentElement.classList.contains("dark");
   const c = {
-    bgPanel:   isDark ? "#1a2235" : "var(--gray-50)",
-    bgRow0:    isDark ? "#1a2235" : "white",
-    bgRow1:    isDark ? "#131c2e" : "var(--gray-50)",
-    border:    isDark ? "rgba(255,255,255,0.08)" : "var(--gray-200)",
+    bgPanel: isDark ? "#1a2235" : "var(--gray-50)",
+    bgRow0: isDark ? "#1a2235" : "white",
+    bgRow1: isDark ? "#131c2e" : "var(--gray-50)",
+    border: isDark ? "rgba(255,255,255,0.08)" : "var(--gray-200)",
     borderHdr: isDark ? "rgba(255,255,255,0.15)" : "var(--gray-300)",
-    textMain:  isDark ? "#e2e8f0" : "var(--gray-800)",
-    textSub:   isDark ? "#94a3b8" : "var(--gray-500)",
+    textMain: isDark ? "#e2e8f0" : "var(--gray-800)",
+    textSub: isDark ? "#94a3b8" : "var(--gray-500)",
     textFaint: isDark ? "#475569" : "var(--gray-400)",
-    axisLbl:   isDark ? "#94a3b8" : "var(--gray-600)",
+    axisLbl: isDark ? "#94a3b8" : "var(--gray-600)",
     axisLblBg: isDark ? "#1a2235" : "var(--gray-50)",
-    dayLine:   isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+    dayLine: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
   };
 
   // ── Date range (day-aligned) ──────────────────────────────────────────────
-  const minStart = Math.min(...missions.map((m) => new Date(m.time_start).getTime()));
-  const maxEnd   = Math.max(...missions.map((m) => new Date(m.time_end).getTime()));
+  const minStart = Math.min(
+    ...missions.map((m) => new Date(m.time_start).getTime()),
+  );
+  const maxEnd = Math.max(
+    ...missions.map((m) => new Date(m.time_end).getTime()),
+  );
 
   const d0 = new Date(minStart);
   d0.setHours(0, 0, 0, 0);
@@ -202,9 +219,9 @@ function _renderGantt(container, missions) {
   const chartEnd = d1.getTime();
 
   const numDays = Math.max(1, Math.round((chartEnd - chartStart) / _TL_DAY_MS));
-  const DAY_W   = _tlDayWidth(numDays);
-  const totalW  = numDays * DAY_W;
-  const now     = Date.now();
+  const DAY_W = _tlDayWidth(numDays);
+  const totalW = numDays * DAY_W;
+  const now = Date.now();
 
   const toX = (ms) => ((ms - chartStart) / _TL_DAY_MS) * DAY_W;
 
@@ -288,12 +305,14 @@ function _renderGantt(container, missions) {
                   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         ${escapeHTML(mission.name)}
       </div>
-      ${mission.owner
-        ? `<div style="font-size: 0.7rem; color: ${c.textSub}; white-space: nowrap;
+      ${
+        mission.owner
+          ? `<div style="font-size: 0.7rem; color: ${c.textSub}; white-space: nowrap;
                        overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">
              ${escapeHTML(mission.owner)}
            </div>`
-        : ""}
+          : ""
+      }
       <div style="font-size: 0.68rem; color: ${c.textFaint}; margin-top: 1px;">
         📡 ${mission.requirements ? mission.requirements.length : 0}
       </div>
@@ -373,11 +392,11 @@ function _renderGantt(container, missions) {
   // Mission rows
   missions.forEach((mission, i) => {
     const mStart = new Date(mission.time_start).getTime();
-    const mEnd   = new Date(mission.time_end).getTime();
-    const barX   = toX(mStart);
-    const barW   = Math.max(toX(mEnd) - barX, 4);
+    const mEnd = new Date(mission.time_end).getTime();
+    const barX = toX(mStart);
+    const barW = Math.max(toX(mEnd) - barX, 4);
     const ownerColor = mission.owner ? getOwnerColor(mission.owner) : c.border;
-    const reqCount   = mission.requirements ? mission.requirements.length : 0;
+    const reqCount = mission.requirements ? mission.requirements.length : 0;
     const bg = i % 2 === 0 ? c.bgRow0 : c.bgRow1;
 
     const row = document.createElement("div");
@@ -429,12 +448,14 @@ function _renderGantt(container, missions) {
 
     if (mission.owner && barW >= 110) {
       const dot = document.createElement("span");
-      dot.style.cssText = "color: rgba(0,0,0,0.25); flex-shrink: 0; font-size: 0.7rem;";
+      dot.style.cssText =
+        "color: rgba(0,0,0,0.25); flex-shrink: 0; font-size: 0.7rem;";
       dot.textContent = "·";
       bar.appendChild(dot);
 
       const ownerEl = document.createElement("span");
-      ownerEl.style.cssText = "font-size: 0.7rem; color: var(--gray-700); white-space: nowrap; flex-shrink: 0;";
+      ownerEl.style.cssText =
+        "font-size: 0.7rem; color: var(--gray-700); white-space: nowrap; flex-shrink: 0;";
       ownerEl.textContent = mission.owner;
       bar.appendChild(ownerEl);
     }
@@ -458,7 +479,7 @@ function _renderGantt(container, missions) {
   canvas.appendChild(chartBody);
 
   // ── "Now" indicator – appended LAST so it renders on top of everything ────
-  const nowX = toX(now);   // distance from the RIGHT edge (same scale as bars)
+  const nowX = toX(now); // distance from the RIGHT edge (same scale as bars)
   if (nowX >= 0 && nowX <= totalW) {
     const nowLine = document.createElement("div");
     nowLine.style.cssText = `
@@ -487,7 +508,7 @@ function _renderGantt(container, missions) {
       white-space: nowrap;
     `;
     nowLine.appendChild(badge);
-    canvas.appendChild(nowLine);   // LAST child → always paints on top
+    canvas.appendChild(nowLine); // LAST child → always paints on top
   }
 
   scrollArea.appendChild(canvas);
@@ -500,8 +521,8 @@ function _renderGantt(container, missions) {
   if (nowX >= 0 && nowX <= totalW) {
     requestAnimationFrame(() => {
       const visW = scrollArea.clientWidth || 600;
-      const nowLeft = totalW - nowX;               // physical left position of the line
-      const target  = nowLeft - visW * 0.7;        // scroll so "now" is 70 % from left
+      const nowLeft = totalW - nowX; // physical left position of the line
+      const target = nowLeft - visW * 0.7; // scroll so "now" is 70 % from left
       scrollArea.scrollLeft = Math.max(0, Math.min(totalW - visW, target));
     });
   }
@@ -510,17 +531,18 @@ function _renderGantt(container, missions) {
 // ── Unscheduled card ──────────────────────────────────────────────────────────
 
 function _tlCard(mission) {
-  const isDark     = document.documentElement.classList.contains("dark");
+  const isDark = document.documentElement.classList.contains("dark");
   const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
-  const cardBg     = ownerColor || (isDark ? "#243044" : "var(--gray-100)");
-  const reqCount   = mission.requirements ? mission.requirements.length : 0;
+  const cardBg = ownerColor || (isDark ? "#243044" : "var(--gray-100)");
+  const reqCount = mission.requirements ? mission.requirements.length : 0;
 
   // Pick text color based on actual background luminance
   let textMain, textMeta;
   if (ownerColor && ownerColor.startsWith("#")) {
     const fg = contrastColor(ownerColor);
     textMain = fg;
-    textMeta = fg === "white" ? "rgba(241,245,249,0.75)" : "rgba(30,41,59,0.65)";
+    textMeta =
+      fg === "white" ? "rgba(241,245,249,0.75)" : "rgba(30,41,59,0.65)";
   } else {
     textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
     textMeta = isDark ? "#94a3b8" : "var(--gray-600)";

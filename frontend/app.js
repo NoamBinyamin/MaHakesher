@@ -29,14 +29,24 @@ window.confirmCloseModal = confirmCloseModal;
 
 // ==================== Auth & Edit Mode ====================
 
-let _editModeActive  = false;
-let _loggedInUser    = null; // {username, role} when authenticated
+let _editModeActive = false;
+let _loggedInUser = null; // {username, role} when authenticated
 
-function isViewMode()      { return !_editModeActive; }
-function isAuthenticated() { return _loggedInUser !== null; }
-function getCurrentUserRole() { return _loggedInUser ? _loggedInUser.role : null; }
-function isUserRole()      { return getCurrentUserRole() === 'user'; }
-function isAdminRole()     { return getCurrentUserRole() === 'admin'; }
+function isViewMode() {
+  return !_editModeActive;
+}
+function isAuthenticated() {
+  return _loggedInUser !== null;
+}
+function getCurrentUserRole() {
+  return _loggedInUser ? _loggedInUser.role : null;
+}
+function isUserRole() {
+  return getCurrentUserRole() === "user";
+}
+function isAdminRole() {
+  return getCurrentUserRole() === "admin";
+}
 
 // On page load — restore session if token is still valid
 async function restoreSession() {
@@ -45,9 +55,12 @@ async function restoreSession() {
   try {
     // Use raw fetch to avoid showing an error notification for a stale token
     const res = await fetch(window.API_BASE + "/me", {
-      headers: { "X-Auth-Token": token, "Content-Type": "application/json" }
+      headers: { "X-Auth-Token": token, "Content-Type": "application/json" },
     });
-    if (!res.ok) { localStorage.removeItem("mahakesher-token"); return; }
+    if (!res.ok) {
+      localStorage.removeItem("mahakesher-token");
+      return;
+    }
     const me = await res.json();
     _loggedInUser = me;
     _applyRoleClasses();
@@ -81,17 +94,22 @@ function _setEditMode(active) {
   if (!active) {
     const activeContent = document.querySelector(".tab-content.active");
     if (activeContent && activeContent.id === "preferences") {
-      const overviewBtn = document.querySelector('.tab-button[data-tab="overview"]');
-      if (overviewBtn) { overviewBtn.click(); return; }
+      const overviewBtn = document.querySelector(
+        '.tab-button[data-tab="overview"]',
+      );
+      if (overviewBtn) {
+        overviewBtn.click();
+        return;
+      }
     }
   }
 
-  if (window.renderOverview)    renderOverview();
+  if (window.renderOverview) renderOverview();
   if (window.renderMissionsTab) renderMissionsTab();
-  if (window.renderLinksTab)    renderLinksTab();
-  if (window.renderSummaryTab)  renderSummaryTab();
+  if (window.renderLinksTab) renderLinksTab();
+  if (window.renderSummaryTab) renderSummaryTab();
   if (window.renderTimelineTab) renderTimelineTab();
-  if (window.performSearch)     performSearch();
+  if (window.performSearch) performSearch();
 }
 
 function _updateModeButton() {
@@ -116,11 +134,15 @@ function _updateModeButton() {
 }
 
 function _updateUserButton() {
-  const btn  = document.getElementById("userInfoBtn");
+  const btn = document.getElementById("userInfoBtn");
   const name = document.getElementById("userInfoName");
   if (!btn) return;
   if (isAuthenticated()) {
-    if (name) name.textContent = t("login.loggedInAs").replace("{name}", _loggedInUser.username);
+    if (name)
+      name.textContent = t("login.loggedInAs").replace(
+        "{name}",
+        _loggedInUser.username,
+      );
     btn.title = t("login.logoutTooltip");
     btn.style.display = "flex";
   } else {
@@ -149,13 +171,16 @@ function openLoginModal() {
 
 function closeLoginModal() {
   const modal = document.getElementById("loginModal");
-  if (modal) { modal.classList.add("hidden"); enableBodyScroll(); }
+  if (modal) {
+    modal.classList.add("hidden");
+    enableBodyScroll();
+  }
 }
 
 async function submitLogin() {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
-  const errorEl  = document.getElementById("loginError");
+  const errorEl = document.getElementById("loginError");
   errorEl.style.display = "none";
 
   if (!username || !password) {
@@ -194,12 +219,12 @@ async function logout() {
 
 function _applyRoleClasses() {
   const role = getCurrentUserRole();
-  if (role === 'user') {
+  if (role === "user") {
     // user-role stays in view-mode for overview/links etc., only missions are editable
     _editModeActive = false;
     document.documentElement.classList.add("view-mode");
     document.documentElement.classList.add("user-role");
-  } else if (role === 'admin') {
+  } else if (role === "admin") {
     _editModeActive = true;
     document.documentElement.classList.remove("view-mode");
     document.documentElement.classList.remove("user-role");
@@ -236,19 +261,19 @@ window._handleSessionExpired = function () {
   openLoginModal();
 };
 
-window.isViewMode          = isViewMode;
-window.isAuthenticated     = isAuthenticated;
-window.getCurrentUserRole  = getCurrentUserRole;
-window.isUserRole          = isUserRole;
-window.isAdminRole         = isAdminRole;
-window.guardAdminOnly      = guardAdminOnly;
-window.toggleMode          = toggleMode;
-window.openLoginModal  = openLoginModal;
+window.isViewMode = isViewMode;
+window.isAuthenticated = isAuthenticated;
+window.getCurrentUserRole = getCurrentUserRole;
+window.isUserRole = isUserRole;
+window.isAdminRole = isAdminRole;
+window.guardAdminOnly = guardAdminOnly;
+window.toggleMode = toggleMode;
+window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
-window.submitLogin     = submitLogin;
-window.logout          = logout;
-window.confirmLogout   = confirmLogout;
-window.guardViewMode   = guardViewMode;
+window.submitLogin = submitLogin;
+window.logout = logout;
+window.confirmLogout = confirmLogout;
+window.guardViewMode = guardViewMode;
 
 // ==================== Initialization ====================
 
@@ -256,7 +281,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyI18n();
   applyStoredDarkMode();
   applyStoredMode();
-  document.documentElement.style.opacity = '';
+  document.documentElement.style.opacity = "";
   await restoreSession(); // validates stored token with server before data loads
   await initializeApp();
   setupTabNavigation();
@@ -423,7 +448,9 @@ async function _pollForChanges() {
   if (openModal) return;
 
   try {
-    const { ts } = await fetch(window.API_BASE + "/version").then(r => r.json());
+    const { ts } = await fetch(window.API_BASE + "/version").then((r) =>
+      r.json(),
+    );
 
     if (_lastKnownTs === 0) {
       // First poll after init — just record the baseline
@@ -444,12 +471,16 @@ async function _pollForChanges() {
       renderSummaryTab();
       renderTimelineTab();
       if (window.performSearch) performSearch();
-      if (window.renderPreferencesTab &&
-          document.getElementById("preferences")?.classList.contains("active")) {
+      if (
+        window.renderPreferencesTab &&
+        document.getElementById("preferences")?.classList.contains("active")
+      ) {
         renderPreferencesTab();
       }
-      if (window.renderOwnerFreqsTab &&
-          document.getElementById("ownerfreqs")?.classList.contains("active")) {
+      if (
+        window.renderOwnerFreqsTab &&
+        document.getElementById("ownerfreqs")?.classList.contains("active")
+      ) {
         renderOwnerFreqsTab();
       }
     }
@@ -502,7 +533,7 @@ function setupKeyboardShortcuts() {
     if (e.altKey && e.key >= "1" && e.key <= "9") {
       e.preventDefault();
       const visibleTabs = Array.from(
-        document.querySelectorAll(".tab-button")
+        document.querySelectorAll(".tab-button"),
       ).filter((btn) => btn.offsetParent !== null);
       const idx = parseInt(e.key) - 1;
       if (visibleTabs[idx]) visibleTabs[idx].click();
@@ -525,8 +556,10 @@ async function _keyboardForceRefresh() {
     renderSummaryTab();
     renderTimelineTab();
     if (window.performSearch) performSearch();
-    if (window.renderOwnerFreqsTab &&
-        document.getElementById("ownerfreqs")?.classList.contains("active")) {
+    if (
+      window.renderOwnerFreqsTab &&
+      document.getElementById("ownerfreqs")?.classList.contains("active")
+    ) {
       renderOwnerFreqsTab();
     }
     showNotification(t("notify.dataRefreshed"), "success");

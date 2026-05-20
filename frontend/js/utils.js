@@ -38,7 +38,7 @@ function getSiteName(siteId) {
 function getFrequencyBandForDevice(deviceType) {
   const rt = window.appState.config.radio_types;
   if (Array.isArray(rt)) {
-    const device = rt.find(d => d.name === deviceType);
+    const device = rt.find((d) => d.name === deviceType);
     return device ? device.band : null;
   }
   return rt[deviceType] || null;
@@ -83,7 +83,10 @@ async function exportData() {
     URL.revokeObjectURL(url);
     showNotification(t("notify.exportOk"), "success");
   } catch (error) {
-    showNotification(t("notify.exportFailed", { error: error.message }), "error");
+    showNotification(
+      t("notify.exportFailed", { error: error.message }),
+      "error",
+    );
   }
 }
 
@@ -117,7 +120,10 @@ async function importData(input) {
       renderLinksTab();
       renderSummaryTab();
     } catch (error) {
-      showNotification(t("notify.importFailed", { error: error.message }), "error");
+      showNotification(
+        t("notify.importFailed", { error: error.message }),
+        "error",
+      );
     }
   };
   reader.readAsText(file);
@@ -156,8 +162,14 @@ window.enableBodyScroll = enableBodyScroll;
 // Used wherever owner-colored badges or cards need readable text.
 function contrastColor(hex) {
   if (!hex || !hex.startsWith("#")) return "white";
-  const h    = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const h = hex.replace("#", "");
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
   const r = parseInt(full.slice(0, 2), 16);
   const g = parseInt(full.slice(2, 4), 16);
   const b = parseInt(full.slice(4, 6), 16);
@@ -170,11 +182,13 @@ window.contrastColor = contrastColor;
 // ==================== Frequency Formatting ====================
 
 function formatFrequency(freq, bandName) {
-  if (freq === null || freq === undefined || freq === "" || freq === "-") return "-";
+  if (freq === null || freq === undefined || freq === "" || freq === "-")
+    return "-";
   const num = Number(freq);
   if (isNaN(num)) return String(freq);
-  const band = ((window.appState?.config?.frequency_bands) || {})[bandName];
-  const decimals = (band && typeof band.decimals === "number") ? band.decimals : 3;
+  const band = (window.appState?.config?.frequency_bands || {})[bandName];
+  const decimals =
+    band && typeof band.decimals === "number" ? band.decimals : 3;
   return num.toFixed(decimals);
 }
 
@@ -182,8 +196,8 @@ window.formatFrequency = formatFrequency;
 
 // ==================== Undo Toast ====================
 
-let _undoTimer    = null;
-let _undoToastEl  = null;
+let _undoTimer = null;
+let _undoToastEl = null;
 let _undoPendingFn = null;
 
 function showUndoToast(message, onUndo, duration = 5000) {
@@ -221,8 +235,14 @@ function _triggerUndo() {
 }
 
 function _dismissUndoToast(runUndo = false) {
-  if (_undoTimer) { clearTimeout(_undoTimer); _undoTimer = null; }
-  if (runUndo && _undoPendingFn) { _undoPendingFn(); _undoPendingFn = null; }
+  if (_undoTimer) {
+    clearTimeout(_undoTimer);
+    _undoTimer = null;
+  }
+  if (runUndo && _undoPendingFn) {
+    _undoPendingFn();
+    _undoPendingFn = null;
+  }
   if (_undoToastEl) {
     _undoToastEl.classList.remove("visible");
     const el = _undoToastEl;
@@ -231,6 +251,6 @@ function _dismissUndoToast(runUndo = false) {
   }
 }
 
-window.showUndoToast     = showUndoToast;
-window._triggerUndo      = _triggerUndo;
+window.showUndoToast = showUndoToast;
+window._triggerUndo = _triggerUndo;
 window._dismissUndoToast = _dismissUndoToast;

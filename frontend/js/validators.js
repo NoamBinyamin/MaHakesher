@@ -20,7 +20,10 @@ function updateFrequencyBandDisplay() {
 
   const limits = getFrequencyBandLimits(band);
   if (limits) {
-    limitsDiv.textContent = t("validator.validRange", { min: limits.min, max: limits.max });
+    limitsDiv.textContent = t("validator.validRange", {
+      min: limits.min,
+      max: limits.max,
+    });
   }
 
   frequencyInput.value = "";
@@ -54,7 +57,11 @@ function validateFrequency() {
     frequencyInput.classList.remove("invalid");
     return true;
   } else {
-    errorDiv.textContent = t("error.freqOutOfRange", { min: limits.min, max: limits.max, band });
+    errorDiv.textContent = t("error.freqOutOfRange", {
+      min: limits.min,
+      max: limits.max,
+      band,
+    });
     errorDiv.classList.add("show");
     frequencyInput.classList.add("invalid");
     return false;
@@ -89,7 +96,11 @@ function validateStandbyFrequency() {
     frequencyInput.classList.remove("invalid");
     return true;
   } else {
-    errorDiv.textContent = t("error.freqOutOfRange", { min: limits.min, max: limits.max, band });
+    errorDiv.textContent = t("error.freqOutOfRange", {
+      min: limits.min,
+      max: limits.max,
+      band,
+    });
     errorDiv.classList.add("show");
     frequencyInput.classList.add("invalid");
     return false;

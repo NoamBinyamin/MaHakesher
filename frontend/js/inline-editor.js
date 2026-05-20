@@ -40,7 +40,8 @@ function validateInlineFrequency(value, radio) {
   if (!value || value === "") return { valid: true, value: null };
 
   const frequency = parseFloat(value);
-  if (isNaN(frequency)) return { valid: false, error: t("inline.invalidNumber") };
+  if (isNaN(frequency))
+    return { valid: false, error: t("inline.invalidNumber") };
 
   const band = getFrequencyBandForDevice(radio.device_type);
   if (!band) return { valid: true, value: frequency };
@@ -51,7 +52,11 @@ function validateInlineFrequency(value, radio) {
   if (frequency < limits.min || frequency > limits.max) {
     return {
       valid: false,
-      error: t("error.freqOutOfRange", { min: limits.min, max: limits.max, band }),
+      error: t("error.freqOutOfRange", {
+        min: limits.min,
+        max: limits.max,
+        band,
+      }),
     };
   }
 
@@ -66,7 +71,11 @@ function checkFrequencyConflict(frequency, radio, isStandby) {
     if (r.id === radio.id) return false;
     if (r.site_id !== siteId) return false;
     if (r.frequency && Math.abs(r.frequency - frequency) < 0.001) return true;
-    if (r.standby_frequency && Math.abs(r.standby_frequency - frequency) < 0.001) return true;
+    if (
+      r.standby_frequency &&
+      Math.abs(r.standby_frequency - frequency) < 0.001
+    )
+      return true;
     return false;
   });
 
@@ -156,9 +165,14 @@ function createEditor(cell, radio, columnIndex) {
     optionValues.forEach((opt) => {
       const option = document.createElement("option");
       option.value = opt;
-      option.textContent = columnIndex === 11
-        ? t(opt === "Usable" ? "search.statusUsable" : "search.statusUnusable")
-        : opt;
+      option.textContent =
+        columnIndex === 11
+          ? t(
+              opt === "Usable"
+                ? "search.statusUsable"
+                : "search.statusUnusable",
+            )
+          : opt;
       if (opt === currentValue) option.selected = true;
       input.appendChild(option);
     });
@@ -243,7 +257,10 @@ function openInlineEditor(cell, radioId, columnIndex) {
   }
 
   // Live frequency conflict detection
-  if (COLUMN_CONFIG[columnIndex] && COLUMN_CONFIG[columnIndex].type === "number") {
+  if (
+    COLUMN_CONFIG[columnIndex] &&
+    COLUMN_CONFIG[columnIndex].type === "number"
+  ) {
     const isStandby = columnIndex === 7;
     input.addEventListener("input", () => {
       clearInlineWarning(cell);
@@ -386,7 +403,10 @@ function saveInlineEdit(cell, radioId, columnIndex, input, radio) {
       if (missionOwner && missionOwner !== newValue) {
         showInlineError(
           cell,
-          t("inline.missionOwnerMismatch", { owner: missionOwner, selected: newValue }),
+          t("inline.missionOwnerMismatch", {
+            owner: missionOwner,
+            selected: newValue,
+          }),
         );
         input.focus();
         return;
@@ -421,7 +441,10 @@ function saveInlineEdit(cell, radioId, columnIndex, input, radio) {
           renderMissionsTab();
         }
         // Update search tab if it's active
-        if (document.getElementById("search").classList.contains("active") && window.performSearch) {
+        if (
+          document.getElementById("search").classList.contains("active") &&
+          window.performSearch
+        ) {
           performSearch();
         }
       });
@@ -460,7 +483,12 @@ function closeInlineEditor(restoreOriginal = true) {
 // Editable column indices in order
 const EDITABLE_COLUMNS = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-function navigateToNextCell(currentCell, currentRadioId, currentColumnIndex, reverse) {
+function navigateToNextCell(
+  currentCell,
+  currentRadioId,
+  currentColumnIndex,
+  reverse,
+) {
   const row = currentCell.closest("tr");
   if (!row) return;
 
@@ -517,12 +545,16 @@ function navigateToNextCell(currentCell, currentRadioId, currentColumnIndex, rev
 }
 
 function findAdjacentRadioRow(currentRow, reverse) {
-  let sibling = reverse ? currentRow.previousElementSibling : currentRow.nextElementSibling;
+  let sibling = reverse
+    ? currentRow.previousElementSibling
+    : currentRow.nextElementSibling;
   while (sibling) {
     if (sibling.classList.contains("radio-row")) {
       return sibling;
     }
-    sibling = reverse ? sibling.previousElementSibling : sibling.nextElementSibling;
+    sibling = reverse
+      ? sibling.previousElementSibling
+      : sibling.nextElementSibling;
   }
   return null;
 }
@@ -531,7 +563,9 @@ function getRadioIdFromRow(row) {
   // Extract radio ID from an ondblclick attribute in the row
   const editableCell = row.querySelector("td[ondblclick]");
   if (!editableCell) return null;
-  const match = editableCell.getAttribute("ondblclick").match(/openInlineEditor\(this,\s*'([^']+)'/);
+  const match = editableCell
+    .getAttribute("ondblclick")
+    .match(/openInlineEditor\(this,\s*'([^']+)'/);
   return match ? match[1] : null;
 }
 

@@ -182,10 +182,11 @@ async function handleLinkExcelUpload(input) {
       const freqIdx = header.findIndex(
         (h) => h.includes("freq") || h.includes("mhz"),
       );
-      const bandIdx        = header.findIndex((h) => h.includes("band"));
-      const ownerIdx       = header.findIndex((h) => h.includes("owner"));
+      const bandIdx = header.findIndex((h) => h.includes("band"));
+      const ownerIdx = header.findIndex((h) => h.includes("owner"));
       const genericRoleIdx = header.findIndex(
-        (h) => h.includes("generic") || (h.includes("role") && !h.includes("owner")),
+        (h) =>
+          h.includes("generic") || (h.includes("role") && !h.includes("owner")),
       );
 
       if (nameIdx === -1) {
@@ -214,7 +215,9 @@ async function handleLinkExcelUpload(input) {
 
         const frequency = parseFloat(String(row[freqIdx] ?? "").trim());
         if (isNaN(frequency)) {
-          errors.push(t("import.link.invalidFreq", { row: i + 1, name: linkName }));
+          errors.push(
+            t("import.link.invalidFreq", { row: i + 1, name: linkName }),
+          );
           continue;
         }
 
@@ -224,7 +227,9 @@ async function handleLinkExcelUpload(input) {
         if (!frequencyBand)
           frequencyBand = getBandForFrequency(frequency) || "";
         if (!frequencyBand) {
-          errors.push(t("error.noBandDetected", { row: i + 1, freq: frequency }));
+          errors.push(
+            t("error.noBandDetected", { row: i + 1, freq: frequency }),
+          );
           continue;
         }
 
@@ -260,12 +265,15 @@ async function handleLinkExcelUpload(input) {
           (l) => Math.abs(Number(l.frequency) - frequency) < 0.001,
         );
         if (dupFreq || batchFreqs.has(frequency)) {
-          errors.push(t("import.link.freqDup", { row: i + 1, freq: frequency }));
+          errors.push(
+            t("import.link.freqDup", { row: i + 1, freq: frequency }),
+          );
           continue;
         }
 
-        const owner       = ownerIdx       >= 0 ? String(row[ownerIdx]       || "").trim() : "";
-        const genericRole = genericRoleIdx >= 0 ? String(row[genericRoleIdx] || "").trim() : "";
+        const owner = ownerIdx >= 0 ? String(row[ownerIdx] || "").trim() : "";
+        const genericRole =
+          genericRoleIdx >= 0 ? String(row[genericRoleIdx] || "").trim() : "";
 
         // Validate owner against known list (empty owner is allowed)
         if (owner) {
@@ -274,7 +282,9 @@ async function handleLinkExcelUpload(input) {
             (o) => o.name.toLowerCase() === owner.toLowerCase(),
           );
           if (!ownerValid) {
-            errors.push(t("import.link.unknownOwner", { row: i + 1, name: owner }));
+            errors.push(
+              t("import.link.unknownOwner", { row: i + 1, name: owner }),
+            );
             continue;
           }
         }
@@ -291,7 +301,9 @@ async function handleLinkExcelUpload(input) {
           batchNames.add(nameLower);
           batchFreqs.add(frequency);
         } catch (err) {
-          errors.push(t("import.link.saveFailed", { row: i + 1, name: linkName }));
+          errors.push(
+            t("import.link.saveFailed", { row: i + 1, name: linkName }),
+          );
         }
       }
 
@@ -302,7 +314,10 @@ async function handleLinkExcelUpload(input) {
       if (errors.length > 0) {
         _showLinkImportErrors(errors, imported);
       } else if (imported > 0) {
-        showNotification(t("notify.linksImported", { count: imported }), "success");
+        showNotification(
+          t("notify.linksImported", { count: imported }),
+          "success",
+        );
       } else {
         showNotification(t("notify.noValidLinks"), "warning");
       }
@@ -366,7 +381,13 @@ function downloadLinkTemplate() {
   const ws = XLSX.utils.aoa_to_sheet(template);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Links");
-  ws["!cols"] = [{ wch: 20 }, { wch: 14 }, { wch: 12 }, { wch: 20 }, { wch: 18 }];
+  ws["!cols"] = [
+    { wch: 20 },
+    { wch: 14 },
+    { wch: 12 },
+    { wch: 20 },
+    { wch: 18 },
+  ];
   XLSX.writeFile(wb, "link_dictionary_template.xlsx");
 }
 

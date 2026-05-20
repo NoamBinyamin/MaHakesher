@@ -15,15 +15,19 @@ async function apiCall(endpoint, method = "GET", data = null) {
 
     if (!response.ok) {
       // Session expired — clear local auth state and prompt re-login
-      if (response.status === 401 && endpoint !== '/login' && endpoint !== '/me') {
-        localStorage.removeItem('mahakesher-token');
+      if (
+        response.status === 401 &&
+        endpoint !== "/login" &&
+        endpoint !== "/me"
+      ) {
+        localStorage.removeItem("mahakesher-token");
         if (window._handleSessionExpired) window._handleSessionExpired();
       }
       let errorMsg = `API Error: ${response.status}`;
       try {
         const errorData = await response.json();
         if (errorData.error) errorMsg = errorData.error;
-        if (errorData.details) errorMsg += ': ' + errorData.details.join(', ');
+        if (errorData.details) errorMsg += ": " + errorData.details.join(", ");
       } catch (_) {}
       throw new Error(errorMsg);
     }
@@ -79,7 +83,9 @@ async function apiLogin(username, password) {
 }
 
 async function apiLogout() {
-  try { await apiCall("/logout", "POST"); } catch (_) {}
+  try {
+    await apiCall("/logout", "POST");
+  } catch (_) {}
   localStorage.removeItem("mahakesher-token");
 }
 
@@ -87,28 +93,44 @@ async function apiMe() {
   return apiCall("/me");
 }
 
-async function apiGetUsers()              { return apiCall('/users'); }
-async function apiUpdateUserRole(username, role) { return apiCall(`/users/${encodeURIComponent(username)}`, 'POST', { role }); }
+async function apiGetUsers() {
+  return apiCall("/users");
+}
+async function apiUpdateUserRole(username, role) {
+  return apiCall(`/users/${encodeURIComponent(username)}`, "POST", { role });
+}
 
-window.apiLogin          = apiLogin;
-window.apiLogout         = apiLogout;
-window.apiMe             = apiMe;
-window.apiGetUsers       = apiGetUsers;
+window.apiLogin = apiLogin;
+window.apiLogout = apiLogout;
+window.apiMe = apiMe;
+window.apiGetUsers = apiGetUsers;
 window.apiUpdateUserRole = apiUpdateUserRole;
 
 // ==================== Config CRUD ====================
 
-async function createOwner(data) { return apiCall('/config/owners', 'POST', data); }
-async function updateOwner(id, data) { return apiCall(`/config/owners/${id}`, 'POST', data); }
-async function deleteOwner(id) { return apiCall(`/config/owners/${id}`, 'DELETE'); }
+async function createOwner(data) {
+  return apiCall("/config/owners", "POST", data);
+}
+async function updateOwner(id, data) {
+  return apiCall(`/config/owners/${id}`, "POST", data);
+}
+async function deleteOwner(id) {
+  return apiCall(`/config/owners/${id}`, "DELETE");
+}
 
-async function createDevice(data) { return apiCall('/config/devices', 'POST', data); }
-async function updateDevice(id, data) { return apiCall(`/config/devices/${id}`, 'POST', data); }
-async function deleteDevice(id) { return apiCall(`/config/devices/${id}`, 'DELETE'); }
+async function createDevice(data) {
+  return apiCall("/config/devices", "POST", data);
+}
+async function updateDevice(id, data) {
+  return apiCall(`/config/devices/${id}`, "POST", data);
+}
+async function deleteDevice(id) {
+  return apiCall(`/config/devices/${id}`, "DELETE");
+}
 
-window.createOwner  = createOwner;
-window.updateOwner  = updateOwner;
-window.deleteOwner  = deleteOwner;
+window.createOwner = createOwner;
+window.updateOwner = updateOwner;
+window.deleteOwner = deleteOwner;
 window.createDevice = createDevice;
 window.updateDevice = updateDevice;
 window.deleteDevice = deleteDevice;

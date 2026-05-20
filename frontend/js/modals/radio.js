@@ -55,7 +55,8 @@ function openRadioModal(radioId) {
   ownerSelect.disabled = !!radio.mission_name;
   standbyOwnerSelect.disabled = !!radio.standby_mission;
   document.getElementById("radioRole").readOnly = !!radio.mission_name;
-  document.getElementById("radioStandbyRole").readOnly = !!radio.standby_mission;
+  document.getElementById("radioStandbyRole").readOnly =
+    !!radio.standby_mission;
 
   // Remove old listeners before adding new ones (avoids accumulation across modal opens)
   const missionSelect = document.getElementById("radioMission");
@@ -65,7 +66,10 @@ function openRadioModal(radioId) {
     missionSelect.removeEventListener("change", _missionChangeHandler);
   }
   if (_standbyMissionChangeHandler) {
-    standbyMissionSelect.removeEventListener("change", _standbyMissionChangeHandler);
+    standbyMissionSelect.removeEventListener(
+      "change",
+      _standbyMissionChangeHandler,
+    );
   }
 
   _missionChangeHandler = () => {
@@ -219,7 +223,10 @@ function closeAddRadioModal() {
 
 async function saveNewRadio() {
   const deviceType = document.getElementById("addRadioDeviceType").value;
-  const quantity = parseInt(document.getElementById("addRadioQuantity").value, 10);
+  const quantity = parseInt(
+    document.getElementById("addRadioQuantity").value,
+    10,
+  );
 
   if (!deviceType) {
     showNotification(t("error.fillRequired"), "error");
@@ -243,7 +250,7 @@ async function saveNewRadio() {
         standby_owner: null,
         status: "Usable",
         notes: "",
-      })
+      }),
     );
     await Promise.all(requests);
 
@@ -274,11 +281,14 @@ function showRadioFreqSuggestions(inputId, dropdownId) {
   if (!input || !dropdown) return;
 
   const query = input.value.trim();
-  if (!query) { dropdown.style.display = "none"; return; }
+  if (!query) {
+    dropdown.style.display = "none";
+    return;
+  }
 
   const lq = query.toLowerCase();
   const matches = (window.appState.links || []).filter((l) =>
-    l.link_name.toLowerCase().includes(lq)
+    l.link_name.toLowerCase().includes(lq),
   );
 
   if (matches.length === 0) {
@@ -297,7 +307,7 @@ function showRadioFreqSuggestions(inputId, dropdownId) {
       >
         <strong style="color: var(--gray-900);">${escapeHTML(l.link_name)}</strong>
         <span style="color: var(--primary-color); font-weight: 500; direction: ltr;">${formatFrequency(l.frequency, l.frequency_band)} MHz &nbsp;<span style="color: var(--gray-400); font-size: 0.75rem;">${escapeHTML(l.frequency_band || "")}</span></span>
-      </div>`
+      </div>`,
     )
     .join("");
 

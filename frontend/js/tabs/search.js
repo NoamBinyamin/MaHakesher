@@ -68,7 +68,8 @@ function performSearch() {
     if (results.length === 0) {
       countEl.innerHTML = `<span style="color: var(--danger-color);"><i class="fa-solid fa-circle-xmark" style="margin-left: 0.3rem;"></i> ${t("search.noResults")}</span>`;
     } else {
-      const key = results.length === 1 ? "search.results" : "search.resultsPlural";
+      const key =
+        results.length === 1 ? "search.results" : "search.resultsPlural";
       countEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--success-color); margin-left: 0.3rem;"></i> ${t(key, { count: results.length })}`;
     }
   }
@@ -119,9 +120,9 @@ function performSearch() {
           <td style="word-wrap: break-word;">${radio.notes || "-"}</td>
           <td style="word-wrap: break-word; white-space: nowrap; text-align: center;">
             <div style="display: inline-flex; gap: 0.3rem; align-items: center; justify-content: center;">
-              <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t('overview.btn.swapStates'))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>
-              <button class="mission-btn btn-primary"   data-tooltip="${escapeHTML(t('overview.btn.edit'))}"       onclick="openRadioModal('${radio.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button class="mission-btn btn-danger"    data-tooltip="${escapeHTML(t('overview.btn.clear'))}"      onclick="clearDevice('${radio.id}')"><i class="fa-solid fa-eraser"></i></button>
+              <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("overview.btn.swapStates"))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>
+              <button class="mission-btn btn-primary"   data-tooltip="${escapeHTML(t("overview.btn.edit"))}"       onclick="openRadioModal('${radio.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="mission-btn btn-danger"    data-tooltip="${escapeHTML(t("overview.btn.clear"))}"      onclick="clearDevice('${radio.id}')"><i class="fa-solid fa-eraser"></i></button>
             </div>
           </td>
         `;

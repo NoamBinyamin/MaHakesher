@@ -28,7 +28,8 @@ async function saveNewLink() {
     frequency: parseFloat(document.getElementById("linkFrequency").value),
     frequency_band: document.getElementById("linkFrequencyBand").value || null,
     owner: document.getElementById("linkOwner").value,
-    generic_role: document.getElementById("linkGenericRole").value.trim() || null,
+    generic_role:
+      document.getElementById("linkGenericRole").value.trim() || null,
   };
 
   if (!linkData.link_name || !linkData.frequency || !linkData.frequency_band) {
@@ -37,18 +38,27 @@ async function saveNewLink() {
   }
 
   const dupName = window.appState.links.find(
-    (l) => l.link_name.toLowerCase() === linkData.link_name.toLowerCase()
+    (l) => l.link_name.toLowerCase() === linkData.link_name.toLowerCase(),
   );
   if (dupName) {
-    showNotification(t("error.linkNameExists", { name: linkData.link_name }), "error");
+    showNotification(
+      t("error.linkNameExists", { name: linkData.link_name }),
+      "error",
+    );
     return;
   }
 
   const dupFreq = window.appState.links.find(
-    (l) => Math.abs(l.frequency - linkData.frequency) < 0.001
+    (l) => Math.abs(l.frequency - linkData.frequency) < 0.001,
   );
   if (dupFreq) {
-    showNotification(t("error.freqAlreadyUsed", { freq: linkData.frequency, name: dupFreq.link_name }), "error");
+    showNotification(
+      t("error.freqAlreadyUsed", {
+        freq: linkData.frequency,
+        name: dupFreq.link_name,
+      }),
+      "error",
+    );
     return;
   }
 
@@ -70,9 +80,12 @@ function openEditLinkModal(linkId) {
   document.getElementById("editLinkName").value = link.link_name;
   document.getElementById("editLinkFrequency").value = link.frequency;
   document.getElementById("editLinkFrequencyBand").value =
-    link.frequency_band || (link.frequency ? getBandForFrequency(parseFloat(link.frequency)) : "") || "";
+    link.frequency_band ||
+    (link.frequency ? getBandForFrequency(parseFloat(link.frequency)) : "") ||
+    "";
   document.getElementById("editLinkOwner").value = link.owner || "";
-  document.getElementById("editLinkGenericRole").value = link.generic_role || "";
+  document.getElementById("editLinkGenericRole").value =
+    link.generic_role || "";
   document.getElementById("editLinkModal").classList.remove("hidden");
   disableBodyScroll();
 }
@@ -87,9 +100,11 @@ async function saveEditLink() {
   const linkData = {
     link_name: document.getElementById("editLinkName").value,
     frequency: parseFloat(document.getElementById("editLinkFrequency").value),
-    frequency_band: document.getElementById("editLinkFrequencyBand").value || null,
+    frequency_band:
+      document.getElementById("editLinkFrequencyBand").value || null,
     owner: document.getElementById("editLinkOwner").value,
-    generic_role: document.getElementById("editLinkGenericRole").value.trim() || null,
+    generic_role:
+      document.getElementById("editLinkGenericRole").value.trim() || null,
   };
 
   if (!linkData.link_name || !linkData.frequency || !linkData.frequency_band) {
@@ -98,18 +113,30 @@ async function saveEditLink() {
   }
 
   const dupName = window.appState.links.find(
-    (l) => l.id !== linkId && l.link_name.toLowerCase() === linkData.link_name.toLowerCase()
+    (l) =>
+      l.id !== linkId &&
+      l.link_name.toLowerCase() === linkData.link_name.toLowerCase(),
   );
   if (dupName) {
-    showNotification(t("error.linkNameExists", { name: linkData.link_name }), "error");
+    showNotification(
+      t("error.linkNameExists", { name: linkData.link_name }),
+      "error",
+    );
     return;
   }
 
   const dupFreq = window.appState.links.find(
-    (l) => l.id !== linkId && Math.abs(l.frequency - linkData.frequency) < 0.001
+    (l) =>
+      l.id !== linkId && Math.abs(l.frequency - linkData.frequency) < 0.001,
   );
   if (dupFreq) {
-    showNotification(t("error.freqAlreadyUsed", { freq: linkData.frequency, name: dupFreq.link_name }), "error");
+    showNotification(
+      t("error.freqAlreadyUsed", {
+        freq: linkData.frequency,
+        name: dupFreq.link_name,
+      }),
+      "error",
+    );
     return;
   }
 
