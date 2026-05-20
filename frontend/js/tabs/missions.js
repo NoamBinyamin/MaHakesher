@@ -3,7 +3,9 @@
 // Animations play on first load and after a data refresh — not on every re-render
 let _missionsAnimatePending = true;
 
-function markMissionsForAnimation() { _missionsAnimatePending = true; }
+function markMissionsForAnimation() {
+  _missionsAnimatePending = true;
+}
 window.markMissionsForAnimation = markMissionsForAnimation;
 
 // ----- Helper: Check if a radio satisfies a mission requirement -----
@@ -91,7 +93,7 @@ function isAvailableForMission(radio) {
 // Used by Activate Standby to avoid touching any device that has ANY data.
 function _currentStateIsEmpty(radio) {
   if (radio.status !== "Usable") return false;
-  if (radio.mission_name) return false;              // any value including "Routine"
+  if (radio.mission_name) return false; // any value including "Routine"
   if (radio.owner) return false;
   if (radio.role) return false;
   if (radio.frequency != null && radio.frequency !== 0) return false;
@@ -123,7 +125,7 @@ function _missionProgressCell(count, total, colorVar) {
   if (total <= 10) {
     const segs = Array.from({ length: total }, (_, i) => {
       const filled = i < capped;
-      const delay  = filled ? `animation-delay:${i * 45}ms` : "";
+      const delay = filled ? `animation-delay:${i * 45}ms` : "";
       return `<span class="prog-seg${filled ? " filled" : ""}" style="${filled ? `background:${colorVar};` : ""}${delay}"></span>`;
     }).join("");
     barHtml = `<div class="prog-segs${isFull ? " prog-full" : ""}" style="--shimmer-delay:${shimmerDelay}">${segs}</div>`;
@@ -137,21 +139,38 @@ function _missionProgressCell(count, total, colorVar) {
 
 function _buildMissionRow(mission, actions) {
   const reqCount = mission.requirements ? mission.requirements.length : 0;
-  const allocatedDevices = (window.appState.radios || []).filter((r) => isAllocatedToMission(r, mission)).length;
-  const standbyDevices   = (window.appState.radios || []).filter((r) => r.standby_mission === mission.name && r.status === "Usable").length;
-  const extraDevices     = (window.appState.radios || []).filter((r) => isExtraDeviceForMission(r, mission)).length;
+  const allocatedDevices = (window.appState.radios || []).filter((r) =>
+    isAllocatedToMission(r, mission),
+  ).length;
+  const standbyDevices = (window.appState.radios || []).filter(
+    (r) => r.standby_mission === mission.name && r.status === "Usable",
+  ).length;
+  const extraDevices = (window.appState.radios || []).filter((r) =>
+    isExtraDeviceForMission(r, mission),
+  ).length;
   const isOverdue = mission.time_end && new Date(mission.time_end) < new Date();
   const overdueBadge = isOverdue
     ? `<span title="${t("missions.overdueTitle")}" style="display:inline-block;margin-inline-start:0.5rem;padding:0.1rem 0.45rem;background:var(--danger-color);color:#fff;border-radius:4px;font-size:0.72rem;font-weight:700;vertical-align:middle;">${t("missions.overdueBadge")}</span>`
     : "";
-  const ownerColor  = mission.owner ? getOwnerColor(mission.owner) : null;
-  const borderStyle = ownerColor ? `border-right: 4px solid ${ownerColor};` : "";
+  const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
+  const borderStyle = ownerColor
+    ? `border-right: 4px solid ${ownerColor};`
+    : "";
 
-  const allocatedCell = _missionProgressCell(allocatedDevices, reqCount, "var(--success-color)");
-  const standbyCell   = _missionProgressCell(standbyDevices,   reqCount, "var(--warning-color)");
-  const extraCell     = extraDevices > 0
-    ? `<td><span class="mission-extra-badge">+${extraDevices}</span></td>`
-    : `<td style="color:var(--gray-400)">-</td>`;
+  const allocatedCell = _missionProgressCell(
+    allocatedDevices,
+    reqCount,
+    "var(--success-color)",
+  );
+  const standbyCell = _missionProgressCell(
+    standbyDevices,
+    reqCount,
+    "var(--warning-color)",
+  );
+  const extraCell =
+    extraDevices > 0
+      ? `<td><span class="mission-extra-badge">+${extraDevices}</span></td>`
+      : `<td style="color:var(--gray-400)">-</td>`;
 
   const isFullyAllocated = reqCount > 0 && allocatedDevices >= reqCount;
   // Shimmer delay matches when the last filled segment finishes animating
@@ -174,7 +193,16 @@ function _buildMissionRow(mission, actions) {
   return row;
 }
 
-function _appendMissionSection(container, titleKey, missions, buildActions, emptyKey, extraStyle = "", subtitleKey = "", showHelp = false) {
+function _appendMissionSection(
+  container,
+  titleKey,
+  missions,
+  buildActions,
+  emptyKey,
+  extraStyle = "",
+  subtitleKey = "",
+  showHelp = false,
+) {
   const row = document.createElement("div");
   row.className = "missions-section-header-row";
   if (extraStyle) row.style.cssText = extraStyle;
@@ -225,7 +253,9 @@ function _appendMissionSection(container, titleKey, missions, buildActions, empt
     <tbody></tbody>`;
 
   const tbody = table.querySelector("tbody");
-  missions.forEach((m) => tbody.appendChild(_buildMissionRow(m, buildActions(m))));
+  missions.forEach((m) =>
+    tbody.appendChild(_buildMissionRow(m, buildActions(m))),
+  );
   container.appendChild(table);
 }
 
@@ -248,9 +278,13 @@ function renderMissionsTab() {
     container.classList.add("missions-no-anim");
   }
 
-  const planned  = (window.appState.plannedMissions  || []).filter((m) => m.status === "planned");
-  const active   = (window.appState.plannedMissions  || []).filter((m) => m.status === "active");
-  const archived =  window.appState.archivedMissions || [];
+  const planned = (window.appState.plannedMissions || []).filter(
+    (m) => m.status === "planned",
+  );
+  const active = (window.appState.plannedMissions || []).filter(
+    (m) => m.status === "active",
+  );
+  const archived = window.appState.archivedMissions || [];
 
   // ----- Planned Missions (compact: no allocation columns, no delete) -----
   const plannedRow = document.createElement("div");
@@ -277,9 +311,11 @@ function renderMissionsTab() {
       <tbody></tbody>`;
     const plannedTbody = plannedTable.querySelector("tbody");
     planned.forEach((m) => {
-      const reqCount    = m.requirements ? m.requirements.length : 0;
-      const ownerColor  = m.owner ? getOwnerColor(m.owner) : null;
-      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
+      const reqCount = m.requirements ? m.requirements.length : 0;
+      const ownerColor = m.owner ? getOwnerColor(m.owner) : null;
+      const borderStyle = ownerColor
+        ? `border-right:4px solid ${ownerColor};`
+        : "";
       const row = document.createElement("tr");
       row.innerHTML = `
         <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(m.name)}</strong></td>
@@ -296,14 +332,23 @@ function renderMissionsTab() {
   }
 
   // ----- Active Missions — admin only -----
-  _appendMissionSection(container, "missions.activeMissions", active, (m) => `
+  _appendMissionSection(
+    container,
+    "missions.activeMissions",
+    active,
+    (m) => `
     <button class="mission-btn btn-primary admin-only" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
     <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.allocate"))}" onclick="allocateMission('${m.id}')"><i class="fa-solid fa-bolt"></i></button>
     <button class="mission-btn admin-only" style="background:#0ea5e9;" data-tooltip="${escapeHTML(t("missions.btn.allocateToStandby"))}" onclick="allocateToStandby('${m.id}')"><i class="fa-solid fa-hourglass-half"></i></button>
     <button class="mission-btn btn-secondary admin-only" data-tooltip="${escapeHTML(t("missions.btn.activateStandby"))}" onclick="activateStandbyBtn('${m.id}')"><i class="fa-solid fa-circle-play"></i></button>
     <button class="mission-btn btn-warning admin-only" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="returnToPlanning('${m.id}')"><i class="fa-solid fa-rotate-left"></i></button>
     <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("missions.btn.finishAndArchive"))}" onclick="endMission('${m.id}')"><i class="fa-solid fa-flag-checkered"></i></button>
-  `, "missions.noActive", "margin-top:1.5rem", "missions.sub.active", true);
+  `,
+    "missions.noActive",
+    "margin-top:1.5rem",
+    "missions.sub.active",
+    true,
+  );
 
   // ----- Archived Missions -----
   const archivedRow = document.createElement("div");
@@ -331,8 +376,10 @@ function renderMissionsTab() {
     const tbody = table.querySelector("tbody");
     archived.forEach((mission) => {
       const reqCount = mission.requirements ? mission.requirements.length : 0;
-      const ownerColor  = mission.owner ? getOwnerColor(mission.owner) : null;
-      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
+      const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
+      const borderStyle = ownerColor
+        ? `border-right:4px solid ${ownerColor};`
+        : "";
       const row = document.createElement("tr");
       row.innerHTML = `
         <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(mission.name)}</strong></td>
@@ -353,6 +400,16 @@ function deviceMatchesBand(device, frequencyBand) {
   const deviceBand =
     device.frequency_band || getFrequencyBandForDevice(device.device_type);
   return deviceBand === frequencyBand;
+}
+
+// ----- Shared post-action refresh -----
+// Every mission action that mutates server state ends with this sequence.
+async function _refreshAfterMissionAction() {
+  await loadAllData();
+  await loadConfiguration();
+  populateSelects();
+  renderMissionsTab();
+  renderOverview();
 }
 
 // ----- Mission Actions -----
@@ -433,12 +490,10 @@ async function startMission(missionId) {
 
   if (requirementsToFulfill.length === 0 && roleUpdates.length === 0) {
     // All requirements already satisfied — still activate the mission status
-    try { await apiCall(`/planned_missions/${missionId}/activate`, "POST"); } catch (_) {}
-    await loadAllData();
-    await loadConfiguration();
-    populateSelects();
-    renderMissionsTab();
-    renderOverview();
+    try {
+      await apiCall(`/planned_missions/${missionId}/activate`, "POST");
+    } catch (_) {}
+    await _refreshAfterMissionAction();
     showNotification(t("error.missionFulfilled"), "info");
     return;
   }
@@ -526,18 +581,16 @@ async function startMission(missionId) {
   }
 
   // Activate mission status (assignments done client-side, status updated server-side)
-  try { await apiCall(`/planned_missions/${missionId}/activate`, "POST"); } catch (_) {}
+  try {
+    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
+  } catch (_) {}
 
   // Show popup for failed requirements if any
   if (failedRequirements.length > 0) {
     showFailedRequirementsModal(failedRequirements);
   }
 
-  await loadAllData();
-  await loadConfiguration();
-  populateSelects();
-  renderMissionsTab();
-  renderOverview();
+  await _refreshAfterMissionAction();
 }
 
 // ── Finish Mission Planning: planned → active (status only, no allocation) ──
@@ -547,10 +600,7 @@ async function finishMissionPlanning(missionId) {
   try {
     await apiCall(`/planned_missions/${missionId}/activate`, "POST");
     showNotification(t("notify.missionActivated"), "success");
-    await loadAllData();
-    await loadConfiguration();
-    populateSelects();
-    renderMissionsTab();
+    await _refreshAfterMissionAction();
   } catch (_) {}
 }
 
@@ -562,11 +612,7 @@ async function returnToPlanning(missionId) {
   try {
     await apiCall(`/planned_missions/${missionId}/deactivate`, "POST");
     showNotification(t("notify.missionDeactivated"), "success");
-    await loadAllData();
-    await loadConfiguration();
-    populateSelects();
-    renderMissionsTab();
-    renderOverview();
+    await _refreshAfterMissionAction();
   } catch (_) {}
 }
 
@@ -575,7 +621,7 @@ async function returnToPlanning(missionId) {
 // Current on the same radio (if free) or another matching free radio.
 
 async function _activateStandbyInternal(mission) {
-  const missionName  = mission.name;
+  const missionName = mission.name;
   const missionOwner = mission.owner;
 
   const standbyRadios = (window.appState.radios || []).filter(
@@ -584,25 +630,26 @@ async function _activateStandbyInternal(mission) {
   if (standbyRadios.length === 0) return { promoted: 0, failed: 0 };
 
   let promoted = 0;
-  let failed   = 0;
-  const usedIds   = new Set();
+  let failed = 0;
+  const usedIds = new Set();
   const batchUpdates = [];
 
   for (const standby of standbyRadios) {
-    const band = standby.frequency_band || getFrequencyBandForDevice(standby.device_type);
+    const band =
+      standby.frequency_band || getFrequencyBandForDevice(standby.device_type);
 
     // Option 1: promote on the same radio if ALL its current-state fields are free
     if (_currentStateIsEmpty(standby)) {
       batchUpdates.push({
         ...standby,
-        mission_name:      missionName,
-        frequency:         standby.standby_frequency,
-        owner:             missionOwner || standby.standby_owner,
-        role:              standby.standby_role,
-        standby_mission:   null,
+        mission_name: missionName,
+        frequency: standby.standby_frequency,
+        owner: missionOwner || standby.standby_owner,
+        role: standby.standby_role,
+        standby_mission: null,
         standby_frequency: null,
-        standby_owner:     null,
-        standby_role:      null,
+        standby_owner: null,
+        standby_role: null,
       });
       promoted++;
       usedIds.add(standby.id);
@@ -615,7 +662,8 @@ async function _activateStandbyInternal(mission) {
         r.id !== standby.id &&
         !usedIds.has(r.id) &&
         _currentStateIsEmpty(r) &&
-        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) === band &&
+        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) ===
+          band &&
         r.site_id === standby.site_id,
     );
 
@@ -623,16 +671,16 @@ async function _activateStandbyInternal(mission) {
       batchUpdates.push({
         ...freeRadio,
         mission_name: missionName,
-        frequency:    standby.standby_frequency,
-        owner:        missionOwner || standby.standby_owner,
-        role:         standby.standby_role,
+        frequency: standby.standby_frequency,
+        owner: missionOwner || standby.standby_owner,
+        role: standby.standby_role,
       });
       batchUpdates.push({
         ...standby,
-        standby_mission:   null,
+        standby_mission: null,
         standby_frequency: null,
-        standby_owner:     null,
-        standby_role:      null,
+        standby_owner: null,
+        standby_role: null,
       });
       promoted++;
       usedIds.add(freeRadio.id);
@@ -657,47 +705,66 @@ async function _activateStandbyInternal(mission) {
 
 async function activateStandbyBtn(missionId) {
   if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
-  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+  const mission = window.appState.plannedMissions.find(
+    (m) => m.id === missionId,
+  );
+  if (!mission) {
+    showNotification(t("error.missionNotFound"), "error");
+    return;
+  }
 
   const { promoted, failed } = await _activateStandbyInternal(mission);
 
   if (promoted === 0 && failed === 0) {
     showNotification(t("notify.noStandbyDevices"), "info");
   } else {
-    if (promoted > 0) showNotification(t("notify.standbyActivated", { count: promoted, name: mission.name }), "success");
-    if (failed   > 0) showNotification(t("notify.standbyActivateFailed", { count: failed }), "warning");
+    if (promoted > 0)
+      showNotification(
+        t("notify.standbyActivated", { count: promoted, name: mission.name }),
+        "success",
+      );
+    if (failed > 0)
+      showNotification(
+        t("notify.standbyActivateFailed", { count: failed }),
+        "warning",
+      );
   }
 
-  await loadAllData();
-  await loadConfiguration();
-  populateSelects();
-  renderMissionsTab();
-  renderOverview();
+  await _refreshAfterMissionAction();
 }
 
 // ── Allocate: Activate Standby first, then allocate remaining to Current ──
 
 async function allocateMission(missionId) {
   if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
-  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+  const mission = window.appState.plannedMissions.find(
+    (m) => m.id === missionId,
+  );
+  if (!mission) {
+    showNotification(t("error.missionNotFound"), "error");
+    return;
+  }
   if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error"); return;
+    showNotification(t("error.missionHasNoReqs"), "error");
+    return;
   }
 
-  const missionName  = mission.name;
+  const missionName = mission.name;
   const missionOwner = mission.owner;
 
   // Step 1: promote standby devices to current first
   await _activateStandbyInternal(mission);
   await loadAllData();
 
-  const freshMission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  const freshMission = window.appState.plannedMissions.find(
+    (m) => m.id === missionId,
+  );
   if (!freshMission) return;
 
   // Step 2: find which requirements are still unmet in Current
-  const allocatedRadios = window.appState.radios.filter((r) => isAllocatedToMission(r, freshMission));
+  const allocatedRadios = window.appState.radios.filter((r) =>
+    isAllocatedToMission(r, freshMission),
+  );
   const usedIds = new Set();
   const toFulfill = [];
 
@@ -706,19 +773,25 @@ async function allocateMission(missionId) {
       if (usedIds.has(r.id)) return false;
       return radioSatisfiesRequirement(r, freshMission, req);
     });
-    if (match) { usedIds.add(match.id); } else { toFulfill.push(req); }
+    if (match) {
+      usedIds.add(match.id);
+    } else {
+      toFulfill.push(req);
+    }
   }
 
   if (toFulfill.length === 0) {
     showNotification(t("error.missionFulfilled"), "info");
-    await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
+    await _refreshAfterMissionAction();
     return;
   }
 
   // Step 3: assign remaining requirements to free devices (Current field)
-  let available = window.appState.radios.filter((r) => isAvailableForMission(r));
+  let available = window.appState.radios.filter((r) =>
+    isAvailableForMission(r),
+  );
   const assignments = [];
-  const failedReqs  = [];
+  const failedReqs = [];
 
   for (const req of toFulfill) {
     const idx = available.findIndex((r) => {
@@ -744,76 +817,122 @@ async function allocateMission(missionId) {
         updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
           mission_name: missionName,
-          frequency:    requirement.frequency || radio.frequency,
-          owner:        missionOwner || radio.owner,
-          role:         requirement.role || null,
+          frequency: requirement.frequency || radio.frequency,
+          owner: missionOwner || radio.owner,
+          role: requirement.role || null,
         })),
       });
-      showNotification(t("notify.missionAllocated", { count: assignments.length, name: missionName }), "success");
+      showNotification(
+        t("notify.missionAllocated", {
+          count: assignments.length,
+          name: missionName,
+        }),
+        "success",
+      );
     } catch (error) {
-      showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
+      showNotification(
+        t("notify.missionAllocFailed", { error: error.message }),
+        "error",
+      );
     }
   }
 
   if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
 
-  await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
+  await _refreshAfterMissionAction();
 }
 
 // ── Allocate to Standby: only assigns to devices with NO current allocation ──
 
 async function allocateToStandby(missionId) {
   if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
-  if (!mission) { showNotification(t("error.missionNotFound"), "error"); return; }
+  const mission = window.appState.plannedMissions.find(
+    (m) => m.id === missionId,
+  );
+  if (!mission) {
+    showNotification(t("error.missionNotFound"), "error");
+    return;
+  }
   if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error"); return;
+    showNotification(t("error.missionHasNoReqs"), "error");
+    return;
   }
 
-  const missionName  = mission.name;
+  const missionName = mission.name;
   const missionOwner = mission.owner;
 
   // Determine which requirements are already satisfied (current or standby)
-  const currentRadios = window.appState.radios.filter((r) => r.mission_name === mission.name && r.status === "Usable");
-  const standbyRadios = window.appState.radios.filter((r) => r.standby_mission === mission.name && r.status === "Usable");
-  const usedCurrent   = new Set();
-  const usedStandby   = new Set();
-  const toFulfill     = [];
+  const currentRadios = window.appState.radios.filter(
+    (r) => r.mission_name === mission.name && r.status === "Usable",
+  );
+  const standbyRadios = window.appState.radios.filter(
+    (r) => r.standby_mission === mission.name && r.status === "Usable",
+  );
+  const usedCurrent = new Set();
+  const usedStandby = new Set();
+  const toFulfill = [];
 
   for (const req of mission.requirements) {
-    const matchCurrent = currentRadios.find((r) => { if (usedCurrent.has(r.id)) return false; return radioSatisfiesRequirement(r, mission, req); });
-    if (matchCurrent) { usedCurrent.add(matchCurrent.id); continue; }
+    const matchCurrent = currentRadios.find((r) => {
+      if (usedCurrent.has(r.id)) return false;
+      return radioSatisfiesRequirement(r, mission, req);
+    });
+    if (matchCurrent) {
+      usedCurrent.add(matchCurrent.id);
+      continue;
+    }
 
     const matchStandby = standbyRadios.find((r) => {
       if (usedStandby.has(r.id)) return false;
       const band = r.frequency_band || getFrequencyBandForDevice(r.device_type);
       if (band !== req.frequencyBand) return false;
       if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) { const site = window.appState.sites.find((s) => s.id === r.site_id); if (!site || site.sector_id !== req.sectorId) return false; }
-      if (req.frequency && r.standby_frequency && Math.abs(r.standby_frequency - req.frequency) > 0.01) return false;
+      if (req.sectorId) {
+        const site = window.appState.sites.find((s) => s.id === r.site_id);
+        if (!site || site.sector_id !== req.sectorId) return false;
+      }
+      if (
+        req.frequency &&
+        r.standby_frequency &&
+        Math.abs(r.standby_frequency - req.frequency) > 0.01
+      )
+        return false;
       return true;
     });
-    if (matchStandby) { usedStandby.add(matchStandby.id); continue; }
+    if (matchStandby) {
+      usedStandby.add(matchStandby.id);
+      continue;
+    }
 
     toFulfill.push(req);
   }
 
-  if (toFulfill.length === 0) { showNotification(t("error.missionFulfilled"), "info"); return; }
+  if (toFulfill.length === 0) {
+    showNotification(t("error.missionFulfilled"), "info");
+    return;
+  }
 
   // Only block devices already assigned to THIS mission in current state
-  let available = window.appState.radios.filter((r) => isAvailableForStandbyMission(r) && r.mission_name !== missionName);
+  let available = window.appState.radios.filter(
+    (r) => isAvailableForStandbyMission(r) && r.mission_name !== missionName,
+  );
   const assignments = [];
-  const failedReqs  = [];
+  const failedReqs = [];
 
   for (const req of toFulfill) {
     const idx = available.findIndex((r) => {
       if (!deviceMatchesBand(r, req.frequencyBand)) return false;
       if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) { const site = window.appState.sites.find((s) => s.id === r.site_id); if (!site || site.sector_id !== req.sectorId) return false; }
+      if (req.sectorId) {
+        const site = window.appState.sites.find((s) => s.id === r.site_id);
+        if (!site || site.sector_id !== req.sectorId) return false;
+      }
       return true;
     });
-    if (idx !== -1) { assignments.push({ radio: available[idx], requirement: req }); available.splice(idx, 1); }
-    else failedReqs.push(req);
+    if (idx !== -1) {
+      assignments.push({ radio: available[idx], requirement: req });
+      available.splice(idx, 1);
+    } else failedReqs.push(req);
   }
 
   if (assignments.length > 0) {
@@ -821,21 +940,30 @@ async function allocateToStandby(missionId) {
       await apiCall("/batch/update_radios", "POST", {
         updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
-          standby_mission:   missionName,
-          standby_owner:     missionOwner || radio.standby_owner,
+          standby_mission: missionName,
+          standby_owner: missionOwner || radio.standby_owner,
           standby_frequency: requirement.frequency || radio.standby_frequency,
-          standby_role:      requirement.role || null,
+          standby_role: requirement.role || null,
         })),
       });
-      showNotification(t("notify.missionStandby", { count: assignments.length, name: missionName }), "success");
+      showNotification(
+        t("notify.missionStandby", {
+          count: assignments.length,
+          name: missionName,
+        }),
+        "success",
+      );
     } catch (error) {
-      showNotification(t("notify.missionAllocFailed", { error: error.message }), "error");
+      showNotification(
+        t("notify.missionAllocFailed", { error: error.message }),
+        "error",
+      );
     }
   }
 
   if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
 
-  await loadAllData(); await loadConfiguration(); populateSelects(); renderMissionsTab(); renderOverview();
+  await _refreshAfterMissionAction();
 }
 
 // ----- Place Mission on Standby (similar to Start, but for standby state) -----
@@ -1015,22 +1143,22 @@ async function deletePlannedMission(missionId, missionName) {
   if (!confirm(t("confirm.deleteMission", { name: missionName }))) return;
   try {
     await apiCall(`/planned_missions/${missionId}`, "DELETE");
-    showNotification(t("notify.missionDeleted", { name: missionName }), "success");
-    await loadAllData();
-    await loadConfiguration();
-    populateSelects();
-    renderMissionsTab();
+    showNotification(
+      t("notify.missionDeleted", { name: missionName }),
+      "success",
+    );
+    await _refreshAfterMissionAction();
   } catch (e) {
     showNotification(t("notify.missionDeleteFailed"), "error");
   }
 }
 
-window.deletePlannedMission   = deletePlannedMission;
-window.finishMissionPlanning  = finishMissionPlanning;
-window.returnToPlanning       = returnToPlanning;
-window.activateStandbyBtn     = activateStandbyBtn;
-window.allocateMission        = allocateMission;
-window.allocateToStandby      = allocateToStandby;
+window.deletePlannedMission = deletePlannedMission;
+window.finishMissionPlanning = finishMissionPlanning;
+window.returnToPlanning = returnToPlanning;
+window.activateStandbyBtn = activateStandbyBtn;
+window.allocateMission = allocateMission;
+window.allocateToStandby = allocateToStandby;
 
 function showFailedRequirementsModal(failedRequirements) {
   const modal = document.createElement("div");
@@ -1430,11 +1558,7 @@ async function savePlannedMission() {
 
     markModalClean("planMissionModal");
     closePlanMissionModal();
-    await loadAllData();
-    await loadConfiguration();
-    populateSelects();
-    renderMissionsTab();
-    renderOverview();
+    await _refreshAfterMissionAction();
     if (window.renderTimelineTab) renderTimelineTab();
   } catch (error) {
     showNotification(
@@ -1485,7 +1609,9 @@ function openMissionAllocHelp() {
     },
   ];
 
-  const sectionsHtml = sections.map((s) => `
+  const sectionsHtml = sections
+    .map(
+      (s) => `
     <div class="alloc-help-section">
       <div class="alloc-help-section-title">
         <span class="alloc-help-icon" style="background:${s.color};"><i class="fa-solid ${s.icon}"></i></span>
@@ -1494,13 +1620,15 @@ function openMissionAllocHelp() {
       <ul class="alloc-help-list">
         ${s.steps.map((step) => `<li>${escapeHTML(step)}</li>`).join("")}
       </ul>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 
   const modal = document.createElement("div");
   modal.className = "modal";
   modal.id = "missionAllocHelpModal";
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 700px;">
+    <div class="modal-content" style="max-width: 850px;">
       <div class="modal-header">
         <h3>
           <i class="fa-solid fa-circle-question" style="color:var(--primary-color);margin-left:0.5rem;"></i>
@@ -1518,7 +1646,9 @@ function openMissionAllocHelp() {
     </div>`;
 
   document.body.appendChild(modal);
-  modal.addEventListener("click", (e) => { if (e.target === modal) closeMissionAllocHelp(); });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeMissionAllocHelp();
+  });
   disableBodyScroll();
 }
 
@@ -1627,7 +1757,12 @@ async function handleMissionExcelUpload(input) {
           window.appState.config.frequency_bands || {},
         );
         if (!validBands.includes(frequencyBand)) {
-          errors.push(t("import.mission.unknownBand", { row: i + 1, band: frequencyBand }));
+          errors.push(
+            t("import.mission.unknownBand", {
+              row: i + 1,
+              band: frequencyBand,
+            }),
+          );
           continue;
         }
 
@@ -1665,7 +1800,9 @@ async function handleMissionExcelUpload(input) {
             );
             resolvedSectorName = sector ? sector.name : null;
           } else {
-            errors.push(t("import.mission.siteNotFound", { row: i + 1, name: siteName }));
+            errors.push(
+              t("import.mission.siteNotFound", { row: i + 1, name: siteName }),
+            );
             continue;
           }
         } else if (sectorName) {
@@ -1676,7 +1813,12 @@ async function handleMissionExcelUpload(input) {
             sectorId = sector.id;
             resolvedSectorName = sector.name;
           } else {
-            errors.push(t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }));
+            errors.push(
+              t("import.mission.sectorNotFound", {
+                row: i + 1,
+                name: sectorName,
+              }),
+            );
             continue;
           }
         }
@@ -1700,7 +1842,10 @@ async function handleMissionExcelUpload(input) {
       if (errors.length > 0) {
         showExcelImportErrorsModal(errors, imported);
       } else if (imported > 0) {
-        showNotification(t("notify.reqsImported", { count: imported }), "success");
+        showNotification(
+          t("notify.reqsImported", { count: imported }),
+          "success",
+        );
       } else {
         showNotification(t("notify.noValidReqs"), "error");
       }

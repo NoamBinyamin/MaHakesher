@@ -518,14 +518,9 @@ function _tlCard(mission) {
   // Pick text color based on actual background luminance
   let textMain, textMeta;
   if (ownerColor && ownerColor.startsWith("#")) {
-    const h    = ownerColor.replace("#", "");
-    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-    const r = parseInt(full.slice(0, 2), 16);
-    const g = parseInt(full.slice(2, 4), 16);
-    const b = parseInt(full.slice(4, 6), 16);
-    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    textMain = lum > 0.55 ? "#1e293b" : "#f1f5f9";
-    textMeta = lum > 0.55 ? "rgba(30,41,59,0.65)" : "rgba(241,245,249,0.75)";
+    const fg = contrastColor(ownerColor);
+    textMain = fg;
+    textMeta = fg === "white" ? "rgba(241,245,249,0.75)" : "rgba(30,41,59,0.65)";
   } else {
     textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
     textMeta = isDark ? "#94a3b8" : "var(--gray-600)";

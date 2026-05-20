@@ -387,13 +387,37 @@
       <div id="search" class="tab-content">
         <div class="tab-header">
           <h2 data-i18n="search.title">Search & Filter</h2>
-          <button
-            class="btn btn-secondary"
-            onclick="clearSearch()"
-            data-i18n="search.clear"
-          >
-            <i class="fa-solid fa-xmark"></i> Clear
-          </button>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div style="display: flex; gap: 0.5rem;">
+              <button
+                id="searchFreqModeBtn"
+                class="btn btn-primary"
+                onclick="setOverviewFreqMode('frequency')"
+                data-i18n="overview.modeFrequency"
+                data-i18n-title="overview.freqModeTitle"
+                title="Show frequencies as numbers"
+              >
+                <i class="fa-solid fa-wave-square"></i> Frequency
+              </button>
+              <button
+                id="searchLinkModeBtn"
+                class="btn btn-secondary"
+                onclick="setOverviewFreqMode('link')"
+                data-i18n="overview.modeLink"
+                data-i18n-title="overview.linkModeTitle"
+                title="Show frequencies as link names"
+              >
+                <i class="fa-solid fa-link"></i> Link
+              </button>
+            </div>
+            <button
+              class="btn btn-secondary"
+              onclick="clearSearch()"
+              data-i18n="search.clear"
+            >
+              <i class="fa-solid fa-xmark"></i> Clear
+            </button>
+          </div>
         </div>
 
         <div class="search-panel" style="padding: 1.25rem 1.5rem">
@@ -548,37 +572,18 @@
               <col style="width: 6%" />
             </colgroup>
             <thead>
-              <tr class="global-header">
-                <th class="col-band" data-i18n="overview.col.band">
-                  Frequency Band
-                </th>
-                <th class="col-device" data-i18n="overview.col.device">
-                  Device Type
-                </th>
-                <th
-                  colspan="4"
-                  class="state-header"
-                  data-i18n="overview.col.current"
-                >
-                  Current State
-                </th>
-                <th
-                  colspan="4"
-                  class="state-header"
-                  data-i18n="overview.col.standby"
-                >
-                  Standby State
-                </th>
-                <th class="col-status" data-i18n="overview.col.status">
-                  Status
-                </th>
+              <tr class="global-header" style="text-align: center;">
                 <th class="col-site" data-i18n="overview.col.site">Site</th>
+                <th class="col-band" data-i18n="overview.col.band">Frequency Band</th>
+                <th class="col-device" data-i18n="overview.col.device">Device Type</th>
+                <th colspan="4" class="state-header" data-i18n="overview.col.current">Current State</th>
+                <th colspan="4" class="state-header" data-i18n="overview.col.standby">Standby State</th>
+                <th class="col-status" data-i18n="overview.col.status">Status</th>
                 <th class="col-notes" data-i18n="overview.col.notes">Notes</th>
-                <th class="col-actions" data-i18n="overview.col.actions">
-                  Actions
-                </th>
+                <th class="col-actions" data-i18n="overview.col.actions">Actions</th>
               </tr>
-              <tr class="sub-header">
+              <tr class="sub-header" style="text-align: center;">
+                <th></th>
                 <th></th>
                 <th></th>
                 <th data-i18n="overview.col.frequency">Frequency</th>
@@ -589,7 +594,6 @@
                 <th data-i18n="overview.col.owner">Owner</th>
                 <th data-i18n="overview.col.mission">Mission</th>
                 <th data-i18n="overview.col.role">Role</th>
-                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>

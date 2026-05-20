@@ -150,6 +150,23 @@ function enableBodyScroll() {
 window.disableBodyScroll = disableBodyScroll;
 window.enableBodyScroll = enableBodyScroll;
 
+// ==================== Color Utilities ====================
+
+// Returns a dark or light text color that contrasts well against a hex background.
+// Used wherever owner-colored badges or cards need readable text.
+function contrastColor(hex) {
+  if (!hex || !hex.startsWith("#")) return "white";
+  const h    = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.55 ? "#1e293b" : "white";
+}
+
+window.contrastColor = contrastColor;
+
 // ==================== Frequency Formatting ====================
 
 function formatFrequency(freq, bandName) {

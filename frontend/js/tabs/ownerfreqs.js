@@ -57,24 +57,10 @@ function _missionsForFrequency(frequency) {
   return { active, planned };
 }
 
-// Returns "black" or "white" depending on which has better contrast against a hex bg color
-function _contrastColor(hex) {
-  if (!hex || !hex.startsWith("#")) return "white";
-  const h = hex.replace("#", "");
-  const full = h.length === 3
-    ? h.split("").map((c) => c + c).join("")
-    : h;
-  const r = parseInt(full.slice(0, 2), 16);
-  const g = parseInt(full.slice(2, 4), 16);
-  const b = parseInt(full.slice(4, 6), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.55 ? "#1e293b" : "white";
-}
-
 function _missionBadge({ mission, roles }) {
   const color = mission.owner ? getOwnerColor(mission.owner) : null;
   const bg    = color || "var(--gray-300)";
-  const fg    = color ? _contrastColor(color) : "var(--gray-700)";
+  const fg    = color ? contrastColor(color) : "var(--gray-700)";
   const label = roles.length
     ? `${escapeHTML(mission.name)} - ${roles.map(escapeHTML).join(" | ")}`
     : escapeHTML(mission.name);

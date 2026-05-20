@@ -104,24 +104,24 @@ function performSearch() {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-          <td style="padding-right: 4rem; word-wrap: break-word;">${radio.frequency_band}</td>
+          <td style="word-wrap: break-word; font-weight: 600;">${siteName}</td>
+          <td style="word-wrap: break-word;">${radio.frequency_band}</td>
           <td style="word-wrap: break-word;">${radio.device_type}</td>
-          <td style="word-wrap: break-word; ${freqCellStyle}">${radio.frequency || "-"}</td>
+          <td style="word-wrap: break-word; ${freqCellStyle}">${escapeHTML(String(getFreqLabel(radio.frequency, radio.frequency_band)))}</td>
           <td style="word-wrap: break-word; ${ownerCellStyle}">${radio.owner || "-"}</td>
           <td style="word-wrap: break-word; ${missionCellStyle}">${radio.mission_name || "-"}</td>
           <td style="word-wrap: break-word; ${missionCellStyle}">${radio.role || "-"}</td>
-          <td style="word-wrap: break-word; ${standbyFreqCellStyle}">${radio.standby_frequency || "-"}</td>
+          <td style="word-wrap: break-word; ${standbyFreqCellStyle}">${escapeHTML(String(getFreqLabel(radio.standby_frequency, radio.frequency_band)))}</td>
           <td style="word-wrap: break-word; ${standbyOwnerCellStyle}">${radio.standby_owner || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}">${radio.standby_mission || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}">${radio.standby_role || "-"}</td>
           <td style="word-wrap: break-word;"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
-          <td style="word-wrap: break-word;">${siteName}</td>
           <td style="word-wrap: break-word;">${radio.notes || "-"}</td>
-          <td style="word-wrap: break-word; white-space: nowrap;">
-            <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
-              <button class="btn btn-sm btn-edit" title="${t('overview.btn.swapStates')}" onclick="switchDeviceStates('${radio.id}')">🔄</button>
-              <button class="btn btn-sm btn-edit" title="${t('overview.btn.edit')}" onclick="openRadioModal('${radio.id}')">✏️</button>
-              <button class="btn btn-sm btn-danger" title="${t('overview.btn.clear')}" onclick="clearDevice('${radio.id}')">📃</button>
+          <td style="word-wrap: break-word; white-space: nowrap; text-align: center;">
+            <div style="display: inline-flex; gap: 0.3rem; align-items: center; justify-content: center;">
+              <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t('overview.btn.swapStates'))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>
+              <button class="mission-btn btn-primary"   data-tooltip="${escapeHTML(t('overview.btn.edit'))}"       onclick="openRadioModal('${radio.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="mission-btn btn-danger"    data-tooltip="${escapeHTML(t('overview.btn.clear'))}"      onclick="clearDevice('${radio.id}')"><i class="fa-solid fa-eraser"></i></button>
             </div>
           </td>
         `;

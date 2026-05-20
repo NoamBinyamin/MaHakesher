@@ -87,23 +87,30 @@ function getBadgeLabel(entity_type) {
   return map[entity_type] || entity_type.replace(/_/g, " ");
 }
 
-const FIELD_LABELS = {
-  frequency:         t("history.field.frequency"),
-  owner:             t("history.field.owner"),
-  mission_name:      t("history.field.mission"),
-  role:              t("history.field.role"),
-  status:            t("history.field.status"),
-  standby_frequency: t("history.field.standbyFreq"),
-  standby_owner:     t("history.field.standbyOwner"),
-  standby_mission:   t("history.field.standbyMission"),
-  standby_role:      t("history.field.standbyRole"),
-  name:              t("history.field.name"),
-  coordinates_utm:   t("history.field.coordinates"),
-  site_type:         t("history.field.siteType"),
-  link_name:         t("history.field.linkName"),
-  frequency_band:    t("history.field.band"),
-  generic_role:      t("history.field.genericRole"),
+// Mapping from raw field names to i18n keys.
+// Kept as a static key→key map (not key→translated-string) so that t() is
+// called at render time — not at module load — which makes language switching work.
+const _FIELD_KEY_MAP = {
+  frequency:         "history.field.frequency",
+  owner:             "history.field.owner",
+  mission_name:      "history.field.mission",
+  role:              "history.field.role",
+  status:            "history.field.status",
+  standby_frequency: "history.field.standbyFreq",
+  standby_owner:     "history.field.standbyOwner",
+  standby_mission:   "history.field.standbyMission",
+  standby_role:      "history.field.standbyRole",
+  name:              "history.field.name",
+  coordinates_utm:   "history.field.coordinates",
+  site_type:         "history.field.siteType",
+  link_name:         "history.field.linkName",
+  frequency_band:    "history.field.band",
+  generic_role:      "history.field.genericRole",
 };
+
+function _getFieldLabel(field) {
+  return _FIELD_KEY_MAP[field] ? t(_FIELD_KEY_MAP[field]) : field.replace(/_/g, " ");
+}
 
 // ---- Entity lookup helpers ----
 
@@ -143,7 +150,7 @@ function parseDiff(entry) {
     const fields = new Set([...Object.keys(before), ...Object.keys(after)]);
     return [...fields].map((f) => ({
       rawField: f,
-      field:    FIELD_LABELS[f] || f,
+      field:    _getFieldLabel(f),
       before:   before[f] ?? null,
       after:    after[f]  ?? null,
     }));

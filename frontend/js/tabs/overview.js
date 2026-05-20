@@ -14,11 +14,12 @@ window.setOverviewFreqMode = function (mode) {
   window.overviewFreqMode = mode;
   _syncFreqModeButtons(mode);
   renderOverview();
+  if (window.performSearch) performSearch();
 };
 
 function _syncFreqModeButtons(mode) {
   const isFreq = mode === "frequency";
-  // Tab-header buttons
+  // Overview tab-header buttons
   const freqBtn = document.getElementById("overviewFreqModeBtn");
   const linkBtn = document.getElementById("overviewLinkModeBtn");
   if (freqBtn) freqBtn.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
@@ -28,6 +29,11 @@ function _syncFreqModeButtons(mode) {
   const pillLink = document.getElementById("overviewModePillLink");
   if (pillFreq) pillFreq.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
   if (pillLink) pillLink.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
+  // Search tab buttons
+  const searchFreq = document.getElementById("searchFreqModeBtn");
+  const searchLink = document.getElementById("searchLinkModeBtn");
+  if (searchFreq) searchFreq.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
+  if (searchLink) searchLink.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
 }
 
 // Show the floating pill when the tab-header buttons scroll out of view
