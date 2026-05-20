@@ -105,19 +105,19 @@ function performSearch() {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-          <td style="word-wrap: break-word; font-weight: 600;">${siteName}</td>
-          <td style="word-wrap: break-word;">${radio.frequency_band}</td>
-          <td style="word-wrap: break-word;">${radio.device_type}</td>
-          <td style="word-wrap: break-word; ${freqCellStyle}">${escapeHTML(String(getFreqLabel(radio.frequency, radio.frequency_band)))}</td>
-          <td style="word-wrap: break-word; ${ownerCellStyle}">${radio.owner || "-"}</td>
-          <td style="word-wrap: break-word; ${missionCellStyle}">${radio.mission_name || "-"}</td>
-          <td style="word-wrap: break-word; ${missionCellStyle}">${radio.role || "-"}</td>
-          <td style="word-wrap: break-word; ${standbyFreqCellStyle}">${escapeHTML(String(getFreqLabel(radio.standby_frequency, radio.frequency_band)))}</td>
-          <td style="word-wrap: break-word; ${standbyOwnerCellStyle}">${radio.standby_owner || "-"}</td>
-          <td style="word-wrap: break-word; ${standbyMissionCellStyle}">${radio.standby_mission || "-"}</td>
-          <td style="word-wrap: break-word; ${standbyMissionCellStyle}">${radio.standby_role || "-"}</td>
-          <td style="word-wrap: break-word;"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
-          <td style="word-wrap: break-word;">${radio.notes || "-"}</td>
+          <td style="word-wrap: break-word; font-weight: 600; text-align: center;">${siteName}</td>
+          <td style="word-wrap: break-word; text-align: center;">${radio.frequency_band}</td>
+          <td style="word-wrap: break-word; text-align: center;">${radio.device_type}</td>
+          <td style="word-wrap: break-word; text-align: center; ${freqCellStyle}">${escapeHTML(String(getFreqLabel(radio.frequency, radio.frequency_band)))}</td>
+          <td style="word-wrap: break-word; text-align: center; ${ownerCellStyle}">${radio.owner || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center; ${missionCellStyle}">${radio.mission_name || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center; ${missionCellStyle}">${radio.role || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center; ${standbyFreqCellStyle}">${escapeHTML(String(getFreqLabel(radio.standby_frequency, radio.frequency_band)))}</td>
+          <td style="word-wrap: break-word; text-align: center; ${standbyOwnerCellStyle}">${radio.standby_owner || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center; ${standbyMissionCellStyle}">${radio.standby_mission || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center; ${standbyMissionCellStyle}">${radio.standby_role || "-"}</td>
+          <td style="word-wrap: break-word; text-align: center;"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
+          <td style="word-wrap: break-word; text-align: center;">${radio.notes || "-"}</td>
           <td style="word-wrap: break-word; white-space: nowrap; text-align: center;">
             <div style="display: inline-flex; gap: 0.3rem; align-items: center; justify-content: center;">
               <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("overview.btn.swapStates"))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>

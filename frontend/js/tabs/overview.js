@@ -42,6 +42,13 @@ function _syncFreqModeButtons(mode) {
     searchFreq.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
   if (searchLink)
     searchLink.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
+  // Search tab pill buttons
+  const searchPillFreq = document.getElementById("searchModePillFreq");
+  const searchPillLink = document.getElementById("searchModePillLink");
+  if (searchPillFreq)
+    searchPillFreq.className = isFreq ? "btn btn-primary" : "btn btn-secondary";
+  if (searchPillLink)
+    searchPillLink.className = isFreq ? "btn btn-secondary" : "btn btn-primary";
 }
 
 // Show the floating pill when the tab-header buttons scroll out of view
@@ -72,6 +79,41 @@ function _syncFreqModeButtons(mode) {
     document.querySelectorAll(".tab-button").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.getAttribute("data-tab") !== "overview") {
+          pill.classList.remove("visible");
+        }
+      });
+    });
+  });
+})();
+
+// Show the floating pill when the search tab-header buttons scroll out of view
+(function _initSearchPill() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const pill = document.getElementById("searchModePill");
+    const target = document.getElementById("searchFreqModeBtn");
+    if (!pill || !target || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const onSearch = document
+          .getElementById("search")
+          ?.classList.contains("active");
+        if (entry.isIntersecting || !onSearch) {
+          pill.classList.remove("visible");
+          pill.setAttribute("aria-hidden", "true");
+        } else {
+          pill.classList.add("visible");
+          pill.setAttribute("aria-hidden", "false");
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(target);
+
+    // Also hide when switching away from the search tab
+    document.querySelectorAll(".tab-button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.getAttribute("data-tab") !== "search") {
           pill.classList.remove("visible");
         }
       });

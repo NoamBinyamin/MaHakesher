@@ -287,6 +287,45 @@ html.dark #overviewModePill {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* Floating freq/link mode pill — appears when the search header scrolls out of view */
+#searchModePill {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4rem);
+  display: flex;
+  gap: 0.35rem;
+  background: var(--bg-card, white);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  padding: 0.3rem 0.4rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+#searchModePill.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#searchModePill .btn {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+}
+
+html.dark #searchModePill {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 .tab-header h2 {
   font-size: 1.65rem;
   color: var(--gray-900);

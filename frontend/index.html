@@ -572,28 +572,28 @@
               <col style="width: 6%" />
             </colgroup>
             <thead>
-              <tr class="global-header" style="text-align: center;">
-                <th class="col-site" data-i18n="overview.col.site">Site</th>
-                <th class="col-band" data-i18n="overview.col.band">Frequency Band</th>
-                <th class="col-device" data-i18n="overview.col.device">Device Type</th>
-                <th colspan="4" class="state-header" data-i18n="overview.col.current">Current State</th>
-                <th colspan="4" class="state-header" data-i18n="overview.col.standby">Standby State</th>
-                <th class="col-status" data-i18n="overview.col.status">Status</th>
-                <th class="col-notes" data-i18n="overview.col.notes">Notes</th>
-                <th class="col-actions" data-i18n="overview.col.actions">Actions</th>
+              <tr class="global-header">
+                <th class="col-site" style="text-align: center;" data-i18n="overview.col.site">Site</th>
+                <th class="col-band" style="text-align: center;" data-i18n="overview.col.band">Frequency Band</th>
+                <th class="col-device" style="text-align: center;" data-i18n="overview.col.device">Device Type</th>
+                <th colspan="4" class="state-header" style="text-align: center;" data-i18n="overview.col.current">Current State</th>
+                <th colspan="4" class="state-header" style="text-align: center;" data-i18n="overview.col.standby">Standby State</th>
+                <th class="col-status" style="text-align: center;" data-i18n="overview.col.status">Status</th>
+                <th class="col-notes" style="text-align: center;" data-i18n="overview.col.notes">Notes</th>
+                <th class="col-actions" style="text-align: center;" data-i18n="overview.col.actions">Actions</th>
               </tr>
-              <tr class="sub-header" style="text-align: center;">
+              <tr class="sub-header">
                 <th></th>
                 <th></th>
                 <th></th>
-                <th data-i18n="overview.col.frequency">Frequency</th>
-                <th data-i18n="overview.col.owner">Owner</th>
-                <th data-i18n="overview.col.mission">Mission</th>
-                <th data-i18n="overview.col.role">Role</th>
-                <th data-i18n="overview.col.frequency">Frequency</th>
-                <th data-i18n="overview.col.owner">Owner</th>
-                <th data-i18n="overview.col.mission">Mission</th>
-                <th data-i18n="overview.col.role">Role</th>
+                <th style="text-align: center;" data-i18n="overview.col.frequency">Frequency</th>
+                <th style="text-align: center;" data-i18n="overview.col.owner">Owner</th>
+                <th style="text-align: center;" data-i18n="overview.col.mission">Mission</th>
+                <th style="text-align: center;" data-i18n="overview.col.role">Role</th>
+                <th style="text-align: center;" data-i18n="overview.col.frequency">Frequency</th>
+                <th style="text-align: center;" data-i18n="overview.col.owner">Owner</th>
+                <th style="text-align: center;" data-i18n="overview.col.mission">Mission</th>
+                <th style="text-align: center;" data-i18n="overview.col.role">Role</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -2860,6 +2860,20 @@
         <i class="fa-solid fa-wave-square"></i> Frequency
       </button>
       <button id="overviewModePillLink" class="btn btn-secondary"
+        onclick="setOverviewFreqMode('link')"
+        data-i18n="overview.modeLink">
+        <i class="fa-solid fa-link"></i> Link
+      </button>
+    </div>
+
+    <!-- Floating freq/link mode pill (search tab) -->
+    <div id="searchModePill" aria-hidden="true">
+      <button id="searchModePillFreq" class="btn btn-primary"
+        onclick="setOverviewFreqMode('frequency')"
+        data-i18n="overview.modeFrequency">
+        <i class="fa-solid fa-wave-square"></i> Frequency
+      </button>
+      <button id="searchModePillLink" class="btn btn-secondary"
         onclick="setOverviewFreqMode('link')"
         data-i18n="overview.modeLink">
         <i class="fa-solid fa-link"></i> Link
