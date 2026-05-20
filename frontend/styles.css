@@ -1231,6 +1231,7 @@ html.dark #planMissionForm {
 
 .overview-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   background: white;
   margin-bottom: 1rem;
@@ -2498,6 +2499,14 @@ html.view-mode .btn-danger {
 html.view-mode th.col-actions,
 html.view-mode td.col-actions {
   display: none !important;
+}
+
+html.view-mode .overview-table {
+  table-layout: auto;
+}
+
+html.view-mode col.col-actions {
+  width: 0 !important;
 }
 
 /* Hide the mission-actions cell — but not for user-role (they have mission edit buttons) */

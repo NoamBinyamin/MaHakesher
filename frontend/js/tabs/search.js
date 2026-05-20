@@ -118,7 +118,7 @@ function performSearch() {
           <td style="word-wrap: break-word; text-align: center; ${standbyMissionCellStyle}">${radio.standby_role || "-"}</td>
           <td style="word-wrap: break-word; text-align: center;"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
           <td style="word-wrap: break-word; text-align: center;">${radio.notes || "-"}</td>
-          <td style="word-wrap: break-word; white-space: nowrap; text-align: center;">
+          <td class="col-actions" style="word-wrap: break-word; white-space: nowrap; text-align: center;">
             <div style="display: inline-flex; gap: 0.3rem; align-items: center; justify-content: center;">
               <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("overview.btn.swapStates"))}" onclick="switchDeviceStates('${radio.id}')"><i class="fa-solid fa-right-left"></i></button>
               <button class="mission-btn btn-primary"   data-tooltip="${escapeHTML(t("overview.btn.edit"))}"       onclick="openRadioModal('${radio.id}')"><i class="fa-solid fa-pen-to-square"></i></button>

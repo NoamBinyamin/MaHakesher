@@ -1088,3 +1088,5 @@
 {"timestamp": "2026-05-20T09:35:59.981288", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
 {"timestamp": "2026-05-20T09:36:02.519037", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
 {"timestamp": "2026-05-20T09:41:17.953030", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-20T23:49:00.118269", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-20T23:54:52.464205", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
