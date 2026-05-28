@@ -47,6 +47,9 @@ function isUserRole() {
 function isAdminRole() {
   return getCurrentUserRole() === "admin";
 }
+function getCurrentUsername() {
+  return _loggedInUser ? _loggedInUser.username : null;
+}
 
 // On page load — restore session if token is still valid
 async function restoreSession() {
@@ -266,6 +269,7 @@ window.isAuthenticated = isAuthenticated;
 window.getCurrentUserRole = getCurrentUserRole;
 window.isUserRole = isUserRole;
 window.isAdminRole = isAdminRole;
+window.getCurrentUsername = getCurrentUsername;
 window.guardAdminOnly = guardAdminOnly;
 window.toggleMode = toggleMode;
 window.openLoginModal = openLoginModal;
@@ -373,8 +377,7 @@ function setupTabNavigation() {
 
 function restoreLastTab() {
   const saved = localStorage.getItem("mahakesher-tab");
-  if (!saved || saved === "preferences") {
-    localStorage.setItem("mahakesher-tab", "overview");
+  if (!saved || saved === "overview") {
     return; // overview is already the default active tab
   }
   const btn = document.querySelector(`.tab-button[data-tab="${saved}"]`);
@@ -446,6 +449,11 @@ async function _pollForChanges() {
   // Skip poll while the user has a modal open — avoids overwriting mid-edit state
   const openModal = document.querySelector(".modal:not(.hidden)");
   if (openModal) return;
+
+  // Heartbeat — keeps the online indicator alive while the tab is open
+  if (isAuthenticated()) {
+    apiCall("/ping").catch(() => {});
+  }
 
   try {
     const { ts } = await fetch(window.API_BASE + "/version").then((r) =>

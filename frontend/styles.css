@@ -2376,6 +2376,26 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* ==================== Online indicator dot ==================== */
+
+@keyframes online-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70%  { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.online-dot-pulse {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-left: 0.6rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+  animation: online-glow 1.6s ease-out infinite;
+}
+
 /* ==================== Passkey shake animation ====================
 
 @keyframes passkey-shake {

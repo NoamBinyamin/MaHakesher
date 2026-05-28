@@ -35,7 +35,9 @@ async function apiCall(endpoint, method = "GET", data = null) {
     return await response.json();
   } catch (error) {
     console.error("API Error:", error);
-    showNotification("Error: " + error.message, "error");
+    if (endpoint !== "/login") {
+      showNotification("Error: " + error.message, "error");
+    }
     throw error;
   }
 }
@@ -96,8 +98,11 @@ async function apiMe() {
 async function apiGetUsers() {
   return apiCall("/users");
 }
-async function apiUpdateUserRole(username, role) {
-  return apiCall(`/users/${encodeURIComponent(username)}`, "POST", { role });
+async function apiUpdateUserRole(username, role, owner) {
+  return apiCall(`/users/${encodeURIComponent(username)}`, "POST", { role, owner: owner || null });
+}
+async function apiResetPassword(username, newPassword) {
+  return apiCall(`/users/${encodeURIComponent(username)}/reset_password`, "POST", { new_password: newPassword });
 }
 
 window.apiLogin = apiLogin;
@@ -105,6 +110,7 @@ window.apiLogout = apiLogout;
 window.apiMe = apiMe;
 window.apiGetUsers = apiGetUsers;
 window.apiUpdateUserRole = apiUpdateUserRole;
+window.apiResetPassword = apiResetPassword;
 
 // ==================== Config CRUD ====================
 

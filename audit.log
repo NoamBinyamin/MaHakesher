@@ -1092,3 +1092,23 @@
 {"timestamp": "2026-05-20T23:54:52.464205", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-28T10:54:40.030480+00:00", "action": "login", "entity_type": "user", "details": {"username": "ארבל"}}
 {"timestamp": "2026-05-28T11:13:26.583780+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T11:25:50.057118+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T11:26:33.626554+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T11:44:50.732603+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:47:32.422197+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:47:46.132446+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T11:47:52.166277+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "המדור החזק"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:47:57.033556+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "המדור היותר חזק"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:48:04.674644+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "בעלים איכותי"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:49:19.979072+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "בעלים שלא מסגיר"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:50:44.798209+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "מקושקשים ומבולבלים"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T11:51:53.851641+00:00", "action": "update", "entity_type": "user", "details": {"username": "מדור", "old_role": "user", "new_role": "user", "owner": "בעלים שלא מסגיר"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T12:05:35.466754+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T12:06:42.326211+00:00", "action": "update", "entity_type": "user", "details": {"username": "נועם", "action": "password_reset"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T12:07:30.492631+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T12:07:39.141444+00:00", "action": "update", "entity_type": "user", "details": {"username": "משתמש מדורי", "old_role": "user", "new_role": "user", "owner": "בעלים שלא מסגיר"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T12:11:32.210077+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T12:11:58.232015+00:00", "action": "update", "entity_type": "user", "details": {"username": "משתמש מדורי", "old_role": "user", "new_role": "user", "owner": "בעלים שלא מסגיר"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T12:13:46.473176+00:00", "action": "login", "entity_type": "user", "details": {"username": "משתמש מדורי"}}
+{"timestamp": "2026-05-28T12:15:10.658341+00:00", "action": "login", "entity_type": "user", "details": {"username": "אמיתי"}}
+{"timestamp": "2026-05-28T12:21:34.484409+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}

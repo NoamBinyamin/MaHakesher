@@ -76,6 +76,7 @@ const BADGE_COLORS = {
   full_backup: "#8b5cf6",
   owner: "#db2777",
   device: "#0d9488",
+  user: "#6366f1",
 };
 
 function getBadgeLabel(entity_type) {
@@ -89,6 +90,7 @@ function getBadgeLabel(entity_type) {
     full_backup: t("history.badge.fullBackup"),
     owner: t("history.badge.owner"),
     device: t("history.badge.device"),
+    user: t("history.badge.user"),
   };
   return map[entity_type] || entity_type.replace(/_/g, " ");
 }
@@ -230,6 +232,12 @@ function describeTitle(entry) {
         return t("history.update.device", {
           name: details.new_name || details.old_name || entity_id,
         });
+      if (entity_type === "user") {
+        const name = details.username || entity_id;
+        if (details.action === "password_reset")
+          return t("history.update.userPwdReset", { name });
+        return t("history.update.userRole", { name });
+      }
       return t("history.update.other", { type: entity_type });
     }
 
@@ -344,7 +352,7 @@ function renderHistoryTab() {
           e.entity_type === "mission" || e.entity_type === "archived_mission"
         );
       if (_historyFilter === "preferences")
-        return e.entity_type === "owner" || e.entity_type === "device";
+        return e.entity_type === "owner" || e.entity_type === "device" || e.entity_type === "user";
       return e.entity_type === _historyFilter;
     });
   }

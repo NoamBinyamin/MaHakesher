@@ -23,13 +23,17 @@ async function renderPreferencesTab() {
     _prefUsers = [];
   }
 
-  container.innerHTML = `
-    ${_renderLanguageSection()}
-    <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
-      <div style="flex:1;min-width:300px" id="prefOwnersSection"></div>
-      <div style="flex:1;min-width:300px" id="prefDevicesSection"></div>
-    </div>
-    <div style="margin-top:1.25rem" id="prefUsersSection"></div>`;
+  // Only build the skeleton on the first render — subsequent calls just
+  // refresh each section in-place to avoid wiping content mid-async-call.
+  if (!document.getElementById("prefOwnersSection")) {
+    container.innerHTML = `
+      ${_renderLanguageSection()}
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
+        <div style="flex:1;min-width:300px" id="prefOwnersSection"></div>
+        <div style="flex:1;min-width:300px" id="prefDevicesSection"></div>
+      </div>
+      <div style="margin-top:1.25rem" id="prefUsersSection"></div>`;
+  }
 
   _renderOwnersSection();
   _renderDevicesSection();
@@ -323,52 +327,79 @@ async function prefDeleteDevice(id, name) {
 
 const AVAILABLE_ROLES = ["admin", "user"];
 
+function _ownerBadge(ownerName) {
+  const color = getOwnerColor(ownerName);
+  return `<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:9999px;font-size:0.75rem;font-weight:600;background:${color};color:var(--gray-800);">${escapeHTML(ownerName || "—")}</span>`;
+}
+
 function _renderUsersSection() {
   const sec = document.getElementById("prefUsersSection");
   if (!sec) return;
 
-  const roleOpts = AVAILABLE_ROLES.map(
-    (r) => `<option value="${escapeHTML(r)}">${escapeHTML(r)}</option>`,
-  ).join("");
+  const ownerNames = (window.appState.config?.owners || []).map((o) => o.name);
 
-  const rows = _prefUsers
+  // Admins first, then users
+  const sorted = [..._prefUsers].sort((a, b) => {
+    if (a.role === b.role) return 0;
+    return a.role === "admin" ? -1 : 1;
+  });
+
+  const rows = sorted
     .map((u) => {
+      const onlineDot = u.online
+        ? `<span class="online-dot-pulse" title="${escapeHTML(t("pref.online"))}"></span>`
+        : `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gray-300);margin-left:0.6rem;vertical-align:middle;flex-shrink:0;" title="${escapeHTML(t("pref.offline"))}"></span>`;
       const lastLogin = u.last_login
         ? new Date(u.last_login).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
         : `<span style="color:var(--gray-400)">—</span>`;
-      if (_editingUsername === u.username) {
-        const opts = AVAILABLE_ROLES.map(
-          (r) =>
-            `<option value="${escapeHTML(r)}"${r === u.role ? " selected" : ""}>${escapeHTML(r)}</option>`,
+
+      const ownerDisplay = u.role === "admin"
+        ? `<span class="pref-admin-badge">${escapeHTML(t("pref.role.admin"))}</span>`
+        : _ownerBadge(u.owner);
+
+      // Admins have no editable owner — only "user" role rows get an edit button
+      if (_editingUsername === u.username && u.role === "user") {
+        const ownerOpts = ownerNames.map(
+          (o) => `<option value="${escapeHTML(o)}"${o === u.owner ? " selected" : ""}>${escapeHTML(o)}</option>`,
         ).join("");
         return `
         <tr class="pref-row pref-row-editing">
-          <td style="padding:0.5rem 0.75rem;font-weight:500">${escapeHTML(u.username)}</td>
+          <td style="padding:0.5rem 0.75rem;font-weight:500">${onlineDot}${escapeHTML(u.username)}</td>
           <td style="padding:0.5rem 0.75rem">
-            <select id="editUserRole_${escapeHTML(u.username)}" class="pref-input" style="width:auto">${opts}</select>
+            <span class="pref-band-badge">${escapeHTML(t(`pref.role.${u.role}`) || u.role)}</span>
+          </td>
+          <td style="padding:0.5rem 0.75rem">
+            <select id="editUserOwner_${escapeHTML(u.username)}" class="pref-input" style="width:auto">
+              <option value="">${escapeHTML(t("pref.selectOwner"))}</option>
+              ${ownerOpts}
+            </select>
           </td>
           <td style="padding:0.5rem 0.75rem;color:var(--gray-500);font-size:0.85rem">${lastLogin}</td>
-          <td style="padding:0.5rem 0.75rem;white-space:nowrap">
-            <button class="btn btn-sm btn-primary" onclick="prefSaveUserRole('${escapeHTML(u.username)}')">
-              <i class="fa-solid fa-check"></i>
-            </button>
-            <button class="btn btn-sm btn-secondary" onclick="prefCancelUserEdit()">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+          <td style="padding:0.5rem 0.75rem;white-space:nowrap;">
+            <div style="display:inline-flex;gap:0.3rem;">
+              <button class="btn btn-sm btn-primary" onclick="prefSaveUserRole('${escapeHTML(u.username)}')">
+                <i class="fa-solid fa-check"></i>
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="prefCancelUserEdit()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
           </td>
         </tr>`;
       }
       return `
       <tr class="pref-row">
-        <td style="padding:0.5rem 0.75rem;font-weight:500">${escapeHTML(u.username)}</td>
+        <td style="padding:0.5rem 0.75rem;font-weight:500">${onlineDot}${escapeHTML(u.username)}</td>
         <td style="padding:0.5rem 0.75rem">
-          <span class="pref-band-badge">${escapeHTML(u.role)}</span>
+          <span class="pref-band-badge">${escapeHTML(t(`pref.role.${u.role}`) || u.role)}</span>
         </td>
+        <td style="padding:0.5rem 0.75rem">${ownerDisplay}</td>
         <td style="padding:0.5rem 0.75rem;color:var(--gray-500);font-size:0.85rem">${lastLogin}</td>
-        <td style="padding:0.5rem 0.75rem;white-space:nowrap">
-          <button class="btn btn-sm btn-secondary view-mode-hide" onclick="prefEditUserRole('${escapeHTML(u.username)}')">
-            <i class="fa-solid fa-pen"></i>
-          </button>
+        <td style="padding:0.5rem 0.75rem;white-space:nowrap;">
+          <div style="display:inline-flex;gap:0.3rem;">
+            ${u.role === "user" ? `<button class="btn btn-sm btn-secondary view-mode-hide" title="${escapeHTML(t("pref.col.owner"))}" onclick="prefEditUserRole('${escapeHTML(u.username)}')"><i class="fa-solid fa-pen"></i></button>` : ""}
+            ${(u.role === "user" || u.username === getCurrentUsername()) ? `<button class="btn btn-sm btn-secondary view-mode-hide" title="${escapeHTML(t("pref.resetPwd.tooltip"))}" onclick="openResetPasswordModal('${escapeHTML(u.username)}')"><i class="fa-solid fa-key"></i></button>` : ""}
+          </div>
         </td>
       </tr>`;
     })
@@ -376,15 +407,21 @@ function _renderUsersSection() {
 
   sec.innerHTML = `
     <div class="pref-section-card">
-      <h3 class="pref-section-title"><i class="fa-solid fa-users-gear"></i> ${escapeHTML(t("pref.users"))}</h3>
-      <table class="pref-table">
+      <h3 class="pref-section-title">
+        <i class="fa-solid fa-users-gear"></i> ${escapeHTML(t("pref.users"))}
+        <button class="missions-help-btn" title="${escapeHTML(t("pref.roles.help.tooltip"))}" onclick="openRolesHelp()">
+          <i class="fa-solid fa-circle-question"></i>
+        </button>
+      </h3>
+      <table class="pref-table" style="table-layout:fixed;">
         <thead><tr>
-          <th>${escapeHTML(t("pref.col.username"))}</th>
-          <th>${escapeHTML(t("pref.col.role"))}</th>
-          <th>${escapeHTML(t("pref.col.lastLogin"))}</th>
-          <th>${escapeHTML(t("pref.col.actions"))}</th>
+          <th style="width:22%">${escapeHTML(t("pref.col.username"))}</th>
+          <th style="width:12%">${escapeHTML(t("pref.col.role"))}</th>
+          <th style="width:24%">${escapeHTML(t("pref.col.owner"))}</th>
+          <th style="width:30%">${escapeHTML(t("pref.col.lastLogin"))}</th>
+          <th style="width:12%">${escapeHTML(t("pref.col.actions"))}</th>
         </tr></thead>
-        <tbody>${rows || `<tr><td colspan="4" style="padding:0.75rem;color:var(--gray-400);text-align:center">${escapeHTML(t("pref.noUsers"))}</td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="5" style="padding:0.75rem;color:var(--gray-400);text-align:center">${escapeHTML(t("pref.noUsers"))}</td></tr>`}</tbody>
       </table>
     </div>`;
 }
@@ -401,12 +438,35 @@ function prefCancelUserEdit() {
   _renderUsersSection();
 }
 
+function prefToggleOwnerCell(username) {
+  const role = document.getElementById(`editUserRole_${username}`)?.value;
+  const cell = document.getElementById(`editUserOwnerCell_${username}`);
+  if (!cell) return;
+  const owners = (window.appState.config?.owners || []).map((o) => o.name);
+  if (role === "admin") {
+    cell.innerHTML = `<span class="pref-admin-badge">${escapeHTML(t("pref.role.admin"))}</span>`;
+  } else {
+    const ownerOpts = owners.map(
+      (o) => `<option value="${escapeHTML(o)}">${escapeHTML(o)}</option>`,
+    ).join("");
+    cell.innerHTML = `<select id="editUserOwner_${escapeHTML(username)}" class="pref-input" style="width:auto">
+      <option value="">${escapeHTML(t("pref.selectOwner"))}</option>
+      ${ownerOpts}
+    </select>`;
+  }
+}
+
 async function prefSaveUserRole(username) {
   if (guardViewMode()) return;
-  const role = document.getElementById(`editUserRole_${username}`)?.value;
-  if (!role) return;
+  const user = _prefUsers.find((u) => u.username === username);
+  if (!user) return;
+  const owner = document.getElementById(`editUserOwner_${username}`)?.value || null;
+  if (!owner) {
+    showNotification(t("pref.ownerRequired"), "warning");
+    return;
+  }
   try {
-    await apiUpdateUserRole(username, role);
+    await apiUpdateUserRole(username, user.role, owner);
     _editingUsername = null;
     _prefUsers = await apiGetUsers();
     showNotification(t("pref.notify.userRoleUpdated"), "success");
@@ -623,9 +683,197 @@ function _fullRefresh() {
       color: var(--primary-color);
       cursor: help;
     }
+    .pref-admin-badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1.5px solid #dc2626;
+    }
   `;
   document.head.appendChild(style);
 })();
+
+// ── Reset password modal ─────────────────────────────────────────────────────
+
+function openResetPasswordModal(username) {
+  const existing = document.getElementById("resetPasswordModal");
+  if (existing) existing.remove();
+
+  const subtitle = t("pref.resetPwd.subtitle").replace("{name}", username);
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "resetPasswordModal";
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:400px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin:0;">
+            <i class="fa-solid fa-key" style="color:var(--primary-color);margin-left:0.5rem;"></i>
+            ${escapeHTML(t("pref.resetPwd.title"))}
+          </h3>
+          <p style="margin:0.25rem 0 0 0;font-size:0.82rem;color:var(--gray-400);font-weight:400;">${escapeHTML(subtitle)}</p>
+        </div>
+        <button class="modal-close" onclick="closeResetPasswordModal()">&times;</button>
+      </div>
+      <div class="modal-form">
+        <div class="form-group">
+          <label for="resetPwdNew">
+            <i class="fa-solid fa-lock" style="color:var(--gray-400);margin-left:0.4rem;"></i>
+            ${escapeHTML(t("pref.resetPwd.newPwd"))}
+          </label>
+          <input type="password" id="resetPwdNew" autocomplete="new-password"
+            oninput="_updatePwdFeedback('${escapeHTML(username)}')" />
+          <div id="resetPwdLengthCheck" style="margin-top:0.4rem;font-size:0.78rem;color:var(--gray-400);display:flex;align-items:center;gap:0.35rem;">
+            <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i>
+            ${escapeHTML(t("pref.resetPwd.minLength"))}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="resetPwdConfirm">
+            <i class="fa-solid fa-lock" style="color:var(--gray-400);margin-left:0.4rem;"></i>
+            ${escapeHTML(t("pref.resetPwd.confirmPwd"))}
+          </label>
+          <input type="password" id="resetPwdConfirm" autocomplete="new-password"
+            oninput="_updatePwdFeedback('${escapeHTML(username)}')"
+            onkeydown="if(event.key==='Enter') submitResetPassword('${escapeHTML(username)}')" />
+          <div id="resetPwdMatchCheck" style="margin-top:0.4rem;font-size:0.78rem;color:var(--gray-400);display:flex;align-items:center;gap:0.35rem;visibility:hidden;">
+            <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i>
+            ${escapeHTML(t("pref.resetPwd.match"))}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div></div>
+        <div>
+          <button class="btn btn-secondary" onclick="closeResetPasswordModal()">${escapeHTML(t("btn.cancel"))}</button>
+          <button id="resetPwdSubmitBtn" class="btn btn-primary" onclick="submitResetPassword('${escapeHTML(username)}')" disabled>
+            <i class="fa-solid fa-check"></i> ${escapeHTML(t("btn.save"))}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeResetPasswordModal(); });
+  disableBodyScroll();
+  document.getElementById("resetPwdNew")?.focus();
+}
+
+function _updatePwdFeedback() {
+  const newPwd     = document.getElementById("resetPwdNew")?.value || "";
+  const confirmPwd = document.getElementById("resetPwdConfirm")?.value || "";
+  const lengthOk   = newPwd.length >= 6;
+  const matchOk    = newPwd.length > 0 && newPwd === confirmPwd;
+  const hasConfirm = confirmPwd.length > 0;
+
+  // Length check row
+  const lengthEl = document.getElementById("resetPwdLengthCheck");
+  if (lengthEl) {
+    lengthEl.style.color  = newPwd.length === 0 ? "var(--gray-400)" : lengthOk ? "#10b981" : "#ef4444";
+    lengthEl.querySelector("i").className = lengthOk ? "fa-solid fa-circle-check" : "fa-solid fa-circle";
+  }
+
+  // Match check row
+  const matchEl = document.getElementById("resetPwdMatchCheck");
+  if (matchEl) {
+    if (!hasConfirm) {
+      matchEl.style.visibility = "hidden";
+    } else {
+      matchEl.style.visibility = "visible";
+      matchEl.style.color = matchOk ? "#10b981" : "#ef4444";
+      matchEl.querySelector("i").className = matchOk ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark";
+      matchEl.childNodes[matchEl.childNodes.length - 1].textContent =
+        " " + (matchOk ? t("pref.resetPwd.match") : t("pref.resetPwd.mismatch"));
+    }
+  }
+
+  // Enable/disable save button
+  const btn = document.getElementById("resetPwdSubmitBtn");
+  if (btn) btn.disabled = !(lengthOk && matchOk);
+}
+
+function closeResetPasswordModal() {
+  const modal = document.getElementById("resetPasswordModal");
+  if (modal) modal.remove();
+  enableBodyScroll();
+}
+
+async function submitResetPassword(username) {
+  const newPwd     = document.getElementById("resetPwdNew")?.value || "";
+  const confirmPwd = document.getElementById("resetPwdConfirm")?.value || "";
+  if (newPwd.length < 6 || newPwd !== confirmPwd) return;
+  try {
+    await apiResetPassword(username, newPwd);
+    showNotification(t("pref.resetPwd.success"), "success");
+    closeResetPasswordModal();
+  } catch (e) {
+    showNotification(e.message || t("pref.error.generic"), "error");
+  }
+}
+
+// ── Roles help modal ─────────────────────────────────────────────────────────
+
+function openRolesHelp() {
+  const existing = document.getElementById("rolesHelpModal");
+  if (existing) existing.remove();
+
+  const makeSection = (icon, color, titleKey, points) => `
+    <div class="alloc-help-section">
+      <div class="alloc-help-section-title">
+        <span class="alloc-help-icon" style="background:${color};"><i class="fa-solid ${icon}"></i></span>
+        <strong>${escapeHTML(t(titleKey))}</strong>
+      </div>
+      <ul class="alloc-help-list">
+        ${points.map((k) => `<li>${escapeHTML(t(k))}</li>`).join("")}
+      </ul>
+    </div>`;
+
+  const body =
+    makeSection("fa-shield-halved", "var(--primary-color)", "pref.roles.help.admin.title", [
+      "pref.roles.help.admin.p1",
+      "pref.roles.help.admin.p2",
+      "pref.roles.help.admin.p3",
+      "pref.roles.help.admin.p4",
+    ]) +
+    makeSection("fa-eye", "var(--gray-500)", "pref.roles.help.user.title", [
+      "pref.roles.help.user.p1",
+      "pref.roles.help.user.p2",
+      "pref.roles.help.user.p3",
+    ]);
+
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "rolesHelpModal";
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:520px;">
+      <div class="modal-header">
+        <h3>
+          <i class="fa-solid fa-circle-question" style="color:var(--primary-color);margin-left:0.5rem;"></i>
+          ${escapeHTML(t("pref.roles.help.title"))}
+        </h3>
+        <button class="modal-close" onclick="closeRolesHelp()">&times;</button>
+      </div>
+      <div class="modal-form" style="gap:1.25rem;">${body}</div>
+      <div class="modal-footer">
+        <div></div>
+        <div><button class="btn btn-primary" onclick="closeRolesHelp()">${escapeHTML(t("btn.ok"))}</button></div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeRolesHelp(); });
+  disableBodyScroll();
+}
+
+function closeRolesHelp() {
+  const modal = document.getElementById("rolesHelpModal");
+  if (modal) modal.remove();
+  enableBodyScroll();
+}
 
 // ── Exports ──────────────────────────────────────────────────────────────────
 
@@ -642,3 +890,10 @@ window.prefStartAddDevice = prefStartAddDevice;
 window.prefCancelAddDevice = prefCancelAddDevice;
 window.prefSaveNewDevice = prefSaveNewDevice;
 window.prefDeleteDevice = prefDeleteDevice;
+window.openResetPasswordModal = openResetPasswordModal;
+window.closeResetPasswordModal = closeResetPasswordModal;
+window.submitResetPassword = submitResetPassword;
+window._updatePwdFeedback = _updatePwdFeedback;
+window.openRolesHelp = openRolesHelp;
+window.closeRolesHelp = closeRolesHelp;
+window.prefToggleOwnerCell = prefToggleOwnerCell;

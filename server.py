@@ -204,7 +204,7 @@ def create_default_users():
 
 def create_session(username, role):
     token = str(uuid.uuid4())
-    _sessions[token] = {'username': username, 'role': role}
+    _sessions[token] = {'username': username, 'role': role, 'last_ping': datetime.now(timezone.utc).isoformat()}
     return token
 
 def get_session(token):
@@ -214,6 +214,22 @@ def get_session(token):
 
 def delete_session(token):
     _sessions.pop(token, None)
+
+def get_online_usernames(max_age_seconds=60):
+    """Return set of usernames with a ping in the last max_age_seconds."""
+    now = datetime.now(timezone.utc)
+    online = set()
+    for session in _sessions.values():
+        last_ping = session.get('last_ping')
+        if not last_ping:
+            continue
+        try:
+            delta = (now - datetime.fromisoformat(last_ping)).total_seconds()
+            if delta <= max_age_seconds:
+                online.add(session['username'])
+        except Exception:
+            pass
+    return online
 
 # ==================== HTTP Request Handler ====================
 
@@ -226,7 +242,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_path.path
 
         # API endpoints
-        if path == '/api/me':
+        if path == '/api/ping':
+            return self.handle_ping()
+        elif path == '/api/me':
             return self.handle_me()
         elif path == '/api/config':
             return self.handle_config()
@@ -361,6 +379,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 return self.handle_archive_archived_mission(mission_id)
             else:
                 return self.send_json_response(404, {'error': 'Not found'})
+        elif path.startswith('/api/users/') and path.endswith('/reset_password'):
+            username = unquote(path.split('/')[-2])
+            return self.handle_reset_password(username, post_data)
         elif path.startswith('/api/users/'):
             username = unquote(path.split('/')[-1])
             return self.handle_update_user(username, post_data)
@@ -426,6 +447,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
     # ==================== Auth Endpoints ====================
 
+    def handle_ping(self):
+        """GET /api/ping - Refresh session last_ping timestamp"""
+        token = self.headers.get('X-Auth-Token', '')
+        session = get_session(token)
+        if not session:
+            return self.send_json_response(401, {'error': 'Not authenticated'})
+        session['last_ping'] = datetime.now(timezone.utc).isoformat()
+        return self.send_json_response(200, {'ok': True})
+
     def handle_me(self):
         """GET /api/me - Check if current token is valid"""
         session = get_session(self.headers.get('X-Auth-Token', ''))
@@ -461,25 +491,49 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not get_session(self.headers.get('X-Auth-Token', '')):
             return self.send_json_response(401, {'error': 'Authentication required'})
         users = load_users()
+        online = get_online_usernames()
         return self.send_json_response(200, [
-            {'username': u['username'], 'role': u.get('role', 'admin'), 'last_login': u.get('last_login')}
+            {'username': u['username'], 'role': u.get('role', 'admin'), 'owner': u.get('owner'), 'last_login': u.get('last_login'), 'online': u['username'] in online}
             for u in users
         ])
 
     def handle_update_user(self, username, post_data):
-        """POST /api/users/<username> - Update a user's role"""
+        """POST /api/users/<username> - Update a user's role and/or owner"""
         new_role = (post_data.get('role') or '').strip()
         if not new_role:
             return self.send_json_response(400, {'error': 'Role is required'})
+        new_owner = (post_data.get('owner') or '').strip() or None
+        if new_role == 'user' and not new_owner:
+            return self.send_json_response(400, {'error': 'Owner is required for user role'})
         users = load_users()
         user = next((u for u in users if u['username'] == username), None)
         if not user:
             return self.send_json_response(404, {'error': 'User not found'})
         old_role = user.get('role', 'admin')
         user['role'] = new_role
+        user['owner'] = new_owner
         save_users(users)
-        self._audit('update', 'user', details={'username': username, 'old_role': old_role, 'new_role': new_role})
-        return self.send_json_response(200, {'username': username, 'role': new_role})
+        self._audit('update', 'user', details={'username': username, 'old_role': old_role, 'new_role': new_role, 'owner': new_owner})
+        return self.send_json_response(200, {'username': username, 'role': new_role, 'owner': new_owner})
+
+    def handle_reset_password(self, username, post_data):
+        """POST /api/users/<username>/reset_password - Admin resets own or user-role passwords"""
+        if self._request_role != 'admin':
+            return self.send_json_response(403, {'error': 'Admin access required'})
+        users = load_users()
+        user = next((u for u in users if u['username'] == username), None)
+        if not user:
+            return self.send_json_response(404, {'error': 'User not found'})
+        # Admins can only reset their own password or user-role accounts
+        if user.get('role') == 'admin' and username != self._request_user:
+            return self.send_json_response(403, {'error': 'Cannot reset another admin\'s password'})
+        new_password = (post_data.get('new_password') or '').strip()
+        if len(new_password) < 6:
+            return self.send_json_response(400, {'error': 'Password must be at least 6 characters'})
+        user['password_hash'] = hash_password(new_password)
+        save_users(users)
+        self._audit('update', 'user', details={'username': username, 'action': 'password_reset'})
+        return self.send_json_response(200, {'message': 'Password reset successfully'})
 
     def handle_config(self):
         """GET /api/config"""
@@ -644,17 +698,21 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         archived_count = sum(1 for m in data['data'].get('archived_missions', []) if m.get('owner') == owner_name)
         mapping = load_mapping()
         link_count = sum(1 for l in mapping.get('mappings', []) if l.get('owner') == owner_name)
-        total = radio_count + mission_count + archived_count + link_count
+        users = load_users()
+        user_count = sum(1 for u in users if u.get('owner') == owner_name)
+        total = radio_count + mission_count + archived_count + link_count + user_count
         if total > 0:
             parts = []
             if radio_count:   parts.append(f'{radio_count} radio(s)')
             if mission_count: parts.append(f'{mission_count} planned mission(s)')
             if archived_count: parts.append(f'{archived_count} archived mission(s)')
             if link_count:    parts.append(f'{link_count} link(s)')
+            if user_count:    parts.append(f'{user_count} user(s)')
             return self.send_json_response(409, {
                 'error': f'Cannot delete — owner is assigned to {", ".join(parts)}',
                 'radio_count': radio_count, 'mission_count': mission_count,
                 'archived_count': archived_count, 'link_count': link_count,
+                'user_count': user_count,
             })
         data['config']['owners'] = [o for o in owners if o.get('id') != owner_id]
         save_data(data)
