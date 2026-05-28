@@ -12,7 +12,7 @@ import mimetypes
 import hashlib
 import secrets
 from urllib.parse import urlparse, parse_qs, unquote
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ==================== Configuration ====================
 
@@ -152,7 +152,7 @@ def generate_id(prefix):
 def audit_log(action, entity_type, entity_id=None, details=None, changed_by=None):
     """Append an entry to the audit log (JSON-lines format)"""
     entry = {
-        'timestamp': datetime.now().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'action': action,
         'entity_type': entity_type,
     }
@@ -947,7 +947,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'owner': post_data.get('owner', ''),
             'status': 'planned',
             'requirements': post_data.get('requirements', []),
-            'created_at': datetime.now().isoformat(),
+            'created_at': datetime.now(timezone.utc).isoformat(),
             'time_start': post_data.get('time_start') or None,
             'time_end': post_data.get('time_end') or None,
         }
@@ -1054,7 +1054,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         # Move mission to archived_missions
         if 'archived_missions' not in data['data']:
             data['data']['archived_missions'] = []
-        mission['ended_at'] = datetime.now().isoformat()
+        mission['ended_at'] = datetime.now(timezone.utc).isoformat()
         data['data']['archived_missions'].append(mission)
 
         # Remove from planned_missions
@@ -1190,7 +1190,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
         if 'archived_missions' not in data['data']:
             data['data']['archived_missions'] = []
-        mission['archived_at'] = datetime.now().isoformat()
+        mission['archived_at'] = datetime.now(timezone.utc).isoformat()
         data['data']['archived_missions'].append(mission)
         data['data']['planned_missions'] = [m for m in data['data']['planned_missions'] if m['id'] != mission_id]
 
@@ -1419,7 +1419,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data = load_data()
         mapping = load_mapping()
         export_payload = {
-            'exported_at': datetime.now().isoformat(),
+            'exported_at': datetime.now(timezone.utc).isoformat(),
             'data': data,
             'mapping': mapping,
         }

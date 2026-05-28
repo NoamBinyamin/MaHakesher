@@ -18,5 +18,10 @@
     "username": "עידן",
     "password_hash": "sha256:d54524d86fa46b14ed60bb4331afdbae:91ae945462e294a5199c705fd021378263cdec19a3ff8c0888ce4cfb519220d5",
     "role": "admin"
+  },
+  {
+    "username": "ארבל",
+    "password_hash": "sha256:65eb59940eb12e737e9e092a0150cb91:a6e84b2238bda4da75a405a6ac2784848d2eb36abace33be9e95d9970cc8f7cb",
+    "role": "admin"
   }
 ]
