@@ -256,7 +256,9 @@ const TRANSLATIONS = {
     "planMission.sortLocation": _en.location,
     "planMission.removeAllReqs": "Remove All",
     "confirm.removeAllReqs": "Remove all requirements? This cannot be undone.",
-    "planMission.noReqs": "No requirements added yet.",
+    "planMission.noReqs": "No requirements yet",
+    "planMission.noReqsHint":
+      "Fill in the form above and click Add to define which devices this mission needs",
     "planMission.extraDevices": "Extra Devices (Not in Requirements)",
     "planMission.noExtra": "No extra devices.",
     "planMission.saveMission": "Save Mission",
@@ -985,7 +987,9 @@ const TRANSLATIONS = {
     "planMission.sortLocation": _he.location,
     "planMission.removeAllReqs": "הסר הכל",
     "confirm.removeAllReqs": "להסיר את כל הדרישות? פעולה זו אינה הפיכה.",
-    "planMission.noReqs": "לא נוספו דרישות למשימה זו.",
+    "planMission.noReqs": "אין דרישות עדיין",
+    "planMission.noReqsHint":
+      "מלא את השדות למעלה ולחץ הוסף כדי להגדיר אילו מכשירים דרושים למשימה",
     "planMission.extraDevices": "מכשירים נוספים (לא מופיעים בדרישות)",
     "planMission.noExtra": "ללא מכשירים נוספים.",
     "planMission.saveMission": "שמור משימה",

@@ -319,6 +319,7 @@ function toggleDarkMode() {
   if (window.renderTimelineTab) renderTimelineTab();
   if (window.performSearch) performSearch();
   if (window.renderOwnerFreqsTab) renderOwnerFreqsTab();
+  if (window._renderUsersSection) _renderUsersSection();
 }
 
 window.toggleDarkMode = toggleDarkMode;

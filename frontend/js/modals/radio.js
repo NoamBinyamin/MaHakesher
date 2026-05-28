@@ -116,6 +116,7 @@ function openRadioModal(radioId) {
   standbyMissionSelect.addEventListener("change", _standbyMissionChangeHandler);
 
   document.getElementById("radioModal").classList.remove("hidden");
+  watchModalSaveBtn("radioModal");
   disableBodyScroll();
 }
 
@@ -177,7 +178,7 @@ async function saveRadio() {
     notes: document.getElementById("radioNotes").value,
   };
 
-  try {
+  await withSaveSpinner("radioModal", async () => {
     await apiCall(`/radios/${radioId}`, "POST", radioData);
     showNotification(t("notify.radioSaved"), "success");
     markModalClean("radioModal");
@@ -187,9 +188,7 @@ async function saveRadio() {
     renderOverview();
     if (window.renderMissionsTab) renderMissionsTab();
     if (window.performSearch) performSearch();
-  } catch (error) {
-    showNotification(t("notify.radioSaveFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.radioSaveFailed"), "error"));
 }
 
 async function deleteRadio() {
@@ -213,6 +212,8 @@ async function deleteRadio() {
 function openAddRadioModal() {
   document.getElementById("addRadioForm").reset();
   document.getElementById("addRadioModal").classList.remove("hidden");
+  watchModalSaveBtn("addRadioModal");
+  checkModalSaveBtn("addRadioModal");
   disableBodyScroll();
 }
 
@@ -239,7 +240,7 @@ async function saveNewRadio() {
 
   const siteId = document.getElementById("addRadioSite").value;
 
-  try {
+  await withSaveSpinner("addRadioModal", async () => {
     const requests = Array.from({ length: quantity }, () =>
       apiCall("/radios", "POST", {
         site_id: siteId,
@@ -253,19 +254,15 @@ async function saveNewRadio() {
       }),
     );
     await Promise.all(requests);
-
-    const msg =
-      quantity === 1
-        ? t("notify.radioAdded")
-        : t("notify.radiosAdded").replace("{{count}}", quantity);
+    const msg = quantity === 1
+      ? t("notify.radioAdded")
+      : t("notify.radiosAdded").replace("{{count}}", quantity);
     showNotification(msg, "success");
     closeAddRadioModal();
     await loadAllData();
     populateSelects();
     renderOverview();
-  } catch (error) {
-    showNotification(t("notify.radioAddFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.radioAddFailed"), "error"));
 }
 
 function openAddRadioModalForSite(siteId) {

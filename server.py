@@ -12,7 +12,9 @@ import mimetypes
 import hashlib
 import secrets
 from urllib.parse import urlparse, parse_qs, unquote
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+SESSION_TIMEOUT_HOURS = 8
 
 # ==================== Configuration ====================
 
@@ -210,7 +212,19 @@ def create_session(username, role):
 def get_session(token):
     if not token:
         return None
-    return _sessions.get(token)
+    session = _sessions.get(token)
+    if not session:
+        return None
+    last_ping = session.get('last_ping')
+    if last_ping:
+        try:
+            age = (datetime.now(timezone.utc) - datetime.fromisoformat(last_ping)).total_seconds()
+            if age > SESSION_TIMEOUT_HOURS * 3600:
+                _sessions.pop(token, None)
+                return None
+        except Exception:
+            pass
+    return session
 
 def delete_session(token):
     _sessions.pop(token, None)

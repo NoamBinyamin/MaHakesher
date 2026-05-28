@@ -66,47 +66,21 @@
 
       <!-- Tab Navigation -->
       <div class="tabs">
-        <button
-          class="tab-button active"
-          data-tab="overview"
-          data-i18n="tab.overview"
-        >
-          Overview
-        </button>
-        <button class="tab-button" data-tab="missions" data-i18n="tab.missions">
-          Missions
-        </button>
-        <button class="tab-button" data-tab="timeline" data-i18n="tab.timeline">
-          Timeline
-        </button>
-        <button class="tab-button" data-tab="links" data-i18n="tab.links">
-          Link Dictionary
-        </button>
-        <button class="tab-button" data-tab="ownerfreqs" data-i18n="tab.ownerfreqs">
-          Owner Frequencies
-        </button>
-        <button class="tab-button" data-tab="search" data-i18n="tab.search">
-          Search
-        </button>
-        <button class="tab-button" data-tab="summary" data-i18n="tab.summary">
-          Summary
-        </button>
-        <button class="tab-button" data-tab="history" data-i18n="tab.history">
-          History
-        </button>
-        <button
-          class="tab-button view-mode-hide"
-          data-tab="preferences"
-          data-i18n="tab.preferences"
-        >
-          Preferences
-        </button>
+        <button class="tab-button active" data-tab="overview" data-i18n="tab.overview">Overview</button>
+        <button class="tab-button" data-tab="missions" data-i18n="tab.missions">Missions</button>
+        <button class="tab-button" data-tab="timeline" data-i18n="tab.timeline">Timeline</button>
+        <button class="tab-button" data-tab="links" data-i18n="tab.links">Link Dictionary</button>
+        <button class="tab-button" data-tab="ownerfreqs" data-i18n="tab.ownerfreqs">Owner Frequencies</button>
+        <button class="tab-button" data-tab="search" data-i18n="tab.search">Search</button>
+        <button class="tab-button" data-tab="summary" data-i18n="tab.summary">Summary</button>
+        <button class="tab-button" data-tab="history" data-i18n="tab.history">History</button>
+        <button class="tab-button view-mode-hide" data-tab="preferences" data-i18n="tab.preferences">Preferences</button>
       </div>
 
       <!-- Overview Tab: Unified Table -->
       <div id="overview" class="tab-content active">
         <div class="tab-header">
-          <h2 data-i18n="overview.title">Deployment Overview</h2>
+          <h2 data-i18n="overview.title"><i class="fa-solid fa-tower-broadcast" style="color:var(--primary-color);margin-left:0.5rem;"></i> Deployment Overview</h2>
           <div style="display: flex; gap: 0.75rem; align-items: center">
             <div style="display: flex; gap: 0.5rem">
               <button
@@ -223,7 +197,7 @@
       <!-- Missions Tab -->
       <div id="missions" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="missions.title">Missions Management</h2>
+          <h2 data-i18n="missions.title"><i class="fa-solid fa-rocket" style="color:var(--primary-color);margin-left:0.5rem;"></i> Missions Management</h2>
           <button
             class="btn btn-primary user-edit-allowed"
             onclick="openPlanMissionModal()"
@@ -242,7 +216,7 @@
       <!-- Link Dictionary Tab (NEW) -->
       <div id="links" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="links.title">Link Dictionary</h2>
+          <h2 data-i18n="links.title"><i class="fa-solid fa-link" style="color:var(--primary-color);margin-left:0.5rem;"></i> Link Dictionary</h2>
           <div style="display: flex; gap: 0.75rem; align-items: center">
             <button
               class="btn btn-secondary"
@@ -385,7 +359,7 @@
       <!-- Search Tab -->
       <div id="search" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="search.title">Search & Filter</h2>
+          <h2 data-i18n="search.title"><i class="fa-solid fa-magnifying-glass" style="color:var(--primary-color);margin-left:0.5rem;"></i> Search & Filter</h2>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             <div style="display: flex; gap: 0.5rem;">
               <button
@@ -614,7 +588,7 @@
             align-items: center;
           "
         >
-          <h2 data-i18n="summary.title">Summary Statistics</h2>
+          <h2 data-i18n="summary.title"><i class="fa-solid fa-chart-pie" style="color:var(--primary-color);margin-left:0.5rem;"></i> Summary Statistics</h2>
           <div style="display: flex; gap: 0.75rem">
             <button class="btn btn-secondary" onclick="exportData()">
               <i class="fa-solid fa-download"></i>
@@ -812,7 +786,7 @@
       <!-- History Tab -->
       <div id="history" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="history.title">History</h2>
+          <h2 data-i18n="history.title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary-color);margin-left:0.5rem;"></i> History</h2>
           <button
             class="btn btn-secondary"
             onclick="refreshHistory()"
@@ -916,7 +890,7 @@
       <!-- Timeline Tab -->
       <div id="timeline" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="timeline.title">Mission Timeline</h2>
+          <h2 data-i18n="timeline.title"><i class="fa-solid fa-calendar-days" style="color:var(--primary-color);margin-left:0.5rem;"></i> Mission Timeline</h2>
         </div>
         <div id="timelineContent">
           <!-- Populated by JavaScript -->
@@ -926,7 +900,7 @@
       <!-- Owner Frequencies Tab -->
       <div id="ownerfreqs" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="ownerfreqs.title">Owner Frequencies</h2>
+          <h2 data-i18n="ownerfreqs.title"><i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-left:0.5rem;"></i> Owner Frequencies</h2>
         </div>
         <div class="missions-container">
           <div id="ownerFreqsContent">
@@ -2188,6 +2162,7 @@
                   id="planMissionName"
                   data-i18n-placeholder="planMission.namePlaceholder"
                   placeholder="e.g., Saving Willy"
+                  required
                 />
               </div>
               <div class="form-group" style="margin-bottom: 0">
@@ -2202,6 +2177,7 @@
                 <select
                   id="planMissionOwner"
                   onchange="updatePlanMissionHeaderColor(); checkFreqOwnerMismatch()"
+                  required
                 >
                   <option value="" data-i18n="planMission.ownerSelect">
                     Select an owner...

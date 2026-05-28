@@ -11,6 +11,8 @@ function openSiteModal(siteId) {
   document.getElementById("siteModalTitle").textContent = t("site.editTitle");
   document.getElementById("deleteSiteBtn").style.display = "block";
   document.getElementById("siteModal").classList.remove("hidden");
+  watchModalSaveBtn("siteModal");
+  checkModalSaveBtn("siteModal");
   disableBodyScroll();
 }
 
@@ -46,24 +48,18 @@ async function saveSite() {
     site_type: document.getElementById("siteType").value,
   };
 
-  try {
+  await withSaveSpinner("siteModal", async () => {
     if (siteId) {
-      // Update existing site
       await apiCall(`/sites/${siteId}`, "POST", siteData);
-      showNotification(t("notify.siteSaved"), "success");
     } else {
-      // Create new site
-      const newSiteData = { ...siteData, sector_id: sectorId };
-      await apiCall("/sites", "POST", newSiteData);
-      showNotification(t("notify.siteSaved"), "success");
+      await apiCall("/sites", "POST", { ...siteData, sector_id: sectorId });
     }
+    showNotification(t("notify.siteSaved"), "success");
     markModalClean("siteModal");
     closeSiteModal();
     await loadAllData();
     renderOverview();
-  } catch (error) {
-    showNotification(t("notify.siteSaveFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.siteSaveFailed"), "error"));
 }
 
 async function deleteSite() {
@@ -91,6 +87,8 @@ function openAddSiteModalForSector(sectorId) {
   document.getElementById("siteModalTitle").textContent = t("site.addTitle");
   document.getElementById("deleteSiteBtn").style.display = "none";
   document.getElementById("siteModal").classList.remove("hidden");
+  watchModalSaveBtn("siteModal");
+  checkModalSaveBtn("siteModal");
   disableBodyScroll();
 }
 

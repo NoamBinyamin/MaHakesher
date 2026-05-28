@@ -254,3 +254,44 @@ function _dismissUndoToast(runUndo = false) {
 window.showUndoToast = showUndoToast;
 window._triggerUndo = _triggerUndo;
 window._dismissUndoToast = _dismissUndoToast;
+
+// ==================== Save Button Utilities ====================
+
+function checkModalSaveBtn(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  const saveBtn = modal.querySelector(".modal-footer .btn-primary");
+  if (!saveBtn || saveBtn.classList.contains("btn-loading")) return;
+  const required = modal.querySelectorAll("[required]");
+  const allFilled = Array.from(required).every((el) => el.value.trim() !== "");
+  saveBtn.disabled = !allFilled;
+}
+
+function watchModalSaveBtn(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal || modal._saveBtnWatcher) return;
+  modal._saveBtnWatcher = true;
+  modal.addEventListener("input",  () => checkModalSaveBtn(modalId));
+  modal.addEventListener("change", () => checkModalSaveBtn(modalId));
+}
+
+async function withSaveSpinner(modalId, asyncFn) {
+  const modal = document.getElementById(modalId);
+  const btn = modal?.querySelector(".modal-footer .btn-primary");
+  if (!btn) { await asyncFn(); return; }
+  const originalHTML = btn.innerHTML;
+  btn.classList.add("btn-loading");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span>`;
+  try {
+    await asyncFn();
+  } finally {
+    btn.classList.remove("btn-loading");
+    btn.innerHTML = originalHTML;
+    checkModalSaveBtn(modalId);
+  }
+}
+
+window.checkModalSaveBtn = checkModalSaveBtn;
+window.watchModalSaveBtn = watchModalSaveBtn;
+window.withSaveSpinner = withSaveSpinner;

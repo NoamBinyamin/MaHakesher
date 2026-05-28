@@ -1112,3 +1112,12 @@
 {"timestamp": "2026-05-28T12:13:46.473176+00:00", "action": "login", "entity_type": "user", "details": {"username": "משתמש מדורי"}}
 {"timestamp": "2026-05-28T12:15:10.658341+00:00", "action": "login", "entity_type": "user", "details": {"username": "אמיתי"}}
 {"timestamp": "2026-05-28T12:21:34.484409+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T20:26:35.887412+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-28T20:37:53.348889+00:00", "action": "create", "entity_type": "radio", "entity_id": "radio-9e77fe21", "details": {"device_type": "מכשיר שלא מסגיר", "site_id": "site-ef4653df", "site_name": "צפת"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:26.886682+00:00", "action": "update", "entity_type": "mission", "entity_id": "mission-f86bd6e8", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:30.552784+00:00", "action": "update", "entity_type": "mission", "entity_id": "mission-f86bd6e8", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:33.275286+00:00", "action": "update", "entity_type": "mission", "entity_id": "mission-dfdbc343", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:37.640127+00:00", "action": "update", "entity_type": "mission", "entity_id": "mission-dfdbc343", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:42.801329+00:00", "action": "update", "entity_type": "link", "entity_id": "link-c1f397ed", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:39:50.686048+00:00", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {}, "after": {}}, "changed_by": "נועם"}
+{"timestamp": "2026-05-28T20:54:33.320510+00:00", "action": "update", "entity_type": "user", "details": {"username": "משתמש מדורי", "old_role": "user", "new_role": "user", "owner": "המדור החזק"}, "changed_by": "נועם"}

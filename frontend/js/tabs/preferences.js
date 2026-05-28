@@ -328,8 +328,26 @@ async function prefDeleteDevice(id, name) {
 const AVAILABLE_ROLES = ["admin", "user"];
 
 function _ownerBadge(ownerName) {
-  const color = getOwnerColor(ownerName);
-  return `<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:9999px;font-size:0.75rem;font-weight:600;background:${color};color:var(--gray-800);">${escapeHTML(ownerName || "—")}</span>`;
+  const isDark = document.documentElement.classList.contains("dark");
+  const entry = (window.appState.config?.owners || []).find((o) => o.name === ownerName);
+  let bg, text, border;
+  if (entry) {
+    if (isDark) {
+      bg = entry.dark;
+      text = contrastColor(entry.dark);
+      border = "transparent";
+    } else {
+      // Light mode: pale background + saturated dark color for text + border = readable badge
+      bg = entry.light;
+      text = entry.dark;
+      border = entry.dark;
+    }
+  } else {
+    bg = isDark ? "#334155" : "#E5E7EB";
+    text = isDark ? "#e2e8f0" : "#374151";
+    border = "transparent";
+  }
+  return `<span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:9999px;font-size:0.75rem;font-weight:600;background:${bg};color:${text};border:1.5px solid ${border};">${escapeHTML(ownerName || "—")}</span>`;
 }
 
 function _renderUsersSection() {
@@ -688,10 +706,15 @@ function _fullRefresh() {
       padding: 0.15rem 0.55rem;
       border-radius: 9999px;
       font-size: 0.75rem;
-      font-weight: 700;
-      background: rgba(220, 38, 38, 0.1);
-      color: #dc2626;
-      border: 1.5px solid #dc2626;
+      font-weight: 600;
+      background: rgba(220, 38, 38, 0.08);
+      color: #b91c1c;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    html.dark .pref-admin-badge {
+      background: rgba(220, 38, 38, 0.2);
+      color: #fca5a5;
+      border-color: rgba(220, 38, 38, 0.5);
     }
   `;
   document.head.appendChild(style);
@@ -878,6 +901,7 @@ function closeRolesHelp() {
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 window.renderPreferencesTab = renderPreferencesTab;
+window._renderUsersSection = _renderUsersSection;
 window.prefEditUserRole = prefEditUserRole;
 window.prefCancelUserEdit = prefCancelUserEdit;
 window.prefSaveUserRole = prefSaveUserRole;

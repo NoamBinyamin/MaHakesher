@@ -3,7 +3,7 @@
     "username": "נועם",
     "password_hash": "sha256:3c17e2ca71fbec770db1bb66b9c115fc:6b494f1c1e618a37b58a17b109437992b8134cb7ed6d643c635ce52177e52a60",
     "role": "admin",
-    "last_login": "2026-05-28T12:21:34.483392+00:00"
+    "last_login": "2026-05-28T20:26:35.886823+00:00"
   },
   {
     "username": "אמיתי",
@@ -14,7 +14,7 @@
     "username": "משתמש מדורי",
     "password_hash": "sha256:d2aecf656bbc650172279ce38547211b:ba19c01412426cc6192cdddefb6850d4d5eab9191df884ef285d36740d394915",
     "role": "user",
-    "owner": "בעלים שלא מסגיר"
+    "owner": "המדור החזק"
   },
   {
     "username": "עידן",

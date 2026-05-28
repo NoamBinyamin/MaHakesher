@@ -2396,6 +2396,26 @@ body {
   animation: online-glow 1.6s ease-out infinite;
 }
 
+/* ==================== Save button spinner ==================== */
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+.btn-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.55s linear infinite;
+  vertical-align: middle;
+}
+.btn-loading {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
 /* ==================== Passkey shake animation ====================
 
 @keyframes passkey-shake {

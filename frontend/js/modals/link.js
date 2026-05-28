@@ -14,6 +14,8 @@ function openAddLinkModal() {
   document.getElementById("linkGenericRole").value = "";
   if (window.populateSelects) window.populateSelects();
   document.getElementById("addLinkModal").classList.remove("hidden");
+  watchModalSaveBtn("addLinkModal");
+  checkModalSaveBtn("addLinkModal");
   disableBodyScroll();
 }
 
@@ -62,15 +64,13 @@ async function saveNewLink() {
     return;
   }
 
-  try {
+  await withSaveSpinner("addLinkModal", async () => {
     await apiCall("/links", "POST", linkData);
     showNotification(t("notify.linkSaved"), "success");
     closeAddLinkModal();
     await loadLinks();
     renderLinksTab();
-  } catch (error) {
-    showNotification(t("notify.linkSaveFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.linkSaveFailed"), "error"));
 }
 
 function openEditLinkModal(linkId) {
@@ -87,6 +87,8 @@ function openEditLinkModal(linkId) {
   document.getElementById("editLinkGenericRole").value =
     link.generic_role || "";
   document.getElementById("editLinkModal").classList.remove("hidden");
+  watchModalSaveBtn("editLinkModal");
+  checkModalSaveBtn("editLinkModal");
   disableBodyScroll();
 }
 
@@ -140,15 +142,13 @@ async function saveEditLink() {
     return;
   }
 
-  try {
+  await withSaveSpinner("editLinkModal", async () => {
     await apiCall(`/links/${linkId}`, "POST", linkData);
     showNotification(t("notify.linkUpdated"), "success");
     closeEditLinkModal();
     await loadLinks();
     renderLinksTab();
-  } catch (error) {
-    showNotification(t("notify.linkUpdateFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.linkUpdateFailed"), "error"));
 }
 
 async function deleteLink() {

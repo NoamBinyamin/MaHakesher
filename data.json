@@ -194,7 +194,7 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": null,
+        "notes": "",
         "frequency_band": "HVHF"
       },
       {
@@ -1259,6 +1259,21 @@
         "id": "radio-abd96b48",
         "site_id": "site-748505e4",
         "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-9e77fe21",
+        "site_id": "site-ef4653df",
+        "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
         "owner": "",
         "mission_name": null,

@@ -289,6 +289,8 @@ function openPlanMissionModal() {
   const modal = document.getElementById("planMissionModal");
   if (modal) {
     modal.classList.remove("hidden");
+    watchModalSaveBtn("planMissionModal");
+    checkModalSaveBtn("planMissionModal");
     disableBodyScroll();
   }
 }
@@ -419,7 +421,33 @@ function renderRequirementsList() {
       missionRequirements.length > 0 ? "inline-block" : "none";
 
   if (missionRequirements.length === 0) {
-    container.innerHTML = `<p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 16px;">${t("planMission.noReqs")}</p>`;
+    container.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        gap: 0.6rem;
+        border: 2px dashed var(--gray-200);
+        border-radius: var(--border-radius-sm);
+        margin: 0.25rem;
+        background: var(--gray-50);
+      ">
+        <div style="
+          width: 48px; height: 48px;
+          border-radius: 50%;
+          background: rgba(37,99,235,0.08);
+          display: flex; align-items: center; justify-content: center;
+        ">
+          <i class="fa-solid fa-list-check" style="font-size:1.3rem;color:var(--primary-color);opacity:0.6;"></i>
+        </div>
+        <span style="font-weight:600;font-size:0.9rem;color:var(--gray-600);">${t("planMission.noReqs")}</span>
+        <span style="font-size:0.78rem;color:var(--gray-400);text-align:center;max-width:280px;line-height:1.4;">
+          <i class="fa-solid fa-arrow-up" style="font-size:0.65rem;margin-left:0.2rem;"></i>
+          ${t("planMission.noReqsHint")}
+        </span>
+      </div>`;
     return;
   }
 

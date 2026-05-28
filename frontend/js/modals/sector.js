@@ -10,6 +10,8 @@ function openSectorModal(sectorId) {
   const deleteBtn = document.querySelector("#sectorModal .btn-danger");
   if (deleteBtn) deleteBtn.style.display = "block";
   document.getElementById("sectorModal").classList.remove("hidden");
+  watchModalSaveBtn("sectorModal");
+  checkModalSaveBtn("sectorModal");
   disableBodyScroll();
 }
 
@@ -21,6 +23,8 @@ function openAddSectorModal() {
   const deleteBtn = document.querySelector("#sectorModal .btn-danger");
   if (deleteBtn) deleteBtn.style.display = "none";
   document.getElementById("sectorModal").classList.remove("hidden");
+  watchModalSaveBtn("sectorModal");
+  checkModalSaveBtn("sectorModal");
   disableBodyScroll();
 }
 
@@ -52,21 +56,18 @@ async function saveSector() {
 
   const sectorData = { name: sectorName };
 
-  try {
+  await withSaveSpinner("sectorModal", async () => {
     if (sectorId) {
       await apiCall(`/sectors/${sectorId}`, "POST", sectorData);
-      showNotification(t("notify.sectorSaved"), "success");
     } else {
       await apiCall("/sectors", "POST", sectorData);
-      showNotification(t("notify.sectorSaved"), "success");
     }
+    showNotification(t("notify.sectorSaved"), "success");
     markModalClean("sectorModal");
     closeSectorModal();
     await loadAllData();
     renderOverview();
-  } catch (error) {
-    showNotification(t("notify.sectorSaveFailed"), "error");
-  }
+  }).catch(() => showNotification(t("notify.sectorSaveFailed"), "error"));
 }
 
 async function deleteSector() {

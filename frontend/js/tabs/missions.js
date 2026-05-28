@@ -1421,6 +1421,9 @@ function editMission(missionId) {
 
   // Show modal
   document.getElementById("planMissionModal").classList.remove("hidden");
+  watchModalSaveBtn("planMissionModal");
+  checkModalSaveBtn("planMissionModal");
+  disableBodyScroll();
 }
 
 function closePlanMissionModal() {
@@ -1484,7 +1487,7 @@ async function savePlannedMission() {
     );
   }
 
-  try {
+  await withSaveSpinner("planMissionModal", async () => {
     // Convert to API format
     const requirementsForApi = missionRequirements.map((req) => ({
       sectorId: req.sectorId,
@@ -1560,12 +1563,10 @@ async function savePlannedMission() {
     closePlanMissionModal();
     await _refreshAfterMissionAction();
     if (window.renderTimelineTab) renderTimelineTab();
-  } catch (error) {
-    showNotification(
-      t("notify.missionSaveFailed", { error: error.message }),
-      "error",
-    );
-  }
+  }).catch((error) => showNotification(
+    t("notify.missionSaveFailed", { error: error.message }),
+    "error",
+  ));
 }
 
 // Export for inline onclick handlers
