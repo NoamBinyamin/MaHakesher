@@ -444,6 +444,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not user or not verify_password(password, user.get('password_hash', '')):
             return self.send_json_response(401, {'error': 'Invalid username or password'})
         token = create_session(username, user['role'])
+        user['last_login'] = datetime.now(timezone.utc).isoformat()
+        save_users(users)
         self._audit('login', 'user', details={'username': username})
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ✅ Login: '{username}' from {self.client_address[0]}")
         return self.send_json_response(200, {'token': token, 'username': username, 'role': user['role']})
@@ -460,7 +462,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json_response(401, {'error': 'Authentication required'})
         users = load_users()
         return self.send_json_response(200, [
-            {'username': u['username'], 'role': u.get('role', 'admin')}
+            {'username': u['username'], 'role': u.get('role', 'admin'), 'last_login': u.get('last_login')}
             for u in users
         ])
 

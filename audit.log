@@ -1091,3 +1091,4 @@
 {"timestamp": "2026-05-20T23:49:00.118269", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-20T23:54:52.464205", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-28T10:54:40.030480+00:00", "action": "login", "entity_type": "user", "details": {"username": "ארבל"}}
+{"timestamp": "2026-05-28T11:13:26.583780+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}

@@ -2,7 +2,8 @@
   {
     "username": "נועם",
     "password_hash": "sha256:93962d2a2bb9a23dba0d6a0c5e8a0d5f:566920cb4a1c4a9f29113bc3cfad314decb7e066fd22fa91c88bd0ef5029e161",
-    "role": "admin"
+    "role": "admin",
+    "last_login": "2026-05-28T11:13:26.582518+00:00"
   },
   {
     "username": "אמיתי",

@@ -333,6 +333,9 @@ function _renderUsersSection() {
 
   const rows = _prefUsers
     .map((u) => {
+      const lastLogin = u.last_login
+        ? new Date(u.last_login).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+        : `<span style="color:var(--gray-400)">—</span>`;
       if (_editingUsername === u.username) {
         const opts = AVAILABLE_ROLES.map(
           (r) =>
@@ -344,6 +347,7 @@ function _renderUsersSection() {
           <td style="padding:0.5rem 0.75rem">
             <select id="editUserRole_${escapeHTML(u.username)}" class="pref-input" style="width:auto">${opts}</select>
           </td>
+          <td style="padding:0.5rem 0.75rem;color:var(--gray-500);font-size:0.85rem">${lastLogin}</td>
           <td style="padding:0.5rem 0.75rem;white-space:nowrap">
             <button class="btn btn-sm btn-primary" onclick="prefSaveUserRole('${escapeHTML(u.username)}')">
               <i class="fa-solid fa-check"></i>
@@ -360,6 +364,7 @@ function _renderUsersSection() {
         <td style="padding:0.5rem 0.75rem">
           <span class="pref-band-badge">${escapeHTML(u.role)}</span>
         </td>
+        <td style="padding:0.5rem 0.75rem;color:var(--gray-500);font-size:0.85rem">${lastLogin}</td>
         <td style="padding:0.5rem 0.75rem;white-space:nowrap">
           <button class="btn btn-sm btn-secondary view-mode-hide" onclick="prefEditUserRole('${escapeHTML(u.username)}')">
             <i class="fa-solid fa-pen"></i>
@@ -376,9 +381,10 @@ function _renderUsersSection() {
         <thead><tr>
           <th>${escapeHTML(t("pref.col.username"))}</th>
           <th>${escapeHTML(t("pref.col.role"))}</th>
+          <th>${escapeHTML(t("pref.col.lastLogin"))}</th>
           <th>${escapeHTML(t("pref.col.actions"))}</th>
         </tr></thead>
-        <tbody>${rows || `<tr><td colspan="3" style="padding:0.75rem;color:var(--gray-400);text-align:center">${escapeHTML(t("pref.noUsers"))}</td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="4" style="padding:0.75rem;color:var(--gray-400);text-align:center">${escapeHTML(t("pref.noUsers"))}</td></tr>`}</tbody>
       </table>
     </div>`;
 }
