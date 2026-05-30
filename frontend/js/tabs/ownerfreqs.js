@@ -6,6 +6,21 @@ function renderOwnerFreqsTab() {
   const content = document.getElementById("ownerFreqsContent");
   if (!content) return;
 
+  // User role: bypass dropdown — show their belonging directly
+  if (isUserRole && isUserRole()) {
+    const userOwner = getCurrentUserOwner ? getCurrentUserOwner() : null;
+    content.innerHTML = `
+      <div class="ownerfreq-controls">
+        <span class="ownerfreq-label" style="font-weight:700;color:var(--gray-700);">
+          <i class="fa-solid fa-user" style="margin-left:0.4rem;color:var(--primary-color);"></i>
+          ${escapeHTML(userOwner || "—")}
+        </span>
+      </div>
+      <div id="ownerFreqTablesArea"></div>`;
+    if (userOwner) _renderOwnerFreqTables(userOwner);
+    return;
+  }
+
   const owners = window.appState.config.owners || [];
 
   // Preserve previous selection if the owner still exists

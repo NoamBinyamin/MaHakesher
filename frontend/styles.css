@@ -2220,6 +2220,24 @@ html.dark #reqSortOrder {
   inherits: false;
 }
 
+/* Read-only mode for mission modal (view only) */
+#planMissionModal.plan-mission-readonly input:not([readonly]),
+#planMissionModal.plan-mission-readonly select,
+#planMissionModal.plan-mission-readonly textarea {
+  pointer-events: none;
+  opacity: 0.65;
+}
+#planMissionModal.plan-mission-readonly #reqSection,
+#planMissionModal.plan-mission-readonly #missionExcelBtns,
+#planMissionModal.plan-mission-readonly #removeAllReqsBtn,
+#planMissionModal.plan-mission-readonly #reqSortOrder,
+#planMissionModal.plan-mission-readonly label[for="reqSortOrder"],
+#planMissionModal.plan-mission-readonly .modal-footer .btn-primary,
+#planMissionModal.plan-mission-readonly #plannedRequirementsList th:last-child,
+#planMissionModal.plan-mission-readonly #plannedRequirementsList td:last-child {
+  display: none !important;
+}
+
 #reqFormBox {
   --req-bg-a: #eff6ff;
   --req-bg-b: #dbeafe;
@@ -2234,15 +2252,30 @@ html.dark #reqFormBox {
   --req-bg-a: #1a2e4a;
   --req-bg-b: #1e3a5f;
 }
-#reqFormBox.mismatch {
-  --req-bg-a: #fee2e2;
-  --req-bg-b: #fecaca;
-  border-color: #ef4444;
-  border-width: 2.5px;
+
+/* Frequency owner mismatch warning */
+.freq-owner-warning {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #92400e;
 }
-html.dark #reqFormBox.mismatch {
-  --req-bg-a: #7f1d1d;
-  --req-bg-b: #991b1b;
+.freq-owner-warning i {
+  color: #d97706;
+}
+html.dark .freq-owner-warning {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.3);
+  color: #fcd34d;
+}
+html.dark .freq-owner-warning i {
+  color: #fbbf24;
 }
 
 /* Radio modal state cards */
@@ -2970,23 +3003,6 @@ html.view-mode:not(.user-role) .missions-actions-cell {
   animation-delay: var(--shimmer-delay, 0ms);
 }
 
-/* Row green flash on full allocation */
-.mission-row-complete {
-  animation: row-success-glow 1.6s ease-out both;
-  animation-delay: var(--shimmer-delay, 0.5s);
-}
-
-@keyframes row-success-glow {
-  0% {
-    background-color: transparent;
-  }
-  25% {
-    background-color: rgba(16, 185, 129, 0.12);
-  }
-  100% {
-    background-color: transparent;
-  }
-}
 
 /* Suppress all progress animations when data hasn't changed */
 .missions-no-anim .prog-seg.filled {
@@ -2999,8 +3015,53 @@ html.view-mode:not(.user-role) .missions-actions-cell {
 .missions-no-anim .prog-fill.prog-full::after {
   display: none;
 }
-.missions-no-anim .mission-row-complete {
-  animation: none;
+
+/* Standby action group dropdown */
+.standby-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.standby-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow-lg);
+  z-index: 500;
+  min-width: 13rem;
+  padding: 0.3rem;
+  white-space: nowrap;
+}
+.standby-dropdown-menu.open {
+  display: block;
+}
+.standby-dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: var(--gray-800);
+  cursor: pointer;
+  text-align: right;
+  transition: background 0.12s;
+}
+.standby-dropdown-menu button:hover {
+  background: var(--gray-200);
+}
+.standby-dropdown-menu button i {
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 /* Extra devices badge */

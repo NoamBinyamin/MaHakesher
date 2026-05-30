@@ -2241,7 +2241,7 @@
                 />
               </div>
             </div>
-            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem">
+            <div id="missionExcelBtns" style="display: flex; gap: 0.75rem; margin-top: 1.25rem">
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -2272,6 +2272,7 @@
 
           <!-- Device Requirements -->
           <div
+            id="reqSection"
             style="
               margin-bottom: 1.75rem;
               padding-bottom: 1.5rem;
@@ -2279,6 +2280,7 @@
             "
           >
             <div
+              id="reqSectionHeader"
               style="
                 padding: 0.5rem 0;
                 border-bottom: 2px solid var(--gray-200);
@@ -2330,6 +2332,14 @@
                   >Add specific device requirements for this mission</span
                 >
               </p>
+              <div
+                id="freqOwnerWarning"
+                class="freq-owner-warning"
+                style="display:none;"
+              >
+                <i class="fa-solid fa-triangle-exclamation" style="flex-shrink:0;"></i>
+                <span data-i18n="planMission.freqOwnerMismatch">Pay attention — the selected frequency belongs to a different owner than this mission</span>
+              </div>
               <div
                 style="
                   display: grid;

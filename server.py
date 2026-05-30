@@ -204,9 +204,9 @@ def create_default_users():
         print(f"⚠️  Created default admin account  →  username: admin  |  password: {default_password}")
         print(f"⚠️  Edit {USERS_FILE} to change credentials.")
 
-def create_session(username, role):
+def create_session(username, role, owner=None):
     token = str(uuid.uuid4())
-    _sessions[token] = {'username': username, 'role': role, 'last_ping': datetime.now(timezone.utc).isoformat()}
+    _sessions[token] = {'username': username, 'role': role, 'owner': owner, 'last_ping': datetime.now(timezone.utc).isoformat()}
     return token
 
 def get_session(token):
@@ -314,8 +314,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         _post_session = get_session(self.headers.get('X-Auth-Token', ''))
         if not _post_session:
             return self.send_json_response(401, {'error': 'Authentication required'})
-        self._request_user = _post_session['username']
-        self._request_role = _post_session.get('role', 'admin')
+        self._request_user  = _post_session['username']
+        self._request_role  = _post_session.get('role', 'admin')
+        self._request_owner = _post_session.get('owner')
         _is_admin = self._request_role == 'admin'
 
         def _admin_only():
@@ -324,6 +325,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 return True
             return False
 
+        # 'user' role may restore their own archived missions
+        if path.startswith('/api/archived_missions/') and path.endswith('/restore'):
+            mission_id = path.split('/')[-2]
+            return self.handle_restore_archived_mission(mission_id)
         # 'user' role may only create/update planned missions (not start/end/archive)
         if path == '/api/planned_missions':
             return self.handle_create_planned_mission(post_data)
@@ -474,7 +479,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         """GET /api/me - Check if current token is valid"""
         session = get_session(self.headers.get('X-Auth-Token', ''))
         if session:
-            return self.send_json_response(200, {'username': session['username'], 'role': session['role']})
+            return self.send_json_response(200, {'username': session['username'], 'role': session['role'], 'owner': session.get('owner')})
         return self.send_json_response(401, {'error': 'Not authenticated'})
 
     def handle_login(self, post_data):
@@ -487,12 +492,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         user = next((u for u in users if u['username'] == username), None)
         if not user or not verify_password(password, user.get('password_hash', '')):
             return self.send_json_response(401, {'error': 'Invalid username or password'})
-        token = create_session(username, user['role'])
+        token = create_session(username, user['role'], owner=user.get('owner'))
         user['last_login'] = datetime.now(timezone.utc).isoformat()
         save_users(users)
         self._audit('login', 'user', details={'username': username})
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ✅ Login: '{username}' from {self.client_address[0]}")
-        return self.send_json_response(200, {'token': token, 'username': username, 'role': user['role']})
+        return self.send_json_response(200, {'token': token, 'username': username, 'role': user['role'], 'owner': user.get('owner')})
 
     def handle_logout(self):
         """POST /api/logout"""
@@ -1012,6 +1017,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_create_planned_mission(self, post_data):
         """POST /api/planned_missions"""
+        if self._request_role == 'user':
+            if post_data.get('owner') != self._request_owner:
+                return self.send_json_response(403, {'error': 'You can only create missions for your own owner'})
         data = load_data()
         if 'planned_missions' not in data['data']:
             data['data']['planned_missions'] = []
@@ -1036,6 +1044,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data = load_data()
         post_data.pop('id', None)
         post_data.pop('created_at', None)  # creation timestamp is immutable
+        if self._request_role == 'user':
+            mission_obj = next((m for m in data.get('data', {}).get('planned_missions', []) if m['id'] == mission_id), None)
+            if mission_obj and mission_obj.get('owner') != self._request_owner:
+                return self.send_json_response(403, {'error': 'You can only edit missions for your own owner'})
+            if post_data.get('owner') and post_data.get('owner') != self._request_owner:
+                return self.send_json_response(403, {'error': 'You cannot change mission owner'})
         for mission in data.get('data', {}).get('planned_missions', []):
             if mission['id'] == mission_id:
                 old_name = mission.get('name')
@@ -1247,6 +1261,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if not mission:
             return self.send_json_response(404, {'error': 'Mission not found'})
 
+        # User role can only archive their own owner's missions
+        if self._request_role == 'user' and mission.get('owner') != self._request_owner:
+            return self.send_json_response(403, {'error': 'You can only archive missions for your own owner'})
+
         # Check if any devices are allocated to this mission
         mission_name = mission.get('name', '')
         allocated_devices = [
@@ -1282,6 +1300,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 break
         if not mission:
             return self.send_json_response(404, {'error': 'Archived mission not found'})
+
+        if self._request_role == 'user' and mission.get('owner') != self._request_owner:
+            return self.send_json_response(403, {'error': 'You can only restore missions for your own owner'})
 
         if 'planned_missions' not in data['data']:
             data['data']['planned_missions'] = []

@@ -50,6 +50,9 @@ function isAdminRole() {
 function getCurrentUsername() {
   return _loggedInUser ? _loggedInUser.username : null;
 }
+function getCurrentUserOwner() {
+  return _loggedInUser ? _loggedInUser.owner : null;
+}
 
 // On page load — restore session if token is still valid
 async function restoreSession() {
@@ -204,11 +207,22 @@ async function submitLogin() {
   }
   // Login succeeded — apply auth state
   localStorage.setItem("mahakesher-token", result.token);
-  _loggedInUser = { username: result.username, role: result.role };
+  _loggedInUser = { username: result.username, role: result.role, owner: result.owner || null };
   closeLoginModal();
   _applyRoleClasses();
   _updateModeButton();
   _updateUserButton();
+  // Fetch full user info (ensures owner is populated regardless of login response version)
+  try {
+    const me = await apiMe();
+    _loggedInUser = me;
+    _applyRoleClasses();
+  } catch (_) {}
+  // Re-render permission-sensitive tabs with the correct role/owner
+  if (window.renderMissionsTab) renderMissionsTab();
+  if (window.renderPreferencesTab &&
+    document.getElementById("preferences")?.classList.contains("active")
+  ) renderPreferencesTab();
 }
 
 async function logout() {
@@ -270,6 +284,7 @@ window.getCurrentUserRole = getCurrentUserRole;
 window.isUserRole = isUserRole;
 window.isAdminRole = isAdminRole;
 window.getCurrentUsername = getCurrentUsername;
+window.getCurrentUserOwner = getCurrentUserOwner;
 window.guardAdminOnly = guardAdminOnly;
 window.toggleMode = toggleMode;
 window.openLoginModal = openLoginModal;

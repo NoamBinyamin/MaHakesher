@@ -195,6 +195,16 @@ const TRANSLATIONS = {
       "Option B (different device): if the device is occupied in current state, the system finds another fully free device at the same site with the same frequency band, assigns the mission to it, and clears the original device's standby slot.",
     "missions.help.activate.step4":
       "If neither option is possible for a device, that standby device is counted as failed and a warning notification is shown.",
+    "missions.help.demote.title":
+      "Send to Standby — Move current allocations to standby",
+    "missions.help.demote.step1":
+      "Scans all devices currently allocated to this mission in their active (current) state.",
+    "missions.help.demote.step2":
+      "Option A (same device): if the device's own standby slot is completely empty (no standby mission, owner, role, or frequency), the current values are moved directly into standby and current state is cleared.",
+    "missions.help.demote.step3":
+      "Option B (different device): if the device's standby slot is already occupied, the system finds another fully free device at the same site with the same frequency band, assigns the mission to its standby slot, and clears the original device's current state.",
+    "missions.help.demote.step4":
+      "If neither option is possible for a device, it is counted as failed and a warning notification is shown.",
     "missions.archivedMissions": "Archived Missions",
     "missions.sub.archived":
       "Completed missions. Can be restored to planning at any time.",
@@ -215,6 +225,8 @@ const TRANSLATIONS = {
     "missions.btn.allocate": "Allocate",
     "missions.btn.allocateToStandby": "Allocate to Standby",
     "missions.btn.activateStandby": "Activate Standby",
+    "missions.btn.demoteToStandby": "Send to Standby",
+    "missions.btn.standbyGroup": "Standby Actions",
     "missions.btn.returnToPlanning": "Return to Planning",
     "missions.btn.finishAndArchive": "Finish & Archive",
     "missions.btn.start": "Start",
@@ -224,10 +236,12 @@ const TRANSLATIONS = {
     "missions.btn.archive": "Archive",
     "missions.btn.restore": "Restore to Planning",
     "missions.btn.editMission": "Edit",
+    "missions.btn.viewMission": "View Details",
 
     // ── Plan Mission modal ────────────────────────────────────
     "planMission.title": "Plan a New Mission",
     "planMission.editTitle": "Edit Mission",
+    "planMission.viewTitle": "View Mission",
     "planMission.infoSection": "Mission Information",
     "planMission.name": "Mission Name",
     "planMission.namePlaceholder": "e.g., Saving Willy",
@@ -237,6 +251,7 @@ const TRANSLATIONS = {
     "planMission.deviceReqs": "Device Requirements",
     "planMission.addReqHint":
       "Add specific device requirements for this mission",
+    "planMission.freqOwnerMismatch": "Pay attention — the selected frequency belongs to a different owner than this mission",
     "planMission.freqBand": _en.freqBand,
     "planMission.freqBandAuto": "Auto-detected",
     "planMission.freqMhz": "Freq (MHz)",
@@ -490,6 +505,11 @@ const TRANSLATIONS = {
     "notify.noStandbyDevices": "No standby devices found for this mission",
     "notify.standbyActivateFailed":
       "{count} standby device(s) could not be promoted",
+    "notify.demotedToStandby":
+      "{count} device(s) moved to standby for '{name}'",
+    "notify.noCurrentDevices": "No current-state devices found for this mission",
+    "notify.demoteToStandbyFailed":
+      "{count} device(s) could not be moved to standby",
     "confirm.returnToPlanning":
       "Return this mission to planning? All device assignments will be cleared.",
     "notify.missionSaved": "Mission planned successfully",
@@ -562,6 +582,9 @@ const TRANSLATIONS = {
       "Frequency must be between {min} and {max} for {band} band",
     "error.selectDeviceType": "Please select a device type",
     "error.fillRequired": "Please fill in all required fields",
+    "error.notAuthenticated": "Not authenticated — please log in",
+    "error.missionOwnerOnly": "You can only create or edit missions for your own owner",
+    "error.missionOwnerChange": "You cannot change the mission owner",
     "error.siteNameExists": "A site with this name already exists",
     "error.sectorNameRequired": "Please enter a sector name",
     "error.sectorNameExists": "A sector with this name already exists",
@@ -928,6 +951,16 @@ const TRANSLATIONS = {
       "אם המכשיר תפוס במצב הפעיל — המערכת מחפשת מכשיר פנוי לחלוטין באותו אתר ובאותו תחום תדר, ומעבירה את משימת הכוננות למכשיר הפנוי.",
     "missions.help.activate.step4":
       "אם אין מכשיר זמין להקצאה, הוא יופיע ברשימת סיכום לטיפול ידני.",
+    "missions.help.demote.title":
+      "העבר לכוננות — הורדת הקצאות פעילות לכוננות",
+    "missions.help.demote.step1":
+      "סורק את כל המכשירים המשובצים כרגע למשימה זו במצב הפעיל.",
+    "missions.help.demote.step2":
+      "אם מצב הכוננות של המכשיר ריק לחלוטין — הערכים הפעילים מועברים לכוננות ומצב הפעיל מתנקה.",
+    "missions.help.demote.step3":
+      "אם מצב הכוננות של המכשיר תפוס — המערכת מחפשת מכשיר פנוי לחלוטין באותו אתר ובאותו תחום תדר ומשבצת אותו לכוננות, ומנקה את המצב הפעיל של המכשיר המקורי.",
+    "missions.help.demote.step4":
+      "אם אין מכשיר זמין, הוא נספר כנכשל ומוצג אזהרה.",
     "missions.archivedMissions": "משימות בארכיון",
     "missions.sub.archived": "משימות שהסתיימו - ניתן לשחזרן לתכנון בכל עת.",
     "missions.noPlanned": "לא קיימות משימות בתכנון.",
@@ -947,6 +980,8 @@ const TRANSLATIONS = {
     "missions.btn.allocate": "הקצה",
     "missions.btn.allocateToStandby": "הקצה לכוננות",
     "missions.btn.activateStandby": "הפעל כוננות",
+    "missions.btn.demoteToStandby": "העבר לכוננות",
+    "missions.btn.standbyGroup": "פעולות כוננות",
     "missions.btn.returnToPlanning": "החזר לתכנון",
     "missions.btn.finishAndArchive": "סיים והעבר לארכיון",
     "missions.btn.start": "התחלה",
@@ -956,10 +991,12 @@ const TRANSLATIONS = {
     "missions.btn.archive": "העברה לארכיון",
     "missions.btn.restore": "שחזור לתכנון",
     "missions.btn.editMission": "עריכה",
+    "missions.btn.viewMission": "צפייה בפרטים",
 
     // ── Plan Mission modal ────────────────────────────────────
     "planMission.title": "תכנן משימה חדשה",
     "planMission.editTitle": "ערוך משימה",
+    "planMission.viewTitle": "צפייה במשימה",
     "planMission.infoSection": "פרטי המשימה",
     "planMission.name": "שם המשימה",
     "planMission.namePlaceholder": "לדוג' - להציל את ווילי",
@@ -968,6 +1005,7 @@ const TRANSLATIONS = {
     "planMission.created": "נוצר",
     "planMission.deviceReqs": "מכשירים נרדשים",
     "planMission.addReqHint": "הוסף מכשירים הנדרשים למשימה זו",
+    "planMission.freqOwnerMismatch": "שים לב — התדר שנבחר שייך לבעלים שונה מבעל המשימה",
     "planMission.freqBand": _he.freqBand,
     "planMission.freqBandAuto": "---",
     "planMission.freqMhz": "תדר (MHz)",
@@ -1220,6 +1258,11 @@ const TRANSLATIONS = {
     "notify.noStandbyDevices": "לא נמצאו מכשירי כוננות למשימה זו",
     "notify.standbyActivateFailed":
       "{count} מכשירי כוננות לא הצליחו לעבור לפעיל",
+    "notify.demotedToStandby":
+      "{count} מכשירים הועברו לכוננות עבור '{name}'",
+    "notify.noCurrentDevices": "לא נמצאו מכשירים פעילים למשימה זו",
+    "notify.demoteToStandbyFailed":
+      "{count} מכשירים לא הצליחו לעבור לכוננות",
     "confirm.returnToPlanning": "להחזיר את המשימה לתכנון? כל ההקצאות יתנקו.",
     "notify.missionSaved": "המשימה נשמרה בהצלחה",
     "notify.missionUpdated": "המשימה עודכנה בהצלחה",
@@ -1293,6 +1336,9 @@ const TRANSLATIONS = {
       "התדר חייב להיות בין {min} ל-{max} עבור תחום {band}",
     "error.selectDeviceType": "נא לבחור סוג מכשיר",
     "error.fillRequired": "נא למלא את כל השדות הנדרשים",
+    "error.notAuthenticated": "לא מחובר — אנא התחבר מחדש",
+    "error.missionOwnerOnly": "ניתן ליצור או לערוך משימות עבור הבעלים שלך בלבד",
+    "error.missionOwnerChange": "לא ניתן לשנות את בעל המשימה",
     "error.siteNameExists": "כבר קיים אתר עם שם זה",
     "error.sectorNameRequired": "נא להזין שם לגזרה",
     "error.sectorNameExists": "כבר קיימת גזרה עם שם זה",

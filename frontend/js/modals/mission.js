@@ -224,17 +224,17 @@ function checkFreqOwnerMismatch() {
     (l) => Math.abs(Number(l.frequency) - freqVal) < 0.001,
   );
 
-  if (link && link.owner && link.owner !== missionOwner) {
-    box.classList.add("mismatch");
-  } else {
-    box.classList.remove("mismatch");
+  const warning = document.getElementById("freqOwnerWarning");
+  if (warning) {
+    warning.style.display = (link && link.owner && link.owner !== missionOwner) ? "flex" : "none";
   }
 }
 
 function _resetReqFormBox(box) {
   if (!box) box = document.getElementById("reqFormBox");
   if (!box) return;
-  box.classList.remove("mismatch");
+  const warning = document.getElementById("freqOwnerWarning");
+  if (warning) warning.style.display = "none";
 }
 
 function openPlanMissionModal() {
@@ -255,7 +255,16 @@ function openPlanMissionModal() {
 
   // Only set values if elements exist
   if (planMissionName) planMissionName.value = "";
-  if (planMissionOwner) planMissionOwner.value = "";
+  if (planMissionOwner) {
+    planMissionOwner.value = "";
+    // User role: pre-select and lock their belonging
+    if (isUserRole() && getCurrentUserOwner()) {
+      planMissionOwner.value = getCurrentUserOwner();
+      planMissionOwner.disabled = true;
+    } else {
+      planMissionOwner.disabled = false;
+    }
+  }
   if (reqSector) reqSector.value = "";
   if (reqSite) reqSite.value = "";
   if (reqFrequencyBand) reqFrequencyBand.value = "";

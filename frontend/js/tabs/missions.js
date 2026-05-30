@@ -173,14 +173,8 @@ function _buildMissionRow(mission, actions) {
       : `<td style="color:var(--gray-400)">-</td>`;
 
   const isFullyAllocated = reqCount > 0 && allocatedDevices >= reqCount;
-  // Shimmer delay matches when the last filled segment finishes animating
-  const rowShimmerDelay = `${(Math.min(allocatedDevices, reqCount) - 1) * 45 + 230}ms`;
   const row = document.createElement("tr");
   if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
-  if (isFullyAllocated) {
-    row.classList.add("mission-row-complete");
-    row.style.setProperty("--shimmer-delay", rowShimmerDelay);
-  }
   row.innerHTML = `
     <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}</td>
     <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
@@ -317,15 +311,20 @@ function renderMissionsTab() {
         ? `border-right:4px solid ${ownerColor};`
         : "";
       const row = document.createElement("tr");
+      const isOwnMission = isAdminRole() || m.owner === getCurrentUserOwner();
+      const plannedActions = isAdminRole()
+        ? `<button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+           <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.finishPlanning"))}" onclick="finishMissionPlanning('${m.id}')"><i class="fa-solid fa-check"></i></button>
+           <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>`
+        : isOwnMission
+          ? `<button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+             <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>`
+          : `<button class="mission-btn" style="background:var(--info-color);" data-tooltip="${escapeHTML(t("missions.btn.viewMission"))}" onclick="editMission('${m.id}', true)"><i class="fa-solid fa-eye"></i></button>`;
       row.innerHTML = `
         <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(m.name)}</strong></td>
         <td>${escapeHTML(m.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
-        <td class="missions-actions-cell">
-          <button class="mission-btn btn-primary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-          <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.finishPlanning"))}" onclick="finishMissionPlanning('${m.id}')"><i class="fa-solid fa-check"></i></button>
-          <button class="mission-btn btn-secondary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>
-        </td>`;
+        <td class="missions-actions-cell">${plannedActions}</td>`;
       plannedTbody.appendChild(row);
     });
     container.appendChild(plannedTable);
@@ -337,12 +336,24 @@ function renderMissionsTab() {
     "missions.activeMissions",
     active,
     (m) => `
-    <button class="mission-btn btn-primary admin-only" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-    <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.allocate"))}" onclick="allocateMission('${m.id}')"><i class="fa-solid fa-bolt"></i></button>
-    <button class="mission-btn admin-only" style="background:#0ea5e9;" data-tooltip="${escapeHTML(t("missions.btn.allocateToStandby"))}" onclick="allocateToStandby('${m.id}')"><i class="fa-solid fa-hourglass-half"></i></button>
-    <button class="mission-btn btn-secondary admin-only" data-tooltip="${escapeHTML(t("missions.btn.activateStandby"))}" onclick="activateStandbyBtn('${m.id}')"><i class="fa-solid fa-circle-play"></i></button>
-    <button class="mission-btn btn-warning admin-only" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="returnToPlanning('${m.id}')"><i class="fa-solid fa-rotate-left"></i></button>
-    <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("missions.btn.finishAndArchive"))}" onclick="endMission('${m.id}')"><i class="fa-solid fa-flag-checkered"></i></button>
+    ${isUserRole() ? `
+    <button class="mission-btn" style="background:var(--info-color);" data-tooltip="${escapeHTML(t("missions.btn.viewMission"))}" onclick="editMission('${m.id}', true)"><i class="fa-solid fa-eye"></i></button>
+    ` : `
+    <button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+    <button class="mission-btn" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.allocate"))}" onclick="allocateMission('${m.id}')"><i class="fa-solid fa-bolt"></i></button>
+    <div class="standby-dropdown">
+      <button class="mission-btn" style="background:#0ea5e9;" data-tooltip="${escapeHTML(t("missions.btn.standbyGroup"))}" onclick="_toggleStandbyMenu('${m.id}', event)">
+        <i class="fa-solid fa-hourglass" style="font-size:0.8rem;"></i><i class="fa-solid fa-chevron-down" style="font-size:0.5rem;margin-right:2px;"></i>
+      </button>
+      <div id="standby-menu-${m.id}" class="standby-dropdown-menu">
+        <button onclick="_closeStandbyMenu();allocateToStandby('${m.id}')"><i class="fa-solid fa-hourglass-half" style="color:#0ea5e9;"></i>${escapeHTML(t("missions.btn.allocateToStandby"))}</button>
+        <button onclick="_closeStandbyMenu();activateStandbyBtn('${m.id}')"><i class="fa-solid fa-circle-play" style="color:var(--gray-500);"></i>${escapeHTML(t("missions.btn.activateStandby"))}</button>
+        <button onclick="_closeStandbyMenu();demoteToStandby('${m.id}')"><i class="fa-solid fa-hourglass-start" style="color:#7c3aed;"></i>${escapeHTML(t("missions.btn.demoteToStandby"))}</button>
+      </div>
+    </div>
+    <button class="mission-btn btn-warning" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="returnToPlanning('${m.id}')"><i class="fa-solid fa-rotate-left"></i></button>
+    <button class="mission-btn btn-danger" data-tooltip="${escapeHTML(t("missions.btn.finishAndArchive"))}" onclick="endMission('${m.id}')"><i class="fa-solid fa-flag-checkered"></i></button>
+    `}
   `,
     "missions.noActive",
     "margin-top:1.5rem",
@@ -385,10 +396,15 @@ function renderMissionsTab() {
         <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(mission.name)}</strong></td>
         <td>${escapeHTML(mission.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
-        <td class="missions-actions-cell">
-          <button class="mission-btn btn-secondary user-edit-allowed" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="restoreMission('${mission.id}')"><i class="fa-solid fa-rotate-right"></i></button>
-          <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("btn.delete"))}" onclick="deleteArchivedMission('${mission.id}')"><i class="fa-solid fa-trash"></i></button>
-        </td>`;
+        ${(() => {
+          const canAct = isAdminRole() || mission.owner === getCurrentUserOwner();
+          if (!canAct) return `<td></td>`;
+          return `<td class="missions-actions-cell">
+            <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("missions.btn.returnToPlanning"))}" onclick="restoreMission('${mission.id}')"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="mission-btn btn-danger admin-only" data-tooltip="${escapeHTML(t("btn.delete"))}" onclick="deleteArchivedMission('${mission.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>`;
+        })()}
+      `;
       tbody.appendChild(row);
     });
     container.appendChild(table);
@@ -699,6 +715,128 @@ async function _activateStandbyInternal(mission) {
   }
 
   return { promoted, failed };
+}
+
+// ── Strict helper: ALL standby-state fields must be completely empty ──
+function _standbyStateIsEmpty(radio) {
+  if (radio.status !== "Usable") return false;
+  if (radio.standby_mission) return false;
+  if (radio.standby_owner) return false;
+  if (radio.standby_role) return false;
+  if (radio.standby_frequency != null && radio.standby_frequency !== 0) return false;
+  return true;
+}
+
+// ── Demote to Standby: internal — mirror of _activateStandbyInternal ──
+// For each radio with mission_name === mission.name, moves current → standby.
+
+async function _demoteToStandbyInternal(mission) {
+  const missionName = mission.name;
+  const missionOwner = mission.owner;
+
+  const currentRadios = (window.appState.radios || []).filter(
+    (r) => r.mission_name === missionName && r.status === "Usable",
+  );
+  if (currentRadios.length === 0) return { demoted: 0, failed: 0 };
+
+  let demoted = 0;
+  let failed = 0;
+  const usedIds = new Set();
+  const batchUpdates = [];
+
+  for (const radio of currentRadios) {
+    const band = radio.frequency_band || getFrequencyBandForDevice(radio.device_type);
+
+    // Option 1: demote in-place if standby state is completely empty
+    if (_standbyStateIsEmpty(radio)) {
+      batchUpdates.push({
+        ...radio,
+        standby_mission: missionName,
+        standby_frequency: radio.frequency,
+        standby_owner: missionOwner || radio.owner,
+        standby_role: radio.role,
+        mission_name: null,
+        frequency: null,
+        owner: null,
+        role: null,
+      });
+      demoted++;
+      usedIds.add(radio.id);
+      continue;
+    }
+
+    // Option 2: find another free radio at same site/band with empty standby
+    const freeRadio = (window.appState.radios || []).find(
+      (r) =>
+        r.id !== radio.id &&
+        !usedIds.has(r.id) &&
+        _standbyStateIsEmpty(r) &&
+        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) === band &&
+        r.site_id === radio.site_id,
+    );
+
+    if (freeRadio) {
+      batchUpdates.push({
+        ...freeRadio,
+        standby_mission: missionName,
+        standby_frequency: radio.frequency,
+        standby_owner: missionOwner || radio.owner,
+        standby_role: radio.role,
+      });
+      batchUpdates.push({
+        ...radio,
+        mission_name: null,
+        frequency: null,
+        owner: null,
+        role: null,
+      });
+      demoted++;
+      usedIds.add(freeRadio.id);
+    } else {
+      failed++;
+    }
+  }
+
+  if (batchUpdates.length > 0) {
+    try {
+      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
+    } catch (_) {
+      failed += demoted;
+      demoted = 0;
+    }
+  }
+
+  return { demoted, failed };
+}
+
+// ── Demote to Standby button ──
+
+async function demoteToStandby(missionId) {
+  if (guardAdminOnly()) return;
+  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
+  if (!mission) {
+    showNotification(t("error.missionNotFound"), "error");
+    return;
+  }
+
+  const { demoted, failed } = await _demoteToStandbyInternal(mission);
+
+  if (demoted === 0 && failed === 0) {
+    showNotification(t("notify.noCurrentDevices"), "info");
+  } else {
+    if (demoted > 0)
+      showNotification(
+        t("notify.demotedToStandby", { count: demoted, name: mission.name }),
+        "success",
+      );
+    if (failed > 0)
+      showNotification(
+        t("notify.demoteToStandbyFailed", { count: failed }),
+        "warning",
+      );
+  }
+
+  await _refreshAfterMissionAction();
 }
 
 // ── Activate Standby button ──
@@ -1157,6 +1295,25 @@ window.deletePlannedMission = deletePlannedMission;
 window.finishMissionPlanning = finishMissionPlanning;
 window.returnToPlanning = returnToPlanning;
 window.activateStandbyBtn = activateStandbyBtn;
+window.demoteToStandby = demoteToStandby;
+
+function _closeStandbyMenu() {
+  document.querySelectorAll(".standby-dropdown-menu.open").forEach((m) => m.classList.remove("open"));
+}
+
+function _toggleStandbyMenu(missionId, event) {
+  event.stopPropagation();
+  const menu = document.getElementById(`standby-menu-${missionId}`);
+  if (!menu) return;
+  const isOpen = menu.classList.contains("open");
+  _closeStandbyMenu();
+  if (!isOpen) menu.classList.add("open");
+}
+
+document.addEventListener("click", _closeStandbyMenu);
+
+window._toggleStandbyMenu = _toggleStandbyMenu;
+window._closeStandbyMenu = _closeStandbyMenu;
 window.allocateMission = allocateMission;
 window.allocateToStandby = allocateToStandby;
 
@@ -1311,7 +1468,7 @@ async function archiveMission(missionId) {
 }
 
 async function restoreMission(missionId) {
-  if (guardAdminOnly()) return;
+  if (guardViewMode()) return;
   if (!confirm(t("confirm.restoreMission"))) return;
   try {
     await apiCall(`/archived_missions/${missionId}/restore`, "POST");
@@ -1346,7 +1503,7 @@ async function deleteArchivedMission(missionId) {
 
 let editingMissionId = null;
 
-function editMission(missionId) {
+function editMission(missionId, readOnly = false) {
   const mission = window.appState.plannedMissions.find(
     (m) => m.id === missionId,
   );
@@ -1416,11 +1573,19 @@ function editMission(missionId) {
   const modalTitle = document.querySelector("#planMissionModal h3");
   if (modalTitle) {
     modalTitle.childNodes[modalTitle.childNodes.length - 1].textContent =
-      " " + t("planMission.editTitle");
+      " " + t(readOnly ? "planMission.viewTitle" : "planMission.editTitle");
+  }
+
+  // Apply/remove read-only mode
+  const modal = document.getElementById("planMissionModal");
+  if (readOnly) {
+    modal.classList.add("plan-mission-readonly");
+  } else {
+    modal.classList.remove("plan-mission-readonly");
   }
 
   // Show modal
-  document.getElementById("planMissionModal").classList.remove("hidden");
+  modal.classList.remove("hidden");
   watchModalSaveBtn("planMissionModal");
   checkModalSaveBtn("planMissionModal");
   disableBodyScroll();
@@ -1429,7 +1594,11 @@ function editMission(missionId) {
 function closePlanMissionModal() {
   if (!confirmCloseModal("planMissionModal")) return;
   markModalClean("planMissionModal");
-  document.getElementById("planMissionModal").classList.add("hidden");
+  const planModal = document.getElementById("planMissionModal");
+  planModal.classList.add("hidden");
+  planModal.classList.remove("plan-mission-readonly");
+  const ownerEl = document.getElementById("planMissionOwner");
+  if (ownerEl) ownerEl.disabled = false;
   enableBodyScroll();
   missionRequirements = [];
   editingMissionId = null;
@@ -1606,6 +1775,17 @@ function openMissionAllocHelp() {
         t("missions.help.activate.step2"),
         t("missions.help.activate.step3"),
         t("missions.help.activate.step4"),
+      ],
+    },
+    {
+      icon: "fa-hourglass-start",
+      color: "#7c3aed",
+      title: t("missions.help.demote.title"),
+      steps: [
+        t("missions.help.demote.step1"),
+        t("missions.help.demote.step2"),
+        t("missions.help.demote.step3"),
+        t("missions.help.demote.step4"),
       ],
     },
   ];

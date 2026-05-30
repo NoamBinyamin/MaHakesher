@@ -1,5 +1,18 @@
 // ==================== API Functions ====================
 
+const _API_ERROR_MAP = {
+  "Not authenticated":                                    () => t("error.notAuthenticated"),
+  "Authentication required":                              () => t("error.notAuthenticated"),
+  "You can only create missions for your own owner":      () => t("error.missionOwnerOnly"),
+  "You can only edit missions for your own owner":        () => t("error.missionOwnerOnly"),
+  "You cannot change mission owner":                      () => t("error.missionOwnerChange"),
+};
+
+function _translateApiError(msg) {
+  const fn = _API_ERROR_MAP[msg];
+  return fn ? fn() : ("Error: " + msg);
+}
+
 async function apiCall(endpoint, method = "GET", data = null) {
   try {
     const headers = { "Content-Type": "application/json" };
@@ -35,8 +48,12 @@ async function apiCall(endpoint, method = "GET", data = null) {
     return await response.json();
   } catch (error) {
     console.error("API Error:", error);
-    if (endpoint !== "/login") {
-      showNotification("Error: " + error.message, "error");
+    // 401 is already handled by _handleSessionExpired — don't double-notify
+    // Login errors are shown inline in the login modal
+    const suppress = endpoint === "/login" || error.message === "Not authenticated";
+    if (!suppress) {
+      const translated = _translateApiError(error.message);
+      showNotification(translated, "error");
     }
     throw error;
   }
