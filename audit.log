@@ -1291,3 +1291,4 @@
 {"timestamp": "2026-05-30T11:40:53.538839+00:00", "action": "login", "entity_type": "user", "details": {"username": "משתמש מדורי"}}
 {"timestamp": "2026-05-30T11:41:39.261637+00:00", "action": "restore", "entity_type": "mission", "entity_id": "mission-77a56890", "details": {"name": "המשימה של המדור שלי"}, "changed_by": "משתמש מדורי"}
 {"timestamp": "2026-05-30T11:41:52.285273+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-30T14:38:40.760504+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}

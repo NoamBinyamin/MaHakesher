@@ -2387,7 +2387,8 @@ body {
 /* Shared size for all three navbar action buttons */
 #modeToggle,
 #userInfoBtn,
-#darkModeToggle {
+#darkModeToggle,
+#navPresentationBtn {
   height: 2.1rem;
   font-size: 0.875rem;
   padding: 0 0.8rem;
@@ -3080,6 +3081,80 @@ html.view-mode:not(.user-role) .missions-actions-cell {
 html.view-mode td[data-inline-editable] {
   cursor: default !important;
   pointer-events: none;
+}
+
+/* ==================== Presentation Modal ==================== */
+
+#presentationModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#presentationModal.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.pres-frame-wrapper {
+  width: 96vw;
+  height: 93vh;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+}
+.pres-frame-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.pres-close {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid #334155;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.pres-close:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+#navPresentationBtn {
+  height: 2.1rem;
+  font-size: 0.875rem;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#navPresentationBtn:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* ==================== Timeline Tab ==================== */

@@ -45,6 +45,14 @@
             <span id="userInfoName"></span>
           </button>
           <button
+            id="navPresentationBtn"
+            onclick="openPresentationModal()"
+            data-i18n-title="btn.presentationTooltip"
+          >
+            <i class="fa-solid fa-chalkboard"></i>
+            <span data-i18n="btn.presentation">מצגת</span>
+          </button>
+          <button
             id="darkModeToggle"
             onclick="toggleDarkMode()"
             data-i18n="btn.dark"
@@ -2863,6 +2871,16 @@
         data-i18n="overview.modeLink">
         <i class="fa-solid fa-link"></i> Link
       </button>
+    </div>
+
+    <!-- Presentation Modal -->
+    <div id="presentationModal">
+      <div class="pres-frame-wrapper">
+        <button class="pres-close" onclick="closePresentationModal()" title="סגור מצגת">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <iframe id="presentationFrame" src="" title="מצגת מערכת מה הקשר?"></iframe>
+      </div>
     </div>
   </body>
 </html>

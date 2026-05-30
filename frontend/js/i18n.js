@@ -124,6 +124,8 @@ const TRANSLATIONS = {
     "btn.dark": "🌙 Dark",
     "btn.light": "☀️ Light",
     "btn.toggleDark": "Toggle dark mode",
+    "btn.presentation": "Presentation",
+    "btn.presentationTooltip": "Open system presentation",
 
     // ── Overview ──────────────────────────────────────────────
     "overview.title": "Deployment Overview",
@@ -251,7 +253,8 @@ const TRANSLATIONS = {
     "planMission.deviceReqs": "Device Requirements",
     "planMission.addReqHint":
       "Add specific device requirements for this mission",
-    "planMission.freqOwnerMismatch": "Pay attention — the selected frequency belongs to a different owner than this mission",
+    "planMission.freqOwnerMismatch":
+      "Pay attention — the selected frequency belongs to a different owner than this mission",
     "planMission.freqBand": _en.freqBand,
     "planMission.freqBandAuto": "Auto-detected",
     "planMission.freqMhz": "Freq (MHz)",
@@ -507,7 +510,8 @@ const TRANSLATIONS = {
       "{count} standby device(s) could not be promoted",
     "notify.demotedToStandby":
       "{count} device(s) moved to standby for '{name}'",
-    "notify.noCurrentDevices": "No current-state devices found for this mission",
+    "notify.noCurrentDevices":
+      "No current-state devices found for this mission",
     "notify.demoteToStandbyFailed":
       "{count} device(s) could not be moved to standby",
     "confirm.returnToPlanning":
@@ -583,7 +587,8 @@ const TRANSLATIONS = {
     "error.selectDeviceType": "Please select a device type",
     "error.fillRequired": "Please fill in all required fields",
     "error.notAuthenticated": "Not authenticated — please log in",
-    "error.missionOwnerOnly": "You can only create or edit missions for your own owner",
+    "error.missionOwnerOnly":
+      "You can only create or edit missions for your own owner",
     "error.missionOwnerChange": "You cannot change the mission owner",
     "error.siteNameExists": "A site with this name already exists",
     "error.sectorNameRequired": "Please enter a sector name",
@@ -883,6 +888,8 @@ const TRANSLATIONS = {
     "btn.dark": "🌙 כהה",
     "btn.light": "☀️ בהיר",
     "btn.toggleDark": "החלף מצב תצוגה",
+    "btn.presentation": "הצגת המערכת",
+    "btn.presentationTooltip": "פתח מצגת מערכת",
 
     // ── Overview ──────────────────────────────────────────────
     "overview.title": "פריסת מכשירים",
@@ -951,8 +958,7 @@ const TRANSLATIONS = {
       "אם המכשיר תפוס במצב הפעיל — המערכת מחפשת מכשיר פנוי לחלוטין באותו אתר ובאותו תחום תדר, ומעבירה את משימת הכוננות למכשיר הפנוי.",
     "missions.help.activate.step4":
       "אם אין מכשיר זמין להקצאה, הוא יופיע ברשימת סיכום לטיפול ידני.",
-    "missions.help.demote.title":
-      "העבר לכוננות — הורדת הקצאות פעילות לכוננות",
+    "missions.help.demote.title": "העבר לכוננות — הורדת הקצאות פעילות לכוננות",
     "missions.help.demote.step1":
       "סורק את כל המכשירים המשובצים כרגע למשימה זו במצב הפעיל.",
     "missions.help.demote.step2":
@@ -1005,7 +1011,8 @@ const TRANSLATIONS = {
     "planMission.created": "נוצר",
     "planMission.deviceReqs": "מכשירים נרדשים",
     "planMission.addReqHint": "הוסף מכשירים הנדרשים למשימה זו",
-    "planMission.freqOwnerMismatch": "שים לב — התדר שנבחר שייך לבעלים שונה מבעל המשימה",
+    "planMission.freqOwnerMismatch":
+      "שים לב — התדר שנבחר שייך לבעלים שונה מבעל המשימה",
     "planMission.freqBand": _he.freqBand,
     "planMission.freqBandAuto": "---",
     "planMission.freqMhz": "תדר (MHz)",
@@ -1258,11 +1265,9 @@ const TRANSLATIONS = {
     "notify.noStandbyDevices": "לא נמצאו מכשירי כוננות למשימה זו",
     "notify.standbyActivateFailed":
       "{count} מכשירי כוננות לא הצליחו לעבור לפעיל",
-    "notify.demotedToStandby":
-      "{count} מכשירים הועברו לכוננות עבור '{name}'",
+    "notify.demotedToStandby": "{count} מכשירים הועברו לכוננות עבור '{name}'",
     "notify.noCurrentDevices": "לא נמצאו מכשירים פעילים למשימה זו",
-    "notify.demoteToStandbyFailed":
-      "{count} מכשירים לא הצליחו לעבור לכוננות",
+    "notify.demoteToStandbyFailed": "{count} מכשירים לא הצליחו לעבור לכוננות",
     "confirm.returnToPlanning": "להחזיר את המשימה לתכנון? כל ההקצאות יתנקו.",
     "notify.missionSaved": "המשימה נשמרה בהצלחה",
     "notify.missionUpdated": "המשימה עודכנה בהצלחה",
@@ -1638,6 +1643,8 @@ function setLang(code) {
       _statusEl.textContent = `${_connected ? "🟢" : "🔴"} ${t(_connected ? "server.connected" : "server.disconnected")}`;
     }
   }
+  if (window._updateModeButton) _updateModeButton();
+  if (window._updateUserButton) _updateUserButton();
   if (window.renderOverview) renderOverview();
   if (window.renderMissionsTab) renderMissionsTab();
   if (window.renderLinksTab) renderLinksTab();

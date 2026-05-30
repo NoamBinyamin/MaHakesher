@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מה הקשר? — מצגת מערכת</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" />
+    <link rel="stylesheet" href="presentation-he.css" />
+  </head>
+  <body>
+    <button class="nav-btn" id="nav-prev" onclick="go(-1)"><i class="fa-solid fa-chevron-right"></i></button>
+    <button class="nav-btn" id="nav-next" onclick="go(1)"><i class="fa-solid fa-chevron-left"></i></button>
+    <div id="progress-bar"></div>
+    <div id="counter"></div>
+
+    <div id="bg-canvas">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <div id="deck">
+
+      <!-- ══ 1 — כותרת ══ -->
+      <div class="slide active" id="slide-1">
+        <div class="logo">📡</div>
+        <div class="eyebrow">הצגת המערכת</div>
+        <h1>מה הקשר?</h1>
+        <p class="subtitle">מערכת ניהול תדרי ומכשירי רדיו מבצעית — לניהול מלא של מכשירים, תדרים ומשימות בפריסה רב-גזרתית</p>
+        <div class="pill-row">
+          <span class="pill"><i class="fa-solid fa-tower-cell c-blue icon-mr"></i> ניהול מכשירי קשר</span>
+          <span class="pill"><i class="fa-solid fa-rocket c-purple icon-mr"></i> תכנון משימות</span>
+          <span class="pill"><i class="fa-solid fa-link c-green icon-mr"></i> מילון תדרים</span>
+          <span class="pill"><i class="fa-solid fa-chart-pie c-amber icon-mr"></i> ניתוח נתונים וסיכום</span>
+          <span class="pill"><i class="fa-solid fa-clock-rotate-left c-cyan icon-mr"></i> היסטוריית פעולות</span>
+        </div>
+      </div>
+
+      <!-- ══ 2 — הבעיה ══ -->
+      <div class="slide">
+        <div class="eyebrow">למה המערכת נבנתה</div>
+        <div class="section-title">האתגר המבצעי</div>
+        <div class="section-sub">ניהול תדרי רדיו בפריסה גדולה הוא מורכב ורגיש לטעויות</div>
+        <ul class="feature-list">
+          <li><span class="icon c-red"><i class="fa-solid fa-triangle-exclamation"></i></span><span><strong>קושי במעקב וניהול כולל - </strong>המצב הקיים מנוהל בקובץ מקומי לא חכם, שלא מאפשר מעקב נכון אחר המידע</span></li>
+          <li><span class="icon c-amber"><i class="fa-solid fa-layer-group"></i></span><span><strong>מצב נוכחי ומצב כוננות</strong> — כל מכשיר מנהל שני תצורות נפרדות במקביל, מה שמכפיל את מורכבות המעקב</span></li>
+          <li><span class="icon c-cyan"><i class="fa-solid fa-rocket"></i></span><span><strong>הקצאת מכשירים למשימות</strong> — כל משימה דורשת מכשירים ספציפיים על תדרים ספציפיים; הקצאה ידנית היא איטית ומועדת לשגיאות</span></li>
+          <li><span class="icon c-purple"><i class="fa-solid fa-map"></i></span><span><strong>פריסה רב-שכבתית</strong> — מאות מכשירים מפוזרים על פני גזרות ואתרים רבים, ללא כלי מרכזי לתצוגה וניהול</span></li>
+          <li><span class="icon c-green"><i class="fa-solid fa-clock-rotate-left"></i></span><span><strong>חוסר שקיפות</strong> — אין תיעוד מי שינה מה ומתי — כל שינוי תצורה "נעלם" בלי עקבות</span></li>
+        </ul>
+      </div>
+
+      <!-- ══ 3 — מפת תכונות ══ -->
+      <div class="slide">
+        <div class="eyebrow">מה המערכת עושה</div>
+        <div class="section-title">מפת תכונות המערכת</div>
+        <div class="section-sub">8 אזורי פונקציונליות — מהנחת היסוד ועד ניהול, תיעוד ואבטחה</div>
+        <div class="cards" style="max-width:1150px;gap:1rem;">
+          <div class="card card-md accent-blue"><div class="card-icon c-blue"><i class="fa-solid fa-layer-group"></i></div><h3>מבנה נתונים</h3><p>היררכיה תלת-שכבתית: גזרות, אתרים ומכשירים — עם תחומי תדר ומצב שמיש/לא שמיש.</p></div>
+          <div class="card card-md accent-purple"><div class="card-icon c-purple"><i class="fa-solid fa-table"></i></div><h3>סקירת פריסה</h3><p>טבלה מאוחדת עם מצב נוכחי וכוננות — עריכה ישירה בשורה ומעבר תדר/עורק.</p></div>
+          <div class="card card-md accent-green"><div class="card-icon c-green"><i class="fa-solid fa-link"></i></div><h3>מילון תדרים</h3><p>מיפוי תדרים לשמות עורקים, ייבוא Excel, השלמה אוטומטית בכל שדה תדר.</p></div>
+          <div class="card card-md accent-indigo"><div class="card-icon c-indigo"><i class="fa-solid fa-rocket"></i></div><h3>ניהול משימות</h3><p>תכנון, הקצאה אוטומטית, כוננות, ציר זמן גאנט ומחזור חיים מלא.</p></div>
+          <div class="card card-md accent-cyan"><div class="card-icon c-cyan"><i class="fa-solid fa-magnifying-glass"></i></div><h3>חיפוש וניתוח</h3><p>חיפוש חי, סינון מתקדם, גרפים וטבלאות ניצולת לפי אתר וגזרה.</p></div>
+          <div class="card card-md accent-amber"><div class="card-icon c-amber"><i class="fa-solid fa-clock-rotate-left"></i></div><h3>מעקב ותיעוד</h3><p>כל שינוי מתועד עם השוואת לפני/אחרי, סינון לפי סוג וחותמות זמן.</p></div>
+          <div class="card card-md accent-red"><div class="card-icon c-red"><i class="fa-solid fa-shield-halved"></i></div><h3>גישה ואבטחה</h3><p>מצב צפייה/עריכה, תפקידי מנהל/משתמש, שיוך לבעלים ואינדיקטור מחובר.</p></div>
+          <div class="card card-md accent-teal"><div class="card-icon c-teal"><i class="fa-solid fa-sliders"></i></div><h3>שימוש שוטף</h3><p>מצב כהה/בהיר, ייצוא וייבוא, סנכרון חי בין משתמשים, קיצורי מקלדת.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 4 — מבנה הנתונים ══ -->
+      <div class="slide">
+        <div class="eyebrow">מבנה הנתונים</div>
+        <div class="section-title">היררכיה תלת-שכבתית</div>
+        <div class="section-sub">כל מכשיר מאורגן בתוך מבנה גיאוגרפי ברור ומוגדר</div>
+        <div class="hierarchy">
+          <div class="h-level">
+            <div class="h-box" style="background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;min-width:220px;">
+              <i class="fa-solid fa-map icon-mr"></i> גזרה
+              <div style="font-size:0.72rem;font-weight:400;opacity:0.85;margin-top:2px;">רמה מרחבית עליונה (למשל: גזרה צפונית)</div>
+            </div>
+          </div>
+          <div class="h-line"></div>
+          <div class="h-spread">
+            <div class="h-branch">
+              <div class="h-box" style="background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;min-width:160px;">
+                <i class="fa-solid fa-location-dot icon-mr"></i> אתר א'
+                <div style="font-size:0.7rem;opacity:0.8;margin-top:2px;">מיקום פיזי</div>
+              </div>
+              <div class="h-line"></div>
+              <div class="h-children">
+                <div class="h-box" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;font-size:0.82rem;padding:0.5rem 0.9rem;">📻 מכשיר רדיו 4</div>
+                <div class="h-box" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;font-size:0.82rem;padding:0.5rem 0.9rem;">📻 מכשיר רדיו 3</div>
+              </div>
+            </div>
+            <div style="width:2px;height:80px;background:var(--border);align-self:flex-start;"></div>
+            <div class="h-branch">
+              <div class="h-box" style="background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;min-width:160px;">
+                <i class="fa-solid fa-location-dot icon-mr"></i> אתר ב'
+                <div style="font-size:0.7rem;opacity:0.8;margin-top:2px;">מיקום פיזי</div>
+              </div>
+              <div class="h-line"></div>
+              <div class="h-children">
+                <div class="h-box" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;font-size:0.82rem;padding:0.5rem 0.9rem;">📻 מכשיר רדיו 2</div>
+                <div class="h-box" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;font-size:0.82rem;padding:0.5rem 0.9rem;">📻 מכשיר רדיו 1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pill-row" style="margin-top:1.5rem">
+          <span class="pill pill-blue">תומך בהפרדת תחום תדר בין מכשירים שונים</span>
+          <span class="pill pill-green">מאפשר מעקב מכשירים שמישים ולא שמישים</span>
+          <span class="pill pill-amber">מאפשר העלאה של קובץ Excel בלחיצה אחת</span>
+        </div>
+      </div>
+
+      <!-- ══ 5 — תשתית ══ -->
+      <div class="slide">
+        <div class="eyebrow">תשתית</div>
+        <div class="section-title">ריצה מקומית — ללא תלות בענן</div>
+        <div class="section-sub">כל הנתונים נשמרים מקומית, ללא תלות בשרת חיצוני</div>
+        <div class="cards" style="max-width:900px">
+          <div class="card card-lg"><div class="card-icon c-blue"><i class="fa-solid fa-server"></i></div><h3>שרת Python מקומי</h3><p>המערכת רצה על שרת מקומי ללא צורך בחיבור לרשת.</p></div>
+          <div class="card card-lg"><div class="card-icon c-green"><i class="fa-solid fa-database"></i></div><h3>מסד נתונים</h3><p>כל הנתונים שמורים בקובץ יחיד — קל לגיבוי, העברה ושחזור. ייצוא/ייבוא של קובץ הנתונים באופן מלא נמצא בממשק המשתמש.</p></div>
+          <div class="card card-lg"><div class="card-icon c-purple"><i class="fa-solid fa-globe"></i></div><h3>ממשק דפדפן</h3><p>ממשק משתמש ב-HTML/CSS/JS טהור — נגיש מכל דפדפן ברשת המקומית, ללא התקנת תומכים מיוחדים.</p></div>
+        </div>
+        <div class="pill-row" style="margin-top:2rem">
+          <span class="pill pill-blue"><i class="fa-solid fa-lock icon-mr"></i> כל הנתונים נשמרים</span>
+          <span class="pill pill-green"><i class="fa-solid fa-wifi icon-mr"></i> עובד ברשת מבודדת</span>
+          <span class="pill pill-amber"><i class="fa-solid fa-bolt icon-mr"></i> זמן תגובה מיידי</span>
+        </div>
+      </div>
+
+      <!-- ══ 6 — סקירה כללית ══ -->
+      <div class="slide">
+        <div class="eyebrow">המסך הראשי</div>
+        <div class="section-title">סקירת הפריסה</div>
+        <div class="section-sub">כל הפריסה בטבלה אחת מאוחדת — מצב נוכחי ומצב כוננות זה לצד זה</div>
+        <div class="cards">
+          <div class="card"><div class="card-icon c-blue"><i class="fa-solid fa-table"></i></div><h3>טבלה מאוחדת</h3><p>כל הגזרות, האתרים והמכשירים בתצוגה אחת. שני מצבי הכיוון מוצגים בו-זמנית לכל מכשיר.</p></div>
+          <div class="card"><div class="card-icon c-cyan"><i class="fa-solid fa-pen-to-square"></i></div><h3>עריכה בשורה</h3><p>לחיצה כפולה על כל תא מאפשרת עריכה ישירה של תדר, בעלים, משימה, סטטוס או הערות.</p></div>
+          <div class="card"><div class="card-icon c-purple"><i class="fa-solid fa-palette"></i></div><h3>צביעה לפי בעלים</h3><p>לכל בעלים צבע ייחודי המוחל על שורות המכשירים שלו — זיהוי ויזואלי מיידי.</p></div>
+          <div class="card"><div class="card-icon c-red"><i class="fa-solid fa-circle-exclamation"></i></div><h3>זיהוי קונפליקטים</h3><p>תדרים כפולים בתוך אתר מסומנים אוטומטית באדום — מונע כפילות וחוסך משאבים.</p></div>
+          <div class="card"><div class="card-icon c-green"><i class="fa-solid fa-toggle-on"></i></div><h3>מצב תדר / עורק</h3><p>מעבר בין הצגת תדרים כמספרים גולמיים לבין שמות העורקים — בלחיצה אחת.</p></div>
+          <div class="card"><div class="card-icon c-amber"><i class="fa-solid fa-rotate"></i></div><h3>הצרחה בלחיצה אחת</h3><p>כפתור ייעודי מחליף בין המצב הנוכחי לכוננות בלחיצה אחת.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 7 — עריכה בשורה ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר עריכה בשורה אחת</div>
+        <div class="section-title">עריכה מהירה בשורה</div>
+        <div class="section-sub">שינוי כל שדה ישירות מהטבלה בלחיצה כפולה עם העכבר — מהיר ופשוט</div>
+        <div class="two-col" style="max-width:900px;align-items:center">
+          <ul class="feature-list">
+            <li><span class="step-badge">1</span><span><strong>לחיצה כפולה על תא</strong> — כל תא שניתן לעריכה הופך לשדה קלט מיידי (תדר, בעלים, משימה, תפקיד, הערות, סטטוס)</span></li>
+            <li><span class="step-badge">2</span><span><strong>שדות תדר</strong> — מציעים השלמה אוטומטית משמות עורקים; תחום התדר מאומת אוטומטית לפי סוג המכשיר ומונע טעויות</span></li>
+            <li><span class="step-badge">3</span><span><strong>שדות בעלים ומשימה</strong> — רשימה נפתחת בתא עם הערכים הזמינים במערכת; לא ניתן להזין ערך שאינו מוכר</span></li>
+            <li><span class="step-badge">4</span><span><strong>שמירה ועדכון</strong> — Enter לאישור, Escape לביטול; השינוי נשמר בבסיס הנתונים ומתעדכן בטבלה מיד</span></li>
+            <li><span class="step-badge">5</span><span><strong>אזהרת אי-התאמה</strong> — אם התדר שנבחר שייך לבעלים שונה מבעל המשימה, מוצגת אזהרה צבעונית</span></li>
+          </ul>
+          <!-- Demo box — unique layout, inline styles kept intentionally -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+            <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:0.25rem;">דוגמה — עריכת תדר</div>
+            <div style="background:#0f172a;border:1px solid #2563eb;border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;">
+              <i class="fa-solid fa-wave-square c-blue"></i>
+              <span style="font-size:0.9rem;color:#60a5fa">120.5</span>
+              <span style="font-size:0.75rem;color:var(--muted);margin-right:auto;">MHz · LVHF</span>
+            </div>
+            <div style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;">
+              <div style="color:#34d399;display:flex;align-items:center;gap:0.4rem;"><i class="fa-solid fa-circle-check"></i> תדר תקין לתחום LVHF</div>
+            </div>
+            <div style="background:#0f172a;border:1px solid #d97706;border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;color:#fbbf24;">
+              <i class="fa-solid fa-triangle-exclamation icon-mr"></i> אי-התאמה: העורק והבעלים אינם שייכים זה לזה
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 8 — מילון עורקים ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר תדר לעורק</div>
+        <div class="section-title">מילון עורקים</div>
+        <div class="section-sub">מיפוי בין מספרי תדרים גולמיים לשמות עורקים מבצעיים</div>
+        <div class="two-col" style="max-width:900px">
+          <ul class="feature-list">
+            <li><span class="icon c-green"><i class="fa-solid fa-link"></i></span><span><strong>מיפוי תדר ↔ שם עורק</strong> — כל רשומה מחברת שם עורק לתדר מספרי במאגר נתונים ייעודי</span></li>
+            <li><span class="icon c-cyan"><i class="fa-solid fa-magnifying-glass"></i></span><span><strong>חיפוש חי</strong> — ניתן להקליד שם עורק או מספר תדר, וההתאמה נעשית באופן מיידי</span></li>
+            <li><span class="icon c-amber"><i class="fa-solid fa-wand-magic-sparkles"></i></span><span><strong>השלמה אוטומטית</strong> — בכל שדה תדר במערכת, הקלד שם עורק והמערכת תציע את התדר המתאים אוטומטית</span></li>
+            <li><span class="icon c-purple"><i class="fa-solid fa-file-excel"></i></span><span><strong>ייבוא מ-Excel</strong> — טעינת מאות עורקים בפעולה אחת עם זיהוי אוטומטי של תחום תדר ואימות בעלים</span></li>
+            <li><span class="icon c-red"><i class="fa-solid fa-eye-slash"></i></span><span><strong>שכבת תצוגה בלבד</strong> — התדרים נשמרים במסד הנתונים כמספרים; שמות העורקים הם תצוגה בלבד ולא משנים את הנתון הגולמי</span></li>
+          </ul>
+          <!-- Demo box — unique layout, inline styles kept intentionally -->
+          <div style="display:flex;flex-direction:column;gap:0.75rem">
+            <div style="background:var(--card);border:1px solid #059669;border-radius:12px;padding:1.1rem 1.25rem;">
+              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:0.6rem;font-weight:700;">דוגמה להמרת עורק ותדר</div>
+              <div style="display:flex;flex-direction:column;gap:0.5rem">
+                <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="font-weight:600">"המחשה"</span><span style="color:var(--muted)">← 32.5 MHz · UHF</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="font-weight:600">"152"</span><span style="color:var(--muted)">← 93.135 MHz · LVHF</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="font-weight:600">"3215"</span><span style="color:var(--muted)">← 125.500 MHz · HVHF</span></div>
+              </div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;font-size:0.85rem;color:var(--muted);line-height:1.7;">
+              <i class="fa-solid fa-circle-info c-cyan icon-mr"></i>
+              ניתן לייצא תבנית Excel, לקחת את הקיים ולהעלות — המערכת תזהה תחומי תדר אוטומטית ותדווח על שגיאות בייבוא.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 9 — ניהול משימות ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר משימות</div>
+        <div class="section-title">תכנון וניהול משימות</div>
+        <div class="section-sub">מחזור חיים מלא של משימה — מתכנון דרך הביצוע ועד תיעודה בארכיון</div>
+        <div class="timeline" style="margin-bottom:1.75rem">
+          <div class="tl-step"><div class="tl-dot" style="background:#1e3a5f;border-color:#2563eb"><i class="fa-solid fa-file-lines" style="color:#60a5fa"></i></div><div class="tl-label">תכנון</div><div class="tl-sub">הגדרת דרישות:<br/>תחום, אתר,<br/>תדר ותפקיד</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#1a3a20;border-color:#059669"><i class="fa-solid fa-play" style="color:#34d399"></i></div><div class="tl-label">התחלה</div><div class="tl-sub">הקצאה אוטומטית<br/>של מכשירים<br/>זמינים מתאימים</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#3d2800;border-color:#d97706"><i class="fa-solid fa-pause" style="color:#fbbf24"></i></div><div class="tl-label">כוננות</div><div class="tl-sub">מיקום מכשירים<br/>במצב כוננות<br/>ללא הפעלה מלאה</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#3d1010;border-color:#dc2626"><i class="fa-solid fa-stop" style="color:#f87171"></i></div><div class="tl-label">סיום</div><div class="tl-sub">שחרור כל המכשירים<br/>חזרה למאגר<br/>הזמין</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#2d1e00;border-color:#92400e"><i class="fa-solid fa-box-archive c-amber"></i></div><div class="tl-label">שמירה בארכיון</div><div class="tl-sub">שמורה לעיון<br/>עתידי, ניתנת<br/>לשחזור</div></div>
+        </div>
+        <div class="cards" style="max-width:1000px">
+          <div class="card card-sm"><div class="card-icon c-green"><i class="fa-solid fa-list-check"></i></div><h3>מעקב הקצאה בזמן אמת</h3><p>רואים בכל רגע כמה דרישות מולאו, כמה בכוננות, וכמה לא מולאו — עם אינדיקציה ויזואלית.</p></div>
+          <div class="card card-sm"><div class="card-icon c-red"><i class="fa-solid fa-shield-halved"></i></div><h3>אכיפת בעלים אוטומטית</h3><p>בעת הפעלת משימה, בעל המשימה מוחל אוטומטית על כל המכשירים המוקצים.</p></div>
+          <div class="card card-sm"><div class="card-icon c-cyan"><i class="fa-solid fa-rotate"></i></div><h3>סנכרון תפקידים</h3><p>עדכון תפקיד בדרישה לאחר הקצאה מעדכן אוטומטית את המכשיר המוקצה — ללא עבודה ידנית.</p></div>
+          <div class="card card-sm"><div class="card-icon c-purple"><i class="fa-solid fa-file-excel"></i></div><h3>ייבוא דרישות מ-Excel</h3><p>טעינת רשימת דרישות שלמה מגיליון Excel — חוסכת זמן הזנה ידנית בתכנון מורכב.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 10 — ציר זמן ══ -->
+      <div class="slide">
+        <div class="eyebrow">ציר הזמן</div>
+        <div class="section-title">ציר זמן משימות</div>
+        <div class="section-sub">תצוגת גאנט — כל המשימות על ציר זמן אחד, ניתן לראות חפיפות ולצפות עומסים במבט אחד</div>
+        <!-- Gantt demo — complex unique layout, inline styles kept intentionally -->
+        <div dir="ltr" style="width:100%;max-width:940px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;">
+          <div style="display:grid;grid-template-columns:145px repeat(7,1fr);background:var(--surface);border-bottom:1px solid var(--border);">
+            <div style="padding:0.5rem 0.85rem;font-size:0.72rem;font-weight:700;color:var(--muted);border-right:1px solid var(--border);">משימה / סטטוס</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 1</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 2</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 3</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;background:rgba(37,99,235,0.12);border-right:2px solid #2563eb;border-left:2px solid #2563eb;"><i class="fa-solid fa-circle" style="color:#2563eb;font-size:0.45rem;display:block;margin-bottom:1px;"></i><span style="font-size:0.65rem;color:#60a5fa;font-weight:700;">היום</span></div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 5</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 6</div>
+            <div style="text-align:center;padding:0.45rem 0.3rem;font-size:0.7rem;color:var(--muted);">יום 7</div>
+          </div>
+          <div style="display:grid;grid-template-columns:145px 1fr;border-bottom:1px solid var(--border);align-items:center;min-height:40px;">
+            <div style="padding:0.4rem 0.85rem;font-size:0.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:0.4rem;"><span style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0;"></span>משימה 1</div>
+            <div style="position:relative;height:26px;margin:0 0.4rem"><div style="position:absolute;left:0;right:0;height:100%;background:linear-gradient(90deg,#065f46,#059669);border-radius:5px;display:flex;align-items:center;padding:0 0.65rem;"><span style="font-size:0.68rem;font-weight:700;color:#6ee7b7">פעיל · 7 ימים</span></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:145px 1fr;border-bottom:1px solid var(--border);align-items:center;min-height:40px;">
+            <div style="padding:0.4rem 0.85rem;font-size:0.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:0.4rem;"><span style="width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;"></span>משימה 2</div>
+            <div style="position:relative;height:26px;margin:0 0.4rem"><div style="position:absolute;left:28.6%;width:57.1%;height:100%;background:linear-gradient(90deg,#78350f,#d97706);border-radius:5px;display:flex;align-items:center;padding:0 0.65rem;"><span style="font-size:0.68rem;font-weight:700;color:#fde68a">כוננות · 4 ימים</span></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:145px 1fr;border-bottom:1px solid var(--border);align-items:center;min-height:40px;">
+            <div style="padding:0.4rem 0.85rem;font-size:0.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:0.4rem;"><span style="width:7px;height:7px;border-radius:50%;background:#94a3b8;flex-shrink:0;"></span>משימה 3</div>
+            <div style="position:relative;height:26px;margin:0 0.4rem"><div style="position:absolute;left:0;width:28.6%;height:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;padding:0 0.65rem;"><span style="font-size:0.68rem;font-weight:700;color:var(--muted)">הסתיים</span></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:145px 1fr;align-items:center;min-height:40px;">
+            <div style="padding:0.4rem 0.85rem;font-size:0.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:0.4rem;"><span style="width:7px;height:7px;border-radius:50%;background:#60a5fa;flex-shrink:0;"></span>משימה 4</div>
+            <div style="position:relative;height:26px;margin:0 0.4rem"><div style="position:absolute;left:57.1%;width:42.9%;height:100%;background:linear-gradient(90deg,#1e3a5f,#1d4ed8);border-radius:5px;display:flex;align-items:center;padding:0 0.65rem;border:1px dashed #3b82f6;"><span style="font-size:0.68rem;font-weight:700;color:#93c5fd">מתוכנן</span></div></div>
+          </div>
+        </div>
+        <div class="cards" style="max-width:940px">
+          <div class="card card-sm"><div class="card-icon c-green"><i class="fa-solid fa-calendar-days"></i></div><h3>תצוגת גאנט</h3><p>כל המשימות על ציר זמן — חפיפות, פערים ועומסים גלויים בבת אחת.</p></div>
+          <div class="card card-sm"><div class="card-icon c-blue"><i class="fa-solid fa-filter"></i></div><h3>סינון לפי מצב</h3><p>הצג רק משימות פעילות, כוננות, מתוכננות או שהסתיימו לפי צורך.</p></div>
+          <div class="card card-sm"><div class="card-icon c-amber"><i class="fa-solid fa-triangle-exclamation"></i></div><h3>זיהוי חפיפות</h3><p>חפיפת משימות בתחום תדרים זהה מסומנת אוטומטית — מניעת קונפליקטים.</p></div>
+          <div class="card card-sm"><div class="card-icon c-purple"><i class="fa-solid fa-clock-rotate-left"></i></div><h3>ארכיון וניתוח</h3><p>צפייה במשימות שהסתיימו ושחזור הגדרותיהן לתכנון עתידי.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 11 — פעולות כוננות ══ -->
+      <div class="slide">
+        <div class="eyebrow">פעולות כוננות מתקדמות</div>
+        <div class="section-title">ניהול מצב כוננות</div>
+        <div class="section-sub">שלוש פעולות כוננות ייעודיות — מקובצות יחד בתפריט נגיש</div>
+        <div class="timeline" style="margin-bottom:2rem">
+          <div class="tl-step"><div class="tl-dot" style="background:#1e3a5f;border-color:#0ea5e9"><i class="fa-solid fa-hourglass-half" style="color:#38bdf8"></i></div><div class="tl-label">הקצה לכוננות</div><div class="tl-sub">מציב מכשירים<br/>פנויים במצב<br/>כוננות למשימה</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#1a2a1a;border-color:#94a3b8"><i class="fa-solid fa-circle-play c-muted"></i></div><div class="tl-label">הפעל כוננות</div><div class="tl-sub">מעלה מכשירי<br/>כוננות למצב<br/>פעיל</div></div>
+          <div class="tl-arrow"></div>
+          <div class="tl-step"><div class="tl-dot" style="background:#2a1a40;border-color:#7c3aed"><i class="fa-solid fa-hourglass-start" style="color:#a78bfa"></i></div><div class="tl-label">העבר לכוננות</div><div class="tl-sub">מוריד מכשירים<br/>פעילים חזרה<br/>לכוננות</div></div>
+        </div>
+        <ul class="feature-list" style="max-width:720px">
+          <li><span class="icon c-cyan"><i class="fa-solid fa-layer-group"></i></span><span><strong>תפריט קבוצת כוננות</strong> — שלושת הפעולות מקובצות בכפתור אחד עם תפריט נפתח, לשמירה על ממשק נקי ומסודר</span></li>
+          <li><span class="icon c-green"><i class="fa-solid fa-arrows-turn-to-dots"></i></span><span><strong>העברה חכמה</strong> — אם המכשיר תפוס, המערכת מוצאת מכשיר פנוי מאותו אתר ואותו תחום תדר ומעבירה אליו</span></li>
+          <li><span class="icon c-purple"><i class="fa-solid fa-circle-question"></i></span><span><strong>מדריך מובנה</strong> — כפתור "?" מסביר בדיוק כיצד כל פעולה עובדת, לאיזה מצב היא מועילה ומה קורה אם אין מכשיר זמין</span></li>
+          <li><span class="icon c-amber"><i class="fa-solid fa-triangle-exclamation"></i></span><span><strong>דיווח כישלונות</strong> — אם מכשיר לא הצליח לעבור, מוצגת התרעה עם מספר המכשירים שלא טופלו</span></li>
+        </ul>
+      </div>
+
+      <!-- ══ 12 — חיפוש וסינון ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר חיפוש</div>
+        <div class="section-title">חיפוש וסינון</div>
+        <div class="section-sub">מציאת כל מכשיר בפריסה — מיידית ומדויקת</div>
+        <div class="two-col" style="align-items:center">
+          <ul class="feature-list">
+            <li><span class="icon c-blue"><i class="fa-solid fa-bolt"></i></span><span><strong>חיפוש חי</strong> — תוצאות מתעדכנות בכל הקשת; מחפש בתדר, בעלים, משימה, סוג מכשיר והערות בו-זמנית</span></li>
+            <li><span class="icon c-cyan"><i class="fa-solid fa-layer-group"></i></span><span><strong>סינון לפי מצב</strong> — הצג רק מכשירים במצב נוכחי, רק כוננות, או שניהם; שימושי לבדיקת מוכנות</span></li>
+            <li><span class="icon c-amber"><i class="fa-solid fa-rocket"></i></span><span><strong>סינון לפי משימה</strong> — הצג רק מכשירים המוקצים למשימה ספציפית</span></li>
+            <li><span class="icon c-green"><i class="fa-solid fa-circle-check"></i></span><span><strong>סינון לפי סטטוס</strong> — הפרד בין מכשירים שמישים ללא שמישים; זיהוי מהיר של אמצעים לא שמישים</span></li>
+            <li><span class="icon c-purple"><i class="fa-solid fa-pen-to-square"></i></span><span><strong>פעולות ישירות מתוצאות</strong> אין צורך לחזור למסך הראשי, ברגע שמכשיר נמצא אפשר לבצע עליו פעולות באופן ישיר</span></li>
+          </ul>
+          <!-- Search demo — unique layout, inline styles kept intentionally -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+            <div style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;"><i class="fa-solid fa-magnifying-glass c-muted"></i><span style="color:var(--muted);font-size:0.9rem">חיפוש תדרים, בעלים, משימות...</span></div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+              <div style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.85rem;font-size:0.82rem;"><div style="color:var(--muted);font-size:0.68rem;font-weight:700;margin-bottom:0.25rem;">מצב הקצאה</div><span>שני המצבים ▾</span></div>
+              <div style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.85rem;font-size:0.82rem;"><div style="color:var(--muted);font-size:0.68rem;font-weight:700;margin-bottom:0.25rem;">משימה</div><span>כל המשימות ▾</span></div>
+              <div style="background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.85rem;font-size:0.82rem;"><div style="color:var(--muted);font-size:0.68rem;font-weight:700;margin-bottom:0.25rem;">סטטוס</div><span>הכל ▾</span></div>
+            </div>
+            <div style="font-size:0.82rem;color:#34d399;display:flex;align-items:center;gap:0.4rem;"><i class="fa-solid fa-circle-check"></i> 14 תוצאות</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 13 — סיכום ואנליטיקה ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר אנליטיקה</div>
+        <div class="section-title">סיכום ואנליטיקה</div>
+        <div class="section-sub">תמונת מצב ויזואלית של אמצעי הרדיו, באמצעות גרפים ותרשימים</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="big-num" data-target="12">0</div><p>סה"כ גזרות</p></div>
+          <div class="stat-card"><div class="big-num" data-target="48">0</div><p>סה"כ אתרים</p></div>
+          <div class="stat-card"><div class="big-num" data-target="240">0</div><p>מכשירי קשר</p></div>
+          <div class="stat-card"><div class="big-num" data-target="12">0</div><p>מכשירים תקולים</p></div>
+        </div>
+        <div class="cards" style="margin-top:1.5rem;max-width:1000px">
+          <div class="card card-md"><div class="card-icon c-green"><i class="fa-solid fa-circle-half-stroke"></i></div><h3>גרף בריאות מכשירים</h3><p>גרף עוגה — יחס מכשירים שמישים מול לא שמישים. זיהוי מיידי וקל של רמת הכשירות הכוללת.</p></div>
+          <div class="card card-md"><div class="card-icon c-blue"><i class="fa-solid fa-rocket"></i></div><h3>גרף כיסוי משימות</h3><p>התפלגות מכשירים לפי מצב: פעיל, כוננות, פנוי ולא שמיש — בכל הפריסה.</p></div>
+          <div class="card card-md"><div class="card-icon c-amber"><i class="fa-solid fa-chart-bar"></i></div><h3>התפלגות לפי תחום תדר</h3><p>גרף עמודות לכל תחום — פנוי / תפוס / לא שמיש. ניתן להסיק בקלות עומסים ומחסורים.</p></div>
+          <div class="card card-md"><div class="card-icon c-purple"><i class="fa-solid fa-table-cells"></i></div><h3>טבלת ניצולת לפי אתר</h3><p>לכל אתר: סה"כ, תפוסים, לא שמישים, פנויים ואחוז פנוי — ניתן לסכם לפי אתר ולפי גזרה.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 14 — היסטוריה ══ -->
+      <div class="slide">
+        <div class="eyebrow">פיצ'ר היסטוריה</div>
+        <div class="section-title">היסטוריה ותיעוד עבר</div>
+        <div class="section-sub">כל שינוי מתועד — ללא סימני שאלה</div>
+        <div class="two-col">
+          <ul class="feature-list">
+            <li><span class="icon c-blue"><i class="fa-solid fa-pen-to-square"></i></span><span><strong>תיעוד מלא</strong> — כל יצירה, עדכון ומחיקה של מכשיר, גזרה, אתר, עורק ומשימה נרשמים אוטומטית</span></li>
+            <li><span class="icon c-green"><i class="fa-solid fa-arrows-left-right"></i></span><span><strong>השוואת לפני/אחרי</strong> — בכל עדכון מוצגים בדיוק אילו שדות השתנו ומה היה הערך הקודם לעומת החדש</span></li>
+            <li><span class="icon c-amber"><i class="fa-solid fa-filter"></i></span><span><strong>סינון לפי סוג</strong> — הצג רק שינויים ברדיו, משימות, גזרות, אתרים או עורקים — לפי צורך</span></li>
+            <li><span class="icon c-purple"><i class="fa-solid fa-clock"></i></span><span><strong>חותמות זמן יחסיות</strong> — "לפני 2 דקות", "אתמול 14:30" — ניתן לעקוב אחרי זמן כל שינוי בקלות</span></li>
+          </ul>
+          <!-- History demo — unique layout, inline styles kept intentionally -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+            <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;">
+              <div style="width:30px;height:30px;border-radius:50%;background:#1e3a5f;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-pen-to-square" style="color:#60a5fa;font-size:0.75rem"></i></div>
+              <div style="flex:1">
+                <div style="font-size:0.85rem;font-weight:600;">עודכן מכשיר באתר X</div>
+                <div style="margin-top:4px;background:#0f172a;border-radius:6px;padding:6px 8px;font-size:0.75rem;">
+                  <div style="display:flex;gap:0.5rem;align-items:center;"><span style="color:var(--muted);min-width:4rem">תדר</span><span style="color:#f87171">93.135</span><span style="color:var(--muted)">←</span><span style="color:#34d399;font-weight:600">120.5</span></div>
+                  <div style="display:flex;gap:0.5rem;align-items:center;margin-top:3px;"><span style="color:var(--muted);min-width:4rem">בעלים</span><span style="color:#f87171">בעלים ישן</span><span style="color:var(--muted)">←</span><span style="color:#34d399;font-weight:600">בעלים חדש</span></div>
+                </div>
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted);">לפני 2 דק'</div>
+            </div>
+            <div style="padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;">
+              <div style="width:30px;height:30px;border-radius:50%;background:#1a3a20;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle" style="color:#34d399;font-size:0.75rem"></i></div>
+              <div style="flex:1"><div style="font-size:0.85rem;font-weight:600;">הופעלה משימה "חרבות ברזל"</div></div>
+              <div style="font-size:0.72rem;color:var(--muted);">לפני 15 דק'</div>
+            </div>
+            <div style="padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;border-top:1px solid var(--border);">
+              <div style="width:30px;height:30px;border-radius:50%;background:#4a1a6e;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-plus-circle" style="color:#c084fc;font-size:0.75rem"></i></div>
+              <div style="flex:1"><div style="font-size:0.85rem;font-weight:600;">נוסף מכשיר מסוג UHF לאתר דרום</div></div>
+              <div style="font-size:0.72rem;color:var(--muted);">לפני שעה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 15 — מצב צפייה ועריכה ══ -->
+      <div class="slide">
+        <div class="eyebrow">עריכה רק למי שחייב</div>
+        <div class="section-title">מצב צפייה ומצב עריכה</div>
+        <div class="section-sub">שלוט על מי רואה ומי משנה — הפרדה בין קריאה לכתיבה בלחיצה אחת</div>
+        <div class="two-col" style="max-width:950px;gap:1.5rem;margin-bottom:1.25rem">
+          <div style="background:var(--card);border:1.5px solid #059669;border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.85rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <div style="width:38px;height:38px;border-radius:9px;background:#1a3a20;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-pen-to-square" style="color:#34d399;font-size:1rem"></i></div>
+              <div><div style="font-size:1rem;font-weight:700;">מצב עריכה</div><div style="font-size:0.76rem;color:var(--muted);">Edit Mode</div></div>
+              <div class="badge" style="background:#1a3a20;color:#6ee7b7;border:1px solid #059669;margin-right:auto;font-size:0.73rem;"><i class="fa-solid fa-lock-open"></i> פתוח לעריכה</div>
+            </div>
+            <ul class="feature-list" style="gap:0.45rem">
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-green" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">עריכה ישירה בכל תא ושדה בטבלה</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-green" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">הוספה ומחיקה של מכשירים, אתרים ומשימות</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-green" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">ניהול מילון עורקים ותכנון משימות מלא</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-green" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">כל שינוי מתועד ביומן הביקורת</span></li>
+            </ul>
+          </div>
+          <div style="background:var(--card);border:1.5px solid #2563eb;border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.85rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <div style="width:38px;height:38px;border-radius:9px;background:#1e3a5f;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-eye" style="color:#60a5fa;font-size:1rem"></i></div>
+              <div><div style="font-size:1rem;font-weight:700;">מצב צפייה</div><div style="font-size:0.76rem;color:var(--muted);">View-Only Mode</div></div>
+              <div class="badge" style="background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;margin-right:auto;font-size:0.73rem;"><i class="fa-solid fa-lock"></i> נעול לקריאה</div>
+            </div>
+            <ul class="feature-list" style="gap:0.45rem">
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-blue" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">קריאת כל הנתונים — ללא הגבלה</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-blue" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">חיפוש, סינון, ייצוא Excel ואנליטיקה</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-blue" style="font-size:0.95rem"><i class="fa-solid fa-check"></i></span><span style="font-size:0.85rem">צפייה בהיסטוריה ויומן ביקורת</span></li>
+              <li style="padding:0.55rem 0.85rem"><span class="icon c-red" style="font-size:0.95rem"><i class="fa-solid fa-xmark"></i></span><span style="font-size:0.85rem;color:var(--muted)">שינויים בנתונים — חסומים לחלוטין</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="pill-row" style="margin-top:0">
+          <span class="pill pill-green"><i class="fa-solid fa-toggle-on icon-mr"></i> מעבר בלחיצה אחת - מותנה בהקשת סיסמה לשינוי</span>
+          <span class="pill pill-blue"><i class="fa-solid fa-floppy-disk icon-mr"></i> שומר על המידע מאובטח</span>
+          <span class="pill pill-purple"><i class="fa-solid fa-shield-halved icon-mr"></i> מגן מפני שינויים באופן לא מכוון</span>
+        </div>
+      </div>
+
+      <!-- ══ 16 — ניהול משתמשים ══ -->
+      <div class="slide">
+        <div class="eyebrow">משתמשים והרשאות</div>
+        <div class="section-title">ניהול משתמשים</div>
+        <div class="section-sub">מערכת כניסה מאובטחת עם הפרדת הרשאות לפי תפקיד</div>
+        <div class="cards" style="max-width:1100px;margin-bottom:1.5rem">
+          <div class="card card-xl"><div class="card-icon c-red"><i class="fa-solid fa-shield-halved"></i></div><h3>תפקיד מנהל (Admin)</h3><p>גישה מלאה — עריכת כל הנתונים, ניהול משתמשים, בעלים, מכשירים, ייבוא/ייצוא.</p></div>
+          <div class="card card-xl"><div class="card-icon c-cyan"><i class="fa-solid fa-user"></i></div><h3>תפקיד משתמש (User)</h3><p>גישה מוגבלת — צפייה בכל הנתונים, תכנון ועריכה של משימות השיוך שלו בלבד.</p></div>
+          <div class="card card-xl"><div class="card-icon c-purple"><i class="fa-solid fa-link"></i></div><h3>שיוך לבעלים</h3><p>כל משתמש "user" משויך לבעלים — יכול לתכנן ולשחזר רק משימות של הבעלים שלו.</p></div>
+          <div class="card card-xl"><div class="card-icon c-green"><i class="fa-solid fa-circle-dot"></i></div><h3>אינדיקטור מחובר</h3><p>נקודה ירוקה מהבהבת ליד שם כל משתמש שפתוח כרגע — מי מחובר ומי לא, בזמן אמת.</p></div>
+        </div>
+        <div class="cards" style="max-width:1100px">
+          <div class="card card-xl"><div class="card-icon c-amber"><i class="fa-solid fa-clock"></i></div><h3>פג תוקף אוטומטי</h3><p>הפגישה פוקעת לאחר 8 שעות ללא פעילות — מאובטח גם אם שוכחים להתנתק.</p></div>
+          <div class="card card-xl"><div class="card-icon c-blue"><i class="fa-solid fa-key"></i></div><h3>איפוס סיסמה</h3><p>מנהל יכול לאפס סיסמה של כל משתמש מהממשק — ללא גישה לקובץ השרת.</p></div>
+          <div class="card card-xl"><div class="card-icon c-cyan"><i class="fa-solid fa-clock-rotate-left"></i></div><h3>כניסה אחרונה</h3><p>מוצג לכל משתמש מתי הייתה הכניסה האחרונה שלו למערכת.</p></div>
+          <div class="card card-xl"><div class="card-icon c-green"><i class="fa-solid fa-rotate"></i></div><h3>סנכרון חי בין משתמשים</h3><p>שינוי שביצע משתמש אחד מתעדכן אצל כל האחרים תוך 10 שניות — ללא רענון ידני.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 17 — נוחות שימוש ══ -->
+      <div class="slide">
+        <div class="eyebrow">תכונות נוספות</div>
+        <div class="section-title">תכונות לשימוש שוטף ויומיומי</div>
+        <div class="section-sub">פרטים קטנים שהופכים את העבודה השוטפת לחלקה ומהירה</div>
+        <div class="cards" style="max-width:1100px">
+          <div class="card"><div class="card-icon">🌙</div><h3>מצב כהה / בהיר</h3><p>תמיכה מלאה בשני ערכות צבעים למי שיושב הרבה זמן מול המסך. העדפת המשתמש נשמרת ונזכרת.</p></div>
+          <div class="card"><div class="card-icon" style="color:#16a34a"><i class="fa-solid fa-file-excel"></i></div><h3>ייבוא וייצוא Excel</h3><p>ייבוא מילוני עורקים ודרישות משימות מגיליון. ייצוא גיבוי מלא בפורמט JSON עם לחיצה אחת.</p></div>
+          <div class="card"><div class="card-icon c-cyan"><i class="fa-solid fa-wand-magic-sparkles"></i></div><h3>השלמה חכמה</h3><p>הקלד שם עורק בכל שדה תדר — המערכת מציעה אוטומטית את התדר המתאים מהמילון.</p></div>
+          <div class="card"><div class="card-icon c-purple"><i class="fa-solid fa-floppy-disk"></i></div><h3>זכירת מצב נוכחי</h3><p>הלשונית האחרונה שנצפתה ע"י המשתמש נזכרת, ובפעם הבאה שיכנס למערכת - ימשיך מהיכן שהפסיק.</p></div>
+          <div class="card"><div class="card-icon c-amber"><i class="fa-solid fa-triangle-exclamation"></i></div><h3>אזהרת אי-התאמת בעלים</h3><p>בטופס תכנון משימה, המערכת מדגישה כאשר תדר שנבחר שייך לבעלים שונה מבעל המשימה.</p></div>
+          <div class="card"><div class="card-icon c-green"><i class="fa-solid fa-language"></i></div><h3>תמיכה רב-לשונית</h3><p>ממשק מלא בעברית — כולל כל ההתראות, שגיאות, כותרות עמודות ותוויות שדות.</p></div>
+        </div>
+      </div>
+
+      <!-- ══ 18 — סיום ══ -->
+      <div class="slide" id="slide-final">
+        <div class="logo">📡</div>
+        <div class="eyebrow">סיכום</div>
+        <h1>מה הקשר?</h1>
+        <div class="divider"></div>
+        <p class="subtitle">מערכת אחת — תמונת מצב ארצית על כל מכשיר, תדר ומשימה.</p>
+        <div class="pill-row" style="margin-top:2rem">
+          <span class="pill pill-blue"><i class="fa-solid fa-server icon-mr"></i> ריצה מקומית — ללא תלות בענן</span>
+          <span class="pill pill-green"><i class="fa-solid fa-lock icon-mr"></i> כל הנתונים במקום אחד</span>
+          <span class="pill pill-purple"><i class="fa-solid fa-language icon-mr"></i> ממשק קל ונוח לתפעול</span>
+        </div>
+      </div>
+
+    </div><!-- /#deck -->
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      let current = 0;
+
+      // ── Counter animation ──
+      function animateCounter(el, target, duration) {
+        duration = duration || 1400;
+        const delay = parseFloat(getComputedStyle(el.closest(".stat-card")).animationDelay) * 1000 || 0;
+        setTimeout(() => {
+          let start = null;
+          const step = (ts) => {
+            if (!start) start = ts;
+            const p = Math.min((ts - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(eased * target);
+            if (p < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        }, delay);
+      }
+
+      function update() {
+        slides.forEach((s) => s.classList.remove("active", "exit"));
+
+        // Force reflow so CSS animations replay on revisit
+        void slides[current].offsetWidth;
+        slides[current].classList.add("active");
+
+        // Trigger number counters on the stats slide
+        slides[current].querySelectorAll(".big-num[data-target]").forEach((el) => {
+          el.textContent = "0";
+          animateCounter(el, parseInt(el.dataset.target));
+        });
+
+        const pct = ((current + 1) / slides.length) * 100;
+        document.getElementById("progress-bar").style.width = pct + "%";
+        document.getElementById("counter").textContent = current + 1 + " / " + slides.length;
+        document.getElementById("nav-prev").style.opacity = current === 0 ? "0.2" : "1";
+        document.getElementById("nav-next").style.opacity = current === slides.length - 1 ? "0.2" : "1";
+      }
+
+      function go(dir) {
+        const next = current + dir;
+        if (next < 0 || next >= slides.length) return;
+        slides[current].classList.add("exit");
+        setTimeout(() => slides[current]?.classList.remove("exit"), 450);
+        current = next;
+        update();
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowUp") go(-1);
+        if (e.key === "ArrowLeft" || e.key === "ArrowDown" || e.key === " ") go(1);
+      });
+
+      update();
+    </script>
+  </body>
+</html>

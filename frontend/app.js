@@ -278,6 +278,32 @@ window._handleSessionExpired = function () {
   openLoginModal();
 };
 
+// ==================== Presentation Modal ====================
+
+function openPresentationModal() {
+  const modal = document.getElementById("presentationModal");
+  const frame = document.getElementById("presentationFrame");
+  if (!frame.src || frame.src === window.location.href) {
+    frame.src = "presentation-he.html";
+  }
+  modal.classList.add("visible");
+  disableBodyScroll();
+}
+
+function closePresentationModal() {
+  document.getElementById("presentationModal").classList.remove("visible");
+  enableBodyScroll();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.getElementById("presentationModal")?.classList.contains("visible")) {
+    closePresentationModal();
+  }
+});
+
+window.openPresentationModal = openPresentationModal;
+window.closePresentationModal = closePresentationModal;
+
 window.isViewMode = isViewMode;
 window.isAuthenticated = isAuthenticated;
 window.getCurrentUserRole = getCurrentUserRole;

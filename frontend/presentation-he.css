@@ -1,0 +1,433 @@
+/* ==================== Presentation Styles — מה הקשר? ==================== */
+
+:root {
+  --blue: #2563eb; --purple: #7c3aed; --green: #059669;
+  --amber: #d97706; --red: #dc2626; --cyan: #0ea5e9;
+  --grad: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --surface: #1e293b; --bg: #0f172a; --text: #f1f5f9;
+  --muted: #94a3b8; --border: #334155; --card: #243044;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Heebo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Deck & Slides ── */
+
+#deck { width: 100%; height: 100vh; position: relative; }
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 5rem;
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+}
+.slide.active  { opacity: 1; transform: translateX(0); pointer-events: all; }
+.slide.exit    { opacity: 0; transform: translateX(60px); }
+
+/* ── Navigation ── */
+
+#progress-bar {
+  position: fixed; bottom: 0; right: 0;
+  height: 3px; background: var(--grad);
+  transition: width 0.4s ease; z-index: 100;
+}
+
+#counter {
+  position: fixed; bottom: 1.25rem; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem; color: var(--muted); letter-spacing: 1px; z-index: 100;
+}
+
+.nav-btn {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  color: var(--muted); width: 44px; height: 44px; border-radius: 50%;
+  cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; z-index: 100;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+#nav-prev { right: 1.5rem; }
+#nav-next { left: 1.5rem; }
+
+/* ── Typography ── */
+
+.eyebrow {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem;
+}
+
+h1 {
+  font-size: 3.5rem; font-weight: 800; line-height: 1.1;
+  background: var(--grad);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 1rem;
+}
+
+h2 { font-size: 2.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+
+.subtitle      { font-size: 1.15rem; color: var(--muted); max-width: 660px; text-align: center; line-height: 1.8; }
+.section-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text); text-align: center; }
+.section-sub   { font-size: 1rem; color: var(--muted); margin-bottom: 1.75rem; text-align: center; }
+
+/* ── Cards ── */
+
+.cards {
+  display: flex; gap: 1.25rem; flex-wrap: wrap;
+  justify-content: center; width: 100%; max-width: 1100px;
+}
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.5rem 1.75rem;
+  flex: 1 1 240px; max-width: 300px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+.card-icon   { font-size: 1.75rem; margin-bottom: 0.75rem; }
+.card h3     { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+.card p      { font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+
+/* ── Feature List ── */
+
+.feature-list {
+  list-style: none; display: flex; flex-direction: column;
+  gap: 0.75rem; max-width: 700px; width: 100%;
+}
+.feature-list li {
+  display: flex; align-items: flex-start; gap: 0.875rem;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.875rem 1.1rem;
+  font-size: 0.95rem; color: var(--text); line-height: 1.6;
+}
+.feature-list li .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* ── Hierarchy ── */
+
+.hierarchy { display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; max-width: 700px; }
+.h-level   { display: flex; gap: 1rem; align-items: center; justify-content: center; width: 100%; }
+.h-box     { padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-align: center; }
+.h-line    { width: 2px; height: 28px; background: var(--border); margin: 0 auto; }
+.h-spread  { display: flex; gap: 1.25rem; align-items: flex-start; justify-content: center; }
+.h-branch  { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.h-children { display: flex; gap: 0.75rem; margin-top: 0; }
+
+/* ── Two Column Layout ── */
+
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2rem; width: 100%; max-width: 1000px; align-items: start;
+}
+
+/* ── Badge ── */
+
+.badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.3rem 0.75rem; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700;
+}
+
+/* ── Special Slides ── */
+
+#slide-1 {
+  background: radial-gradient(ellipse at 60% 40%, #1e3a5f 0%, #0f172a 60%);
+  text-align: center;
+}
+#slide-final {
+  background: radial-gradient(ellipse at 40% 60%, #1e3a5f 0%, #0f172a 60%);
+  text-align: center;
+}
+
+.logo    { font-size: 4rem; margin-bottom: 1rem; }
+.divider { width: 60px; height: 4px; border-radius: 2px; background: var(--grad); margin: 1rem auto; }
+
+/* ── Pills ── */
+
+.pill-row { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; }
+.pill {
+  padding: 0.45rem 1rem; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+}
+
+/* ── Stats ── */
+
+.big-num {
+  font-size: 3rem; font-weight: 800; line-height: 1;
+  background: var(--grad);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem; width: 100%; max-width: 900px; margin-top: 0.5rem;
+}
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; text-align: center; }
+.stat-card p { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; font-weight: 600; letter-spacing: 0.3px; }
+
+/* ── Timeline ── */
+
+.timeline { display: flex; align-items: center; gap: 0; max-width: 900px; width: 100%; }
+.tl-step  { flex: 1; text-align: center; }
+.tl-dot   {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin: 0 auto 0.6rem; border: 2px solid var(--border);
+}
+.tl-label { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.tl-sub   { font-size: 0.73rem; color: var(--muted); line-height: 1.5; }
+.tl-arrow { width: 40px; height: 2px; background: var(--border); flex-shrink: 0; position: relative; }
+.tl-arrow::after {
+  content: ""; position: absolute; left: -1px; top: -4px;
+  border: 5px solid transparent; border-right-color: var(--border);
+}
+
+/* ── Utility: Colors ── */
+.c-blue   { color: #2563eb; }
+.c-purple { color: #7c3aed; }
+.c-green  { color: #059669; }
+.c-amber  { color: #d97706; }
+.c-red    { color: #dc2626; }
+.c-cyan   { color: #0ea5e9; }
+.c-teal   { color: #0d9488; }
+.c-indigo { color: #6366f1; }
+.c-muted  { color: var(--muted); }
+
+/* ── Utility: Icon RTL margin ── */
+.icon-mr { margin-left: 0.4rem; }
+
+/* ── Card size variants ── */
+.card-sm { flex: 1 1 180px; max-width: 220px; }
+.card-md { flex: 1 1 200px; max-width: 240px; }
+.card-lg { flex: 1 1 220px; max-width: 280px; }
+.card-xl { flex: 1 1 200px; max-width: 250px; }
+
+/* ── Card accent borders ── */
+.accent-blue   { border-color: #2563eb; }
+.accent-purple { border-color: #7c3aed; }
+.accent-green  { border-color: #059669; }
+.accent-amber  { border-color: #d97706; }
+.accent-red    { border-color: #dc2626; }
+.accent-cyan   { border-color: #0ea5e9; }
+.accent-teal   { border-color: #0d9488; }
+.accent-indigo { border-color: #6366f1; }
+
+/* ── Pill color variants ── */
+.pill-blue   { border-color: #2563eb; color: #93c5fd; }
+.pill-green  { border-color: #059669; color: #6ee7b7; }
+.pill-amber  { border-color: #d97706; color: #fcd34d; }
+.pill-purple { border-color: #7c3aed; color: #c4b5fd; }
+
+/* ── Title slide: radiant expanding aura ── */
+
+#slide-1::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 68% 28%, rgba(37, 99, 235, 0.28) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 55% at 28% 72%, rgba(124, 58, 237, 0.22) 0%, transparent 65%);
+  animation: title-radiate 8s ease-in-out infinite;
+}
+
+#slide-1::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 38% 38% at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 70%);
+  animation: center-breathe 4.5s ease-in-out infinite;
+}
+
+@keyframes title-radiate {
+  0%, 100% { transform: scale(1)    translate(0, 0);    opacity: 0.75; }
+  38%       { transform: scale(1.18) translate(-4%, 3%); opacity: 1;    }
+  70%       { transform: scale(0.93) translate(5%, -4%); opacity: 0.82; }
+}
+
+@keyframes center-breathe {
+  0%, 100% { transform: scale(1);   opacity: 0.35; }
+  50%       { transform: scale(1.6); opacity: 0.9;  }
+}
+
+/* ── Final slide: converging gathering aura ── */
+
+#slide-final::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 28% 25%, rgba(124, 58, 237, 0.26) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 60% at 72% 75%, rgba(37, 99, 235, 0.22) 0%, transparent 65%);
+  animation: final-converge 10s ease-in-out infinite;
+}
+
+#slide-final::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 42% 42% at 50% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+  animation: center-breathe 5.5s ease-in-out infinite reverse;
+}
+
+@keyframes final-converge {
+  0%, 100% { transform: scale(1)    translate(0, 0);    opacity: 0.78; }
+  42%       { transform: scale(0.86) translate(4%, -3%); opacity: 1;    }
+  72%       { transform: scale(1.1)  translate(-3%, 5%); opacity: 0.84; }
+}
+
+/* ── Background orbs ── */
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.13;
+}
+
+.orb-1 {
+  width: 650px; height: 650px;
+  background: #2563eb;
+  top: -180px; right: -120px;
+  animation: orb-drift-1 16s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 550px; height: 550px;
+  background: #7c3aed;
+  bottom: -140px; left: -100px;
+  animation: orb-drift-2 20s ease-in-out infinite;
+}
+
+.orb-3 {
+  width: 400px; height: 400px;
+  background: #0ea5e9;
+  top: 40%; left: 35%;
+  transform: translate(-50%, -50%);
+  animation: orb-drift-3 13s ease-in-out infinite;
+}
+
+@keyframes orb-drift-1 {
+  0%, 100% { transform: translate(0, 0)    scale(1);    }
+  33%       { transform: translate(-90px, 70px)  scale(1.12); }
+  66%       { transform: translate(70px, -50px)  scale(0.92); }
+}
+
+@keyframes orb-drift-2 {
+  0%, 100% { transform: translate(0, 0)    scale(1);    }
+  40%       { transform: translate(100px, -80px) scale(1.1);  }
+  70%       { transform: translate(-60px, 90px)  scale(0.95); }
+}
+
+@keyframes orb-drift-3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1);    }
+  50%       { transform: translate(-40%, -60%) scale(1.2);  }
+}
+
+/* Ensure deck sits above the orbs */
+#deck { position: relative; z-index: 1; }
+
+/* ── Animations ── */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
+}
+
+/* Header elements — phase 1 */
+.slide.active .eyebrow      { animation: fade-up 0.5s ease both; animation-delay: 0.10s; }
+.slide.active .section-title { animation: fade-up 0.5s ease both; animation-delay: 0.22s; }
+.slide.active .section-sub   { animation: fade-up 0.5s ease both; animation-delay: 0.34s; }
+.slide.active h1             { animation: fade-up 0.55s ease both; animation-delay: 0.15s; }
+.slide.active .subtitle      { animation: fade-up 0.55s ease both; animation-delay: 0.32s; }
+.slide.active .divider       { animation: fade-up 0.5s ease both;  animation-delay: 0.44s; }
+.slide.active .pill-row      { animation: fade-up 0.5s ease both;  animation-delay: 0.55s; }
+
+/* Cards cascade — phase 2 */
+.slide.active .cards .card  { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.slide.active .cards .card:nth-child(1) { animation-delay: 0.42s; }
+.slide.active .cards .card:nth-child(2) { animation-delay: 0.55s; }
+.slide.active .cards .card:nth-child(3) { animation-delay: 0.68s; }
+.slide.active .cards .card:nth-child(4) { animation-delay: 0.81s; }
+.slide.active .cards .card:nth-child(5) { animation-delay: 0.94s; }
+.slide.active .cards .card:nth-child(6) { animation-delay: 1.07s; }
+.slide.active .cards .card:nth-child(7) { animation-delay: 1.20s; }
+.slide.active .cards .card:nth-child(8) { animation-delay: 1.33s; }
+
+/* Feature list items cascade */
+.slide.active .feature-list li { animation: fade-up 0.45s ease both; }
+.slide.active .feature-list li:nth-child(1) { animation-delay: 0.42s; }
+.slide.active .feature-list li:nth-child(2) { animation-delay: 0.57s; }
+.slide.active .feature-list li:nth-child(3) { animation-delay: 0.72s; }
+.slide.active .feature-list li:nth-child(4) { animation-delay: 0.87s; }
+.slide.active .feature-list li:nth-child(5) { animation-delay: 1.02s; }
+
+/* Timeline steps cascade (odd children are steps, even are arrows) */
+.slide.active .tl-step { animation: fade-up 0.45s ease both; }
+.slide.active .tl-step:nth-child(1) { animation-delay: 0.38s; }
+.slide.active .tl-step:nth-child(3) { animation-delay: 0.55s; }
+.slide.active .tl-step:nth-child(5) { animation-delay: 0.72s; }
+.slide.active .tl-step:nth-child(7) { animation-delay: 0.89s; }
+.slide.active .tl-step:nth-child(9) { animation-delay: 1.06s; }
+
+/* Stat cards cascade */
+.slide.active .stat-card { animation: fade-up 0.45s ease both; }
+.slide.active .stat-card:nth-child(1) { animation-delay: 0.38s; }
+.slide.active .stat-card:nth-child(2) { animation-delay: 0.53s; }
+.slide.active .stat-card:nth-child(3) { animation-delay: 0.68s; }
+.slide.active .stat-card:nth-child(4) { animation-delay: 0.83s; }
+
+/* Hierarchy levels cascade */
+.slide.active .h-level  { animation: fade-up 0.5s ease both; animation-delay: 0.38s; }
+.slide.active .h-line   { animation: fade-up 0.4s ease both; animation-delay: 0.52s; }
+.slide.active .h-spread { animation: fade-up 0.5s ease both; animation-delay: 0.66s; }
+
+/* Two-col children */
+.slide.active .two-col > *:first-child { animation: fade-up 0.5s ease both; animation-delay: 0.38s; }
+.slide.active .two-col > *:last-child  { animation: fade-up 0.5s ease both; animation-delay: 0.55s; }
+
+/* Logo float — title and final slides */
+#slide-1.active .logo,
+#slide-final.active .logo {
+  animation: float 3.5s ease-in-out infinite;
+  animation-delay: 0.6s;
+}
+
+/* ── Step Badge ── */
+
+.step-badge {
+  display: inline-block; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--grad); color: white; font-weight: 800;
+  font-size: 0.85rem; line-height: 28px; text-align: center;
+  flex-shrink: 0; margin-top: 1px;
+}
