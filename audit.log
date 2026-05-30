@@ -1292,3 +1292,7 @@
 {"timestamp": "2026-05-30T11:41:39.261637+00:00", "action": "restore", "entity_type": "mission", "entity_id": "mission-77a56890", "details": {"name": "המשימה של המדור שלי"}, "changed_by": "משתמש מדורי"}
 {"timestamp": "2026-05-30T11:41:52.285273+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-05-30T14:38:40.760504+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-30T18:53:40.150868+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-05-30T18:53:44.425474+00:00", "action": "archive", "entity_type": "mission", "entity_id": "mission-fbab542e", "details": {"name": "שדג"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-30T18:53:49.853691+00:00", "action": "restore", "entity_type": "mission", "entity_id": "mission-7947d499", "details": {"name": "משימה שנועדה להשאר בתכנון"}, "changed_by": "נועם"}
+{"timestamp": "2026-05-30T18:53:53.316650+00:00", "action": "delete", "entity_type": "archived_mission", "entity_id": "mission-fbab542e", "details": {"name": "שדג"}, "changed_by": "נועם"}

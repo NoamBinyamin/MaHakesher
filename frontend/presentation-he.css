@@ -237,32 +237,34 @@ h2 { font-size: 2.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.
 #slide-1::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -30%;
   pointer-events: none;
+  will-change: transform, opacity;
   background:
-    radial-gradient(ellipse 55% 45% at 68% 28%, rgba(37, 99, 235, 0.28) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 55% at 28% 72%, rgba(124, 58, 237, 0.22) 0%, transparent 65%);
-  animation: title-radiate 8s ease-in-out infinite;
+    radial-gradient(ellipse 60% 50% at 60% 35%, rgba(37, 99, 235, 0.14) 0%, transparent 100%),
+    radial-gradient(ellipse 55% 60% at 35% 65%, rgba(124, 58, 237, 0.11) 0%, transparent 100%);
+  animation: title-radiate 14s ease-in-out infinite;
 }
 
 #slide-1::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -30%;
   pointer-events: none;
-  background: radial-gradient(ellipse 38% 38% at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 70%);
-  animation: center-breathe 4.5s ease-in-out infinite;
+  will-change: transform, opacity;
+  background: radial-gradient(ellipse 40% 40% at 50% 50%, rgba(14, 165, 233, 0.07) 0%, transparent 100%);
+  animation: center-breathe 9s ease-in-out infinite;
 }
 
 @keyframes title-radiate {
-  0%, 100% { transform: scale(1)    translate(0, 0);    opacity: 0.75; }
-  38%       { transform: scale(1.18) translate(-4%, 3%); opacity: 1;    }
-  70%       { transform: scale(0.93) translate(5%, -4%); opacity: 0.82; }
+  0%, 100% { transform: translate(0, 0);    opacity: 0.5; }
+  38%       { transform: translate(-5%, 4%); opacity: 0.8; }
+  70%       { transform: translate(6%, -5%); opacity: 0.6; }
 }
 
 @keyframes center-breathe {
-  0%, 100% { transform: scale(1);   opacity: 0.35; }
-  50%       { transform: scale(1.6); opacity: 0.9;  }
+  0%, 100% { transform: scale(1);   opacity: 0.2; }
+  50%       { transform: scale(1.5); opacity: 0.6; }
 }
 
 /* ── Final slide: converging gathering aura ── */
@@ -270,27 +272,29 @@ h2 { font-size: 2.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.
 #slide-final::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -30%;
   pointer-events: none;
+  will-change: transform, opacity;
   background:
-    radial-gradient(ellipse 60% 50% at 28% 25%, rgba(124, 58, 237, 0.26) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 60% at 72% 75%, rgba(37, 99, 235, 0.22) 0%, transparent 65%);
-  animation: final-converge 10s ease-in-out infinite;
+    radial-gradient(ellipse 60% 50% at 30% 30%, rgba(124, 58, 237, 0.13) 0%, transparent 100%),
+    radial-gradient(ellipse 55% 60% at 70% 70%, rgba(37, 99, 235, 0.11) 0%, transparent 100%);
+  animation: final-converge 16s ease-in-out infinite;
 }
 
 #slide-final::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -30%;
   pointer-events: none;
-  background: radial-gradient(ellipse 42% 42% at 50% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
-  animation: center-breathe 5.5s ease-in-out infinite reverse;
+  will-change: transform, opacity;
+  background: radial-gradient(ellipse 42% 42% at 50% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 100%);
+  animation: center-breathe 11s ease-in-out infinite reverse;
 }
 
 @keyframes final-converge {
-  0%, 100% { transform: scale(1)    translate(0, 0);    opacity: 0.78; }
-  42%       { transform: scale(0.86) translate(4%, -3%); opacity: 1;    }
-  72%       { transform: scale(1.1)  translate(-3%, 5%); opacity: 0.84; }
+  0%, 100% { transform: translate(0, 0);    opacity: 0.5; }
+  42%       { transform: translate(5%, -4%); opacity: 0.8; }
+  72%       { transform: translate(-4%, 6%); opacity: 0.6; }
 }
 
 /* ── Background orbs ── */
@@ -301,34 +305,37 @@ h2 { font-size: 2.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  contain: paint;
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(70px);
   opacity: 0.13;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .orb-1 {
-  width: 650px; height: 650px;
+  width: 600px; height: 600px;
   background: #2563eb;
-  top: -180px; right: -120px;
+  top: -160px; right: -100px;
   animation: orb-drift-1 16s ease-in-out infinite;
 }
 
 .orb-2 {
-  width: 550px; height: 550px;
+  width: 500px; height: 500px;
   background: #7c3aed;
-  bottom: -140px; left: -100px;
+  bottom: -120px; left: -80px;
   animation: orb-drift-2 20s ease-in-out infinite;
 }
 
 .orb-3 {
-  width: 400px; height: 400px;
+  width: 360px; height: 360px;
   background: #0ea5e9;
   top: 40%; left: 35%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translateZ(0);
   animation: orb-drift-3 13s ease-in-out infinite;
 }
 
@@ -421,6 +428,7 @@ h2 { font-size: 2.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.
 #slide-final.active .logo {
   animation: float 3.5s ease-in-out infinite;
   animation-delay: 0.6s;
+  will-change: transform;
 }
 
 /* ── Step Badge ── */
