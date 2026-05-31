@@ -140,19 +140,54 @@ function _updateModeButton() {
 }
 
 function _updateUserButton() {
-  const btn = document.getElementById("userInfoBtn");
-  const name = document.getElementById("userInfoName");
+  const btn       = document.getElementById("userInfoBtn");
+  const nameEl    = document.getElementById("userInfoName");
+  const ownerEl   = document.getElementById("userInfoOwner");
   if (!btn) return;
+
   if (isAuthenticated()) {
-    if (name)
-      name.textContent = t("login.loggedInAs").replace(
-        "{name}",
-        _loggedInUser.username,
-      );
+    if (nameEl)
+      nameEl.textContent = t("login.loggedInAs").replace("{name}", _loggedInUser.username);
     btn.title = t("login.logoutTooltip");
     btn.style.display = "flex";
+
+    if (ownerEl) {
+      const owner = _loggedInUser.owner;
+      if (isUserRole() && owner) {
+        // User role — owner name badge using owner's colors
+        const ownerEntry = (window.appState?.config?.owners || []).find((o) => o.name === owner);
+        ownerEl.textContent = owner;
+        ownerEl.className = "navbar-role-badge";
+        if (ownerEntry) {
+          const isDark = document.documentElement.classList.contains("dark");
+          if (isDark) {
+            ownerEl.style.background = ownerEntry.dark;
+            ownerEl.style.color      = contrastColor ? contrastColor(ownerEntry.dark) : "#fff";
+            ownerEl.style.border     = "none";
+          } else {
+            ownerEl.style.background = ownerEntry.light;
+            ownerEl.style.color      = ownerEntry.dark;
+            ownerEl.style.border     = `1px solid ${ownerEntry.dark}`;
+          }
+        } else {
+          ownerEl.style.background = "rgba(255,255,255,0.15)";
+          ownerEl.style.color      = "rgba(255,255,255,0.85)";
+          ownerEl.style.border     = "1px solid rgba(255,255,255,0.25)";
+        }
+        ownerEl.style.display = "inline-block";
+      } else if (isAdminRole()) {
+        // Admin role — "מנהל" red badge
+        ownerEl.textContent = t("pref.role.admin");
+        ownerEl.className = "navbar-role-badge navbar-badge-admin";
+        ownerEl.style.cssText = "";
+        ownerEl.style.display = "inline-block";
+      } else {
+        ownerEl.style.display = "none";
+      }
+    }
   } else {
     btn.style.display = "none";
+    if (ownerEl) ownerEl.style.display = "none";
   }
 }
 
@@ -217,6 +252,7 @@ async function submitLogin() {
     const me = await apiMe();
     _loggedInUser = me;
     _applyRoleClasses();
+    _updateUserButton();
   } catch (_) {}
   // Re-render permission-sensitive tabs with the correct role/owner
   if (window.renderMissionsTab) renderMissionsTab();
@@ -361,6 +397,7 @@ function toggleDarkMode() {
   if (window.performSearch) performSearch();
   if (window.renderOwnerFreqsTab) renderOwnerFreqsTab();
   if (window._renderUsersSection) _renderUsersSection();
+  _updateUserButton();
 }
 
 window.toggleDarkMode = toggleDarkMode;
@@ -371,6 +408,7 @@ async function initializeApp() {
     await loadAllData();
     await loadLinks();
     populateSelects();
+    _updateUserButton(); // owners now loaded — refresh badge colors
     renderOverview();
     renderMissionsTab();
     renderLinksTab();
@@ -478,6 +516,46 @@ function setupDirtyTracking() {
   });
 }
 
+// ==================== Live Sync Notifications ====================
+
+function _buildSyncMessage(entry) {
+  const { action, entity_type, details = {}, changed_by } = entry;
+  const by = t("sync.by").replace("{user}", changed_by || "?");
+  const name = details.name || (details.after || {}).name || "";
+
+  let msg = null;
+
+  switch (action) {
+    case "start_mission":
+      msg = t("sync.missionStarted").replace("{name}", name); break;
+    case "end_mission":
+      msg = t("sync.missionEnded").replace("{name}", name); break;
+    case "archive":
+      if (entity_type === "mission") msg = t("sync.missionArchived").replace("{name}", name); break;
+    case "activate":
+      if (entity_type === "mission") msg = t("sync.missionActivated").replace("{name}", name); break;
+    case "deactivate":
+      if (entity_type === "mission") msg = t("sync.missionDeactivated").replace("{name}", name); break;
+    case "batch_clear": {
+      const siteName = window.getSiteName ? getSiteName(entry.entity_id) : "";
+      msg = t("sync.batchClear").replace("{name}", siteName); break;
+    }
+    case "import":
+      msg = t("sync.import"); break;
+    case "create":
+    case "update":
+    case "delete":
+      if (entity_type === "radio")                  msg = t("sync.radioUpdated");
+      else if (entity_type === "mission")           msg = t("sync.missionUpdated");
+      else if (entity_type === "sector" || entity_type === "site") msg = t("sync.structureUpdated");
+      else if (entity_type === "owner" || entity_type === "device") msg = t("sync.configUpdated");
+      break;
+  }
+
+  if (!msg) return null;
+  return `${msg} — ${by}`;
+}
+
 // ==================== Live Sync Polling ====================
 
 const POLL_INTERVAL_MS = 10000; // 10 seconds
@@ -498,7 +576,7 @@ async function _pollForChanges() {
   }
 
   try {
-    const { ts } = await fetch(window.API_BASE + "/version").then((r) =>
+    const { ts, latest } = await fetch(window.API_BASE + "/version").then((r) =>
       r.json(),
     );
 
@@ -510,6 +588,13 @@ async function _pollForChanges() {
 
     if (ts > _lastKnownTs) {
       _lastKnownTs = ts;
+
+      // Show "updated by" notification if another user made the change
+      if (latest && latest.changed_by && latest.changed_by !== getCurrentUsername()) {
+        const msg = _buildSyncMessage(latest);
+        if (msg) showNotification(msg, "info");
+      }
+
       await loadConfiguration();
       await loadAllData();
       await loadLinks();

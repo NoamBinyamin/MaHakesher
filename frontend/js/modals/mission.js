@@ -242,6 +242,10 @@ function openPlanMissionModal() {
   editingMissionId = null; // Reset editing state
   document.getElementById("missionCreatedAtGroup").style.display = "none";
   document.getElementById("missionCreatedAt").value = "";
+  const _createdByGroup = document.getElementById("missionCreatedByGroup");
+  if (_createdByGroup) _createdByGroup.style.display = "none";
+  const _createdByEl = document.getElementById("missionCreatedBy");
+  if (_createdByEl) _createdByEl.value = "";
   document.getElementById("missionInfoGrid").style.gridTemplateColumns =
     "1fr 1fr";
   const planMissionName = document.getElementById("planMissionName");

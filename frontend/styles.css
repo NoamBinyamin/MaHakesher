@@ -710,6 +710,33 @@ html.dark #searchModePill {
   background-clip: text;
 }
 
+/* ── Summary card icon ── */
+.summary-card-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+.summary-icon-blue   { color: #2563eb; background: rgba(37,99,235,0.1); }
+.summary-icon-purple { color: #7c3aed; background: rgba(124,58,237,0.1); }
+.summary-icon-teal   { color: #0891b2; background: rgba(8,145,178,0.1); }
+.summary-icon-green  { color: #059669; background: rgba(5,150,105,0.1); }
+.summary-icon-red    { color: #dc2626; background: rgba(220,38,38,0.1); }
+.summary-icon-amber  { color: #d97706; background: rgba(217,119,6,0.1); }
+
+/* ── Summary card accent borders ── */
+.summary-accent-blue   { border-top: 3px solid #2563eb; }
+.summary-accent-purple { border-top: 3px solid #7c3aed; }
+.summary-accent-teal   { border-top: 3px solid #0891b2; }
+.summary-accent-green  { border-top: 3px solid #059669; }
+.summary-accent-red    { border-top: 3px solid #dc2626; }
+.summary-accent-amber  { border-top: 3px solid #d97706; }
+
 .summary-label {
   font-size: 0.85rem;
   color: var(--gray-600);
@@ -812,6 +839,25 @@ html.dark #searchModePill {
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
+}
+
+/* History filter count badge */
+.hf-count {
+  display: inline-block;
+  background: rgba(255,255,255,0.25);
+  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  margin-right: 0.35rem;
+  margin-left: 0;
+  vertical-align: middle;
+}
+.btn-secondary .hf-count {
+  background: var(--gray-200);
+  color: var(--gray-600);
 }
 
 .btn-success {
@@ -2046,6 +2092,14 @@ html.dark .undo-toast-progress {
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.summary-card-site .data-table th,
+.summary-card-site .data-table td,
+.summary-card-sector .data-table th,
+.summary-card-sector .data-table td {
+  text-align: center;
 }
 
 .summary-card-site:hover,
@@ -2393,6 +2447,28 @@ body {
   font-size: 0.875rem;
   padding: 0 0.8rem;
   box-sizing: border-box;
+}
+
+.navbar-role-badge {
+  margin-right: 0.4rem;
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+.navbar-badge-admin {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+html.dark .navbar-badge-admin {
+  background: #7f1d1d;
+  color: #fecaca;
+  border: none;
 }
 
 #darkModeToggle {

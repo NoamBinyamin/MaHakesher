@@ -260,33 +260,13 @@ function renderSummaryTab() {
       );
 
       allBands.forEach((band) => {
-        const bandRadios = sectorRadios.filter(
-          (r) => r.frequency_band === band,
-        );
+        const bandRadios = sectorRadios.filter((r) => r.frequency_band === band);
         const total = bandRadios.length;
-
-        const unusableCount = bandRadios.filter(
-          (r) => r.status === "Unusable",
-        ).length;
-        const occupiedCount = bandRadios.filter(
-          (r) =>
-            r.status === "Usable" && (r.frequency || r.mission_name || r.owner),
-        ).length;
-
+        if (total === 0) return;
+        const unusableCount = bandRadios.filter((r) => r.status === "Unusable").length;
+        const occupiedCount = bandRadios.filter((r) => r.status === "Usable" && (r.frequency || r.mission_name || r.owner)).length;
         const freeCount = total - unusableCount - occupiedCount;
-        const freePercent =
-          total > 0 ? Math.round((freeCount / total) * 100) : 0;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td style="padding: 0.5rem;"><strong>${band}</strong></td>
-          <td style="padding: 0.5rem;">${total}</td>
-          <td style="padding: 0.5rem;">${occupiedCount}</td>
-          <td style="padding: 0.5rem;">${unusableCount}</td>
-          <td style="padding: 0.5rem;">${freeCount}</td>
-          <td style="padding: 0.5rem;">${freePercent}%</td>
-        `;
-        tbody.appendChild(row);
+        tbody.appendChild(_makeSummaryRow(band, total, occupiedCount, unusableCount, freeCount));
       });
 
       tableResponsive.appendChild(table);
@@ -377,34 +357,13 @@ function renderSummaryTab() {
           );
 
           allBands.forEach((band) => {
-            const bandRadios = siteRadios.filter(
-              (r) => r.frequency_band === band,
-            );
+            const bandRadios = siteRadios.filter((r) => r.frequency_band === band);
             const total = bandRadios.length;
-
-            const unusableCount = bandRadios.filter(
-              (r) => r.status === "Unusable",
-            ).length;
-            const occupiedCount = bandRadios.filter(
-              (r) =>
-                r.status === "Usable" &&
-                (r.frequency || r.mission_name || r.owner),
-            ).length;
-
+            if (total === 0) return;
+            const unusableCount = bandRadios.filter((r) => r.status === "Unusable").length;
+            const occupiedCount = bandRadios.filter((r) => r.status === "Usable" && (r.frequency || r.mission_name || r.owner)).length;
             const freeCount = total - unusableCount - occupiedCount;
-            const freePercent =
-              total > 0 ? Math.round((freeCount / total) * 100) : 0;
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td style="padding: 0.5rem;"><strong>${band}</strong></td>
-              <td style="padding: 0.5rem;">${total}</td>
-              <td style="padding: 0.5rem;">${occupiedCount}</td>
-              <td style="padding: 0.5rem;">${unusableCount}</td>
-              <td style="padding: 0.5rem;">${freeCount}</td>
-              <td style="padding: 0.5rem;">${freePercent}%</td>
-            `;
-            tbody.appendChild(row);
+            tbody.appendChild(_makeSummaryRow(band, total, occupiedCount, unusableCount, freeCount));
           });
 
           tableResponsive.appendChild(table);
@@ -418,6 +377,34 @@ function renderSummaryTab() {
       container.appendChild(sectorWrapper);
     });
   }
+}
+
+function _makeSummaryRow(band, total, occupied, unusable, free) {
+  const freePercent = total > 0 ? Math.round((free / total) * 100) : 0;
+  const pctColor = freePercent > 50 ? "#059669" : freePercent > 20 ? "#d97706" : "#dc2626";
+  const oPct = total > 0 ? ((occupied / total) * 100).toFixed(1) : 0;
+  const uPct = total > 0 ? ((unusable / total) * 100).toFixed(1) : 0;
+  const fPct = total > 0 ? ((free   / total) * 100).toFixed(1) : 0;
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td style="padding:0.5rem;"><strong>${band}</strong></td>
+    <td style="padding:0.5rem;">${total}</td>
+    <td style="padding:0.5rem;color:#2563eb;font-weight:600;">${occupied}</td>
+    <td style="padding:0.5rem;color:${unusable > 0 ? "#dc2626" : "var(--gray-400)"};font-weight:600;">${unusable}</td>
+    <td style="padding:0.5rem;color:#059669;font-weight:600;">${free}</td>
+    <td style="padding:0.5rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <div style="flex:1;height:5px;border-radius:3px;background:var(--gray-200);overflow:hidden;min-width:50px;">
+          <div style="display:flex;height:100%;">
+            <div style="width:${oPct}%;background:#2563eb;"></div>
+            <div style="width:${uPct}%;background:#dc2626;"></div>
+            <div style="width:${fPct}%;background:#059669;"></div>
+          </div>
+        </div>
+        <span style="font-size:0.75rem;font-weight:700;min-width:2rem;color:${pctColor};">${freePercent}%</span>
+      </div>
+    </td>`;
+  return row;
 }
 
 // Export for inline onclick handlers

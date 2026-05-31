@@ -14,6 +14,7 @@ async function loadHistory() {
 async function refreshHistory() {
   await loadHistory();
   renderHistoryTab();
+  _updateHistoryFilterCounts();
 }
 
 function setHistoryFilter(filter) {
@@ -334,6 +335,34 @@ function renderDiffRow(fieldLabel, beforeVal, afterVal, rawField, entityId) {
     </div>`;
 }
 
+// ---- Filter count badges ----
+
+function _getFilterCount(filter) {
+  const entries = _historyEntries.filter(
+    (e) => !(e.entity_type === "user" && e.action === "login"),
+  );
+  if (filter === "all") return entries.length;
+  if (filter === "mission") return entries.filter((e) => e.entity_type === "mission" || e.entity_type === "archived_mission").length;
+  if (filter === "preferences") return entries.filter((e) => e.entity_type === "owner" || e.entity_type === "device" || e.entity_type === "user").length;
+  return entries.filter((e) => e.entity_type === filter).length;
+}
+
+function _updateHistoryFilterCounts() {
+  ["all", "radio", "mission", "sector", "site", "link", "preferences"].forEach((f) => {
+    const btn = document.getElementById(`hf-${f}`);
+    if (!btn) return;
+    const count = _getFilterCount(f);
+    let badge = btn.querySelector(".hf-count");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "hf-count";
+      btn.appendChild(badge);
+    }
+    badge.textContent = count;
+    badge.style.display = count === 0 ? "none" : "";
+  });
+}
+
 // ---- Render full tab ----
 
 function renderHistoryTab() {
@@ -395,9 +424,12 @@ function renderHistoryTab() {
       </div>`;
     })
     .join("");
+
+  _updateHistoryFilterCounts();
 }
 
 window.loadHistory = loadHistory;
 window.refreshHistory = refreshHistory;
 window.setHistoryFilter = setHistoryFilter;
 window.renderHistoryTab = renderHistoryTab;
+window._updateHistoryFilterCounts = _updateHistoryFilterCounts;

@@ -175,8 +175,11 @@ function _buildMissionRow(mission, actions) {
   const isFullyAllocated = reqCount > 0 && allocatedDevices >= reqCount;
   const row = document.createElement("tr");
   if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
+  const _mCreatedBy = mission.created_by
+    ? `<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.65rem;margin-left:0.25rem;"></i>${escapeHTML(t("planMission.createdBy"))} ${escapeHTML(mission.created_by)}</div>`
+    : "";
   row.innerHTML = `
-    <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}</td>
+    <td style="${borderStyle} padding-right: 0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${overdueBadge}${_mCreatedBy}</td>
     <td style="padding-right: 0.5rem;">${escapeHTML(mission.owner) || "-"}</td>
     <td>${t("common.deviceCount", { count: reqCount })}</td>
     ${allocatedCell}
@@ -320,8 +323,11 @@ function renderMissionsTab() {
           ? `<button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
              <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>`
           : `<button class="mission-btn" style="background:var(--info-color);" data-tooltip="${escapeHTML(t("missions.btn.viewMission"))}" onclick="editMission('${m.id}', true)"><i class="fa-solid fa-eye"></i></button>`;
+      const createdByLabel = m.created_by
+        ? `<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.65rem;margin-left:0.25rem;"></i>${escapeHTML(t("planMission.createdBy"))} ${escapeHTML(m.created_by)}</div>`
+        : "";
       row.innerHTML = `
-        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(m.name)}</strong></td>
+        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(m.name)}</strong>${createdByLabel}</td>
         <td>${escapeHTML(m.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
         <td class="missions-actions-cell">${plannedActions}</td>`;
@@ -392,8 +398,11 @@ function renderMissionsTab() {
         ? `border-right:4px solid ${ownerColor};`
         : "";
       const row = document.createElement("tr");
+      const _archCreatedBy = mission.created_by
+        ? `<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.65rem;margin-left:0.25rem;"></i>${escapeHTML(t("planMission.createdBy"))} ${escapeHTML(mission.created_by)}</div>`
+        : "";
       row.innerHTML = `
-        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(mission.name)}</strong></td>
+        <td style="${borderStyle}padding-right:0.5rem;"><strong>${escapeHTML(mission.name)}</strong>${_archCreatedBy}</td>
         <td>${escapeHTML(mission.owner) || "-"}</td>
         <td>${t("common.deviceCount", { count: reqCount })}</td>
         ${(() => {
@@ -1526,18 +1535,24 @@ function editMission(missionId, readOnly = false) {
   if (timeEndEl)
     timeEndEl.value = mission.time_end ? mission.time_end.slice(0, 16) : "";
 
-  // Show creation timestamp (read-only, only visible when editing)
-  const createdAtGroup = document.getElementById("missionCreatedAtGroup");
-  const createdAtInput = document.getElementById("missionCreatedAt");
+  // Show creation metadata (read-only, only visible when editing)
+  const createdAtGroup  = document.getElementById("missionCreatedAtGroup");
+  const createdByGroup  = document.getElementById("missionCreatedByGroup");
+  const createdAtInput  = document.getElementById("missionCreatedAt");
+  const createdByInput  = document.getElementById("missionCreatedBy");
   if (mission.created_at) {
     const d = new Date(mission.created_at);
-    createdAtInput.value = d.toLocaleString();
+    createdAtInput.value = d.toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    if (createdByInput) createdByInput.value = mission.created_by || "—";
     createdAtGroup.style.display = "block";
+    if (createdByGroup) createdByGroup.style.display = "block";
     document.getElementById("missionInfoGrid").style.gridTemplateColumns =
-      "1fr 1fr 1fr";
+      "2fr 2fr 1fr 1fr";
   } else {
     createdAtInput.value = "";
+    if (createdByInput) createdByInput.value = "";
     createdAtGroup.style.display = "none";
+    if (createdByGroup) createdByGroup.style.display = "none";
     document.getElementById("missionInfoGrid").style.gridTemplateColumns =
       "1fr 1fr";
   }

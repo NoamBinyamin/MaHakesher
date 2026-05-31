@@ -43,6 +43,7 @@
           >
             <i class="fa-solid fa-circle-user"></i>
             <span id="userInfoName"></span>
+            <span id="userInfoOwner" style="display:none;"></span>
           </button>
           <button
             id="navPresentationBtn"
@@ -619,41 +620,35 @@
           </div>
         </div>
         <div class="summary-grid">
-          <div class="summary-card">
+          <div class="summary-card summary-accent-blue">
+            <div class="summary-card-icon summary-icon-blue"><i class="fa-solid fa-map"></i></div>
             <div class="summary-value" id="totalSectors">0</div>
-            <div class="summary-label" data-i18n="summary.totalSectors">
-              Total Sectors
-            </div>
+            <div class="summary-label" data-i18n="summary.totalSectors">Total Sectors</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card summary-accent-purple">
+            <div class="summary-card-icon summary-icon-purple"><i class="fa-solid fa-location-dot"></i></div>
             <div class="summary-value" id="totalSites">0</div>
-            <div class="summary-label" data-i18n="summary.totalSites">
-              Total Sites
-            </div>
+            <div class="summary-label" data-i18n="summary.totalSites">Total Sites</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card summary-accent-teal">
+            <div class="summary-card-icon summary-icon-teal"><i class="fa-solid fa-tower-cell"></i></div>
             <div class="summary-value" id="totalRadios">0</div>
-            <div class="summary-label" data-i18n="summary.totalRadios">
-              Total Radios
-            </div>
+            <div class="summary-label" data-i18n="summary.totalRadios">Total Radios</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card summary-accent-green">
+            <div class="summary-card-icon summary-icon-green"><i class="fa-solid fa-circle-check"></i></div>
             <div class="summary-value" id="usableRadios">0</div>
-            <div class="summary-label" data-i18n="summary.usable">
-              Usable Devices
-            </div>
+            <div class="summary-label" data-i18n="summary.usable">Usable Devices</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card summary-accent-red">
+            <div class="summary-card-icon summary-icon-red"><i class="fa-solid fa-circle-xmark"></i></div>
             <div class="summary-value" id="unusableRadios">0</div>
-            <div class="summary-label" data-i18n="summary.unusable">
-              Unusable Devices
-            </div>
+            <div class="summary-label" data-i18n="summary.unusable">Unusable Devices</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card summary-accent-amber">
+            <div class="summary-card-icon summary-icon-amber"><i class="fa-solid fa-wave-square"></i></div>
             <div class="summary-value" id="frequencyBands">0</div>
-            <div class="summary-label" data-i18n="summary.activeBands">
-              Active Bands
-            </div>
+            <div class="summary-label" data-i18n="summary.activeBands">Active Bands</div>
           </div>
         </div>
 
@@ -2208,7 +2203,26 @@
                   type="text"
                   id="missionCreatedAt"
                   readonly
-                  style="color: var(--gray-500); font-size: 0.85rem"
+                  style="color: var(--gray-500);"
+                />
+              </div>
+              <div
+                class="form-group"
+                id="missionCreatedByGroup"
+                style="display: none; margin-bottom: 0"
+              >
+                <label for="missionCreatedBy">
+                  <i
+                    class="fa-solid fa-user"
+                    style="color: var(--gray-400); margin-right: 0.4rem"
+                  ></i>
+                  <span data-i18n="planMission.createdBy">Created by</span>
+                </label>
+                <input
+                  type="text"
+                  id="missionCreatedBy"
+                  readonly
+                  style="color: var(--gray-500);"
                 />
               </div>
             </div>

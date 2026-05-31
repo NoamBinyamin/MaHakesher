@@ -1030,6 +1030,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'status': 'planned',
             'requirements': post_data.get('requirements', []),
             'created_at': datetime.now(timezone.utc).isoformat(),
+            'created_by': self._request_user,
             'time_start': post_data.get('time_start') or None,
             'time_end': post_data.get('time_end') or None,
         }
@@ -1043,7 +1044,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         """POST /api/planned_missions/<id>"""
         data = load_data()
         post_data.pop('id', None)
-        post_data.pop('created_at', None)  # creation timestamp is immutable
+        post_data.pop('created_at', None)   # creation timestamp is immutable
+        post_data.pop('created_by', None)   # creator is immutable
         if self._request_role == 'user':
             mission_obj = next((m for m in data.get('data', {}).get('planned_missions', []) if m['id'] == mission_id), None)
             if mission_obj and mission_obj.get('owner') != self._request_owner:
@@ -1500,14 +1502,37 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
     # ==================== Export / Import ====================
 
     def handle_version(self):
-        """GET /api/version - Returns the last-modified timestamp of the data files.
-        Used by the frontend to detect changes made by other users without a full reload."""
+        """GET /api/version - Returns timestamp + latest relevant audit entry for live sync notifications."""
         try:
             data_ts    = os.path.getmtime(DATA_FILE)    if os.path.exists(DATA_FILE)    else 0
             mapping_ts = os.path.getmtime(MAPPING_FILE) if os.path.exists(MAPPING_FILE) else 0
-            return self.send_json_response(200, {'ts': max(data_ts, mapping_ts)})
+            ts = max(data_ts, mapping_ts)
+
+            latest = None
+            if os.path.exists(AUDIT_LOG_FILE):
+                with open(AUDIT_LOG_FILE, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                for line in reversed(lines):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                        # Skip: login events, restore actions, link changes, password resets
+                        if entry.get('action') == 'restore':
+                            continue
+                        if entry.get('entity_type') in ('link', 'user'):
+                            continue
+                        if entry.get('action') == 'login':
+                            continue
+                        latest = entry
+                        break
+                    except Exception:
+                        continue
+
+            return self.send_json_response(200, {'ts': ts, 'latest': latest})
         except Exception:
-            return self.send_json_response(200, {'ts': 0})
+            return self.send_json_response(200, {'ts': 0, 'latest': None})
 
     def handle_export(self):
         """GET /api/export - Export all data and mappings as a single JSON backup"""
