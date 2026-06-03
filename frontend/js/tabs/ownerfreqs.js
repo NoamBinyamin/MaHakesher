@@ -2,6 +2,28 @@
 
 let _ownerFreqSelected = null;
 
+function _owfOwnerBadge(ownerName) {
+  const isDark = document.documentElement.classList.contains("dark");
+  const entry = (window.appState.config?.owners || []).find((o) => o.name === ownerName);
+  let bg, text, border;
+  if (entry) {
+    if (isDark) {
+      bg = entry.dark;
+      text = contrastColor(entry.dark);
+      border = "transparent";
+    } else {
+      bg = entry.light;
+      text = entry.dark;
+      border = entry.dark;
+    }
+  } else {
+    bg = isDark ? "#334155" : "#E5E7EB";
+    text = isDark ? "#e2e8f0" : "#374151";
+    border = "transparent";
+  }
+  return `<span style="display:inline-block;padding:0.25rem 0.85rem;border-radius:9999px;font-size:0.9rem;font-weight:700;background:${bg};color:${text};border:1.5px solid ${border};vertical-align:middle;">${escapeHTML(ownerName || "—")}</span>`;
+}
+
 function renderOwnerFreqsTab() {
   const content = document.getElementById("ownerFreqsContent");
   if (!content) return;
@@ -11,10 +33,8 @@ function renderOwnerFreqsTab() {
     const userOwner = getCurrentUserOwner ? getCurrentUserOwner() : null;
     content.innerHTML = `
       <div class="ownerfreq-controls">
-        <span class="ownerfreq-label" style="font-weight:700;color:var(--gray-700);">
-          <i class="fa-solid fa-user" style="margin-left:0.4rem;color:var(--primary-color);"></i>
-          ${escapeHTML(userOwner || "—")}
-        </span>
+        <span class="ownerfreq-label"><i class="fa-solid fa-user" style="margin-left:0.4rem;color:var(--primary-color);"></i></span>
+        ${_owfOwnerBadge(userOwner)}
       </div>
       <div id="ownerFreqTablesArea"></div>`;
     if (userOwner) _renderOwnerFreqTables(userOwner);
@@ -39,6 +59,7 @@ function renderOwnerFreqsTab() {
         <option value="">${t("ownerfreqs.selectPlaceholder")}</option>
         ${owners.map((o) => `<option value="${escapeHTML(o.name)}"${_ownerFreqSelected === o.name ? " selected" : ""}>${escapeHTML(o.name)}</option>`).join("")}
       </select>
+      <span id="ownerFreqBadgeArea">${_ownerFreqSelected ? _owfOwnerBadge(_ownerFreqSelected) : ""}</span>
     </div>
     <div id="ownerFreqTablesArea"></div>
   `;
@@ -50,6 +71,8 @@ function renderOwnerFreqsTab() {
 
 function onOwnerFreqChange(ownerName) {
   _ownerFreqSelected = ownerName || null;
+  const badgeArea = document.getElementById("ownerFreqBadgeArea");
+  if (badgeArea) badgeArea.innerHTML = _ownerFreqSelected ? _owfOwnerBadge(_ownerFreqSelected) : "";
   _renderOwnerFreqTables(_ownerFreqSelected);
 }
 
@@ -83,9 +106,113 @@ function _missionBadge({ mission, roles }) {
   const bg = color || "var(--gray-300)";
   const fg = color ? contrastColor(color) : "var(--gray-700)";
   const label = roles.length
-    ? `${escapeHTML(mission.name)} - ${roles.map(escapeHTML).join(" | ")}`
-    : escapeHTML(mission.name);
-  return `<span class="ownerfreq-mission-badge" style="background:${bg};color:${fg};">${label}</span>`;
+    ? `<span style="font-weight:700">${escapeHTML(mission.name)}</span> - <span style="font-weight:400">${roles.map(escapeHTML).join(" | ")}</span>`
+    : `<span style="font-weight:700">${escapeHTML(mission.name)}</span>`;
+  return `<span class="ownerfreq-mission-badge" style="background:${bg};color:${fg};cursor:default;"
+    onmouseenter="_owfShowMissionTooltip('${escapeHTML(mission.id)}', event)"
+    onmousemove="_owfMoveMissionTooltip(event)"
+    onmouseleave="_owfHideMissionTooltip()"
+  >${label}</span>`;
+}
+
+// ── Mission tooltip ───────────────────────────────────────────────────────────
+
+function _owfGetMissionTip() {
+  let tip = document.getElementById("owf-mission-tooltip");
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.id = "owf-mission-tooltip";
+    tip.style.display = "none";
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+function _owfFormatTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(2);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} ${hh}:${min}`;
+}
+
+function _owfShowMissionTooltip(missionId, e) {
+  const mission = (window.appState.plannedMissions || []).find(m => m.id === missionId);
+  if (!mission) return;
+
+  const tip = _owfGetMissionTip();
+  const isDark = document.documentElement.classList.contains("dark");
+  const bg = isDark ? "#1e2d45" : "#ffffff";
+  const border = isDark ? "rgba(255,255,255,0.12)" : "var(--gray-200)";
+  const textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
+  const textSub = isDark ? "#94a3b8" : "var(--gray-500)";
+  const shadow = isDark ? "0 4px 20px rgba(0,0,0,0.5)" : "0 4px 16px rgba(0,0,0,0.15)";
+  const ownerColor = mission.owner ? getOwnerColor(mission.owner) : (isDark ? "rgba(255,255,255,0.2)" : "var(--gray-300)");
+  const reqCount = mission.requirements ? mission.requirements.length : 0;
+
+  tip.style.cssText = `
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    background: ${bg};
+    border: 1px solid ${border};
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    box-shadow: ${shadow};
+    font-size: 0.82rem;
+    min-width: 190px;
+    max-width: 270px;
+    display: block;
+    line-height: 1.6;
+    color: ${textMain};
+  `;
+
+  tip.innerHTML = `
+    <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.55rem;
+                border-right:3px solid ${ownerColor};padding-right:0.45rem;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+      ${escapeHTML(mission.name)}
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:0.2rem 0.65rem;align-items:baseline;">
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">👤 ${escapeHTML(t("missions.col.owner"))}</span>
+      <span>${escapeHTML(mission.owner || "—")}</span>
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">📡 ${escapeHTML(t("missions.col.reqs"))}</span>
+      <span>${reqCount}</span>
+      ${mission.time_start ? `
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">🕐 ${escapeHTML(t("timeline.tooltip.start"))}</span>
+      <span>${_owfFormatTime(mission.time_start)}</span>
+      ` : ""}
+      ${mission.time_end ? `
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">🏁 ${escapeHTML(t("timeline.tooltip.end"))}</span>
+      <span>${_owfFormatTime(mission.time_end)}</span>
+      ` : ""}
+    </div>
+  `;
+
+  _owfMoveMissionTooltip(e);
+}
+
+function _owfMoveMissionTooltip(e) {
+  const tip = document.getElementById("owf-mission-tooltip");
+  if (!tip || tip.style.display === "none") return;
+  const margin = 14;
+  let x = e.clientX + margin;
+  let y = e.clientY - margin;
+  const tipW = tip.offsetWidth || 270;
+  const tipH = tip.offsetHeight || 130;
+  if (x + tipW > window.innerWidth - 8) x = e.clientX - tipW - margin;
+  if (y + tipH > window.innerHeight - 8) y = e.clientY - tipH - margin;
+  if (y < 8) y = 8;
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+}
+
+function _owfHideMissionTooltip() {
+  const tip = document.getElementById("owf-mission-tooltip");
+  if (tip) tip.style.display = "none";
 }
 
 function _renderOwnerFreqTables(ownerName) {
@@ -123,7 +250,6 @@ function _renderOwnerFreqTables(ownerName) {
     return ia - ib;
   });
 
-  const ownerColor = getOwnerColor(ownerName);
   const dash = `<span style="color:var(--gray-400)">—</span>`;
 
   bands.forEach((band) => {
@@ -131,15 +257,17 @@ function _renderOwnerFreqTables(ownerName) {
       .slice()
       .sort((a, b) => a.frequency - b.frequency);
 
+    const bandColor = (window.appState.config.frequency_bands?.[band]?.color) || "var(--primary-color)";
+
     const section = document.createElement("div");
     section.className = "ownerfreq-band-section";
+    section.style.borderRight = `4px solid ${bandColor}`;
 
     const headerRow = document.createElement("div");
     headerRow.className = "ownerfreq-band-header";
-    if (ownerColor) headerRow.style.borderColor = ownerColor;
     headerRow.innerHTML = `
       <span class="ownerfreq-band-title">${t("ownerfreqs.bandTitle").replace("{band}", escapeHTML(band))}</span>
-      <span class="ownerfreq-band-count">${freqs.length}</span>
+      <span class="ownerfreq-band-count" style="background:${bandColor};color:${contrastColor(bandColor)}">${freqs.length}</span>
     `;
     section.appendChild(headerRow);
 

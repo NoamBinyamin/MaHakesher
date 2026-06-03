@@ -27,12 +27,12 @@ async function renderPreferencesTab() {
   // refresh each section in-place to avoid wiping content mid-async-call.
   if (!document.getElementById("prefOwnersSection")) {
     container.innerHTML = `
-      ${_renderLanguageSection()}
-      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
+      <div id="prefUsersSection"></div>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0;margin-top:1.25rem">
         <div style="flex:1;min-width:300px" id="prefOwnersSection"></div>
         <div style="flex:1;min-width:300px" id="prefDevicesSection"></div>
       </div>
-      <div style="margin-top:1.25rem" id="prefUsersSection"></div>`;
+      <div style="margin-top:1.25rem">${_renderLanguageSection()}</div>`;
   }
 
   _renderOwnersSection();
@@ -166,7 +166,11 @@ function _renderDevicesSection() {
       <tr class="pref-row">
         <td style="padding:0.5rem 0.75rem;font-weight:500">${escapeHTML(d.name)}</td>
         <td style="padding:0.5rem 0.75rem">
-          <span class="pref-band-badge" title="${escapeHTML(_bandTooltip(d.band))}">${escapeHTML(d.band)}</span>
+          <span class="pref-band-badge" style="cursor:help"
+            onmouseenter="prefShowBandTooltip('${escapeHTML(d.band)}', event)"
+            onmousemove="_prefMoveBandTooltip(event)"
+            onmouseleave="prefHideBandTooltip()"
+          >${escapeHTML(d.band)}</span>
         </td>
         <td style="padding:0.5rem 0.75rem;white-space:nowrap">
           <button class="btn btn-sm btn-danger" onclick="prefDeleteDevice('${escapeHTML(d.id)}','${escapeHTML(d.name)}')">
@@ -626,6 +630,85 @@ function _fullRefresh() {
   if (window.renderLinksTab) renderLinksTab();
 }
 
+// ── Band hover tooltip ───────────────────────────────────────────────────────
+
+function _prefGetBandTip() {
+  let tip = document.getElementById("pref-band-tooltip");
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.id = "pref-band-tooltip";
+    tip.style.display = "none";
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+function prefShowBandTooltip(band, e) {
+  const limits = ((window.appState.config && window.appState.config.frequency_bands) || {})[band];
+  if (!limits) return;
+
+  const tip = _prefGetBandTip();
+  const isDark = document.documentElement.classList.contains("dark");
+  const bg = isDark ? "#1e2d45" : "#ffffff";
+  const border = isDark ? "rgba(255,255,255,0.12)" : "var(--gray-200)";
+  const textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
+  const textSub = isDark ? "#94a3b8" : "var(--gray-500)";
+  const shadow = isDark ? "0 4px 20px rgba(0,0,0,0.5)" : "0 4px 16px rgba(0,0,0,0.15)";
+
+  tip.style.cssText = `
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    background: ${bg};
+    border: 1px solid ${border};
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    box-shadow: ${shadow};
+    font-size: 0.82rem;
+    min-width: 160px;
+    max-width: 240px;
+    display: block;
+    line-height: 1.6;
+    color: ${textMain};
+  `;
+
+  tip.innerHTML = `
+    <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.55rem;
+                border-right:3px solid ${limits.color || 'var(--primary-color)'};padding-right:0.45rem;">
+      ${escapeHTML(band)}
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:0.2rem 0.65rem;align-items:baseline;">
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">📶 ${escapeHTML(t("pref.band.min"))}</span>
+      <span>${Number(limits.min).toFixed(limits.decimals ?? 0)} MHz</span>
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">📶 ${escapeHTML(t("pref.band.max"))}</span>
+      <span>${Number(limits.max).toFixed(limits.decimals ?? 0)} MHz</span>
+      ${limits.step != null ? `<span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">⚙️ ${escapeHTML(t("pref.band.step"))}</span><span>${limits.step} MHz</span>` : ""}
+    </div>
+  `;
+
+  _prefMoveBandTooltip(e);
+}
+
+function _prefMoveBandTooltip(e) {
+  const tip = document.getElementById("pref-band-tooltip");
+  if (!tip || tip.style.display === "none") return;
+  const margin = 14;
+  let x = e.clientX + margin;
+  let y = e.clientY - margin;
+  const tipW = tip.offsetWidth || 240;
+  const tipH = tip.offsetHeight || 100;
+  if (x + tipW > window.innerWidth - 8) x = e.clientX - tipW - margin;
+  if (y + tipH > window.innerHeight - 8) y = e.clientY - tipH - margin;
+  if (y < 8) y = 8;
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+}
+
+function prefHideBandTooltip() {
+  const tip = document.getElementById("pref-band-tooltip");
+  if (tip) tip.style.display = "none";
+}
+
 // ── Inline CSS ───────────────────────────────────────────────────────────────
 
 (function injectPrefStyles() {
@@ -699,7 +782,6 @@ function _fullRefresh() {
       font-weight: 600;
       background: rgba(37, 99, 235, 0.15);
       color: var(--primary-color);
-      cursor: help;
     }
     .pref-admin-badge {
       display: inline-block;
@@ -921,3 +1003,6 @@ window._updatePwdFeedback = _updatePwdFeedback;
 window.openRolesHelp = openRolesHelp;
 window.closeRolesHelp = closeRolesHelp;
 window.prefToggleOwnerCell = prefToggleOwnerCell;
+window.prefShowBandTooltip = prefShowBandTooltip;
+window._prefMoveBandTooltip = _prefMoveBandTooltip;
+window.prefHideBandTooltip = prefHideBandTooltip;

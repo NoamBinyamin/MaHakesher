@@ -2,13 +2,15 @@
 
 // Unified function to get active mission names (used by both inline editor and modal)
 function getActiveMissionNames() {
-  const activeMissionNames = window.appState.plannedMissions.map((m) => m.name);
-  return activeMissionNames;
+  return (window.appState.plannedMissions || [])
+    .filter((m) => m.status === "active")
+    .map((m) => m.name);
 }
 
 // Unified function to get active missions as options HTML
 function getActiveMissionOptionsHTML() {
   return (window.appState.plannedMissions || [])
+    .filter((m) => m.status === "active")
     .map(
       (m) =>
         `<option value="${escapeHTML(m.name)}">${escapeHTML(m.name)}</option>`,

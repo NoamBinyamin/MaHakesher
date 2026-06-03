@@ -39,6 +39,12 @@ async function saveNewLink() {
     return;
   }
 
+  if (!isFreqAlignedToStep(linkData.frequency, linkData.frequency_band)) {
+    const step = (window.appState.config.frequency_bands[linkData.frequency_band] || {}).step;
+    showNotification(t("error.freqNotAligned", { step, band: linkData.frequency_band }), "error");
+    return;
+  }
+
   const dupName = window.appState.links.find(
     (l) => l.link_name.toLowerCase() === linkData.link_name.toLowerCase(),
   );
@@ -111,6 +117,12 @@ async function saveEditLink() {
 
   if (!linkData.link_name || !linkData.frequency || !linkData.frequency_band) {
     showNotification(t("error.linkNameRequired"), "error");
+    return;
+  }
+
+  if (!isFreqAlignedToStep(linkData.frequency, linkData.frequency_band)) {
+    const step = (window.appState.config.frequency_bands[linkData.frequency_band] || {}).step;
+    showNotification(t("error.freqNotAligned", { step, band: linkData.frequency_band }), "error");
     return;
   }
 

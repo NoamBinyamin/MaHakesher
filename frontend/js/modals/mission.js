@@ -336,13 +336,14 @@ function addMissionRequirement() {
     const limits = window.appState.config.frequency_bands[frequencyBand];
     if (limits && (freqVal < limits.min || freqVal > limits.max)) {
       showNotification(
-        t("error.freqOutOfRange", {
-          min: limits.min,
-          max: limits.max,
-          band: frequencyBand,
-        }),
+        t("error.freqOutOfRange", { min: limits.min, max: limits.max, band: frequencyBand }),
         "error",
       );
+      return;
+    }
+    if (!isFreqAlignedToStep(freqVal, frequencyBand)) {
+      const step = (window.appState.config.frequency_bands[frequencyBand] || {}).step;
+      showNotification(t("error.freqNotAligned", { step, band: frequencyBand }), "error");
       return;
     }
   }
@@ -659,6 +660,8 @@ function renderExtraDevices() {
   section.style.display = "block";
   container.innerHTML = "";
 
+  const isReadOnly = document.getElementById("planMissionModal")?.classList.contains("plan-mission-readonly");
+
   const table = document.createElement("table");
   table.style.cssText = "width: 100%; font-size: 14px; text-align: right;";
   table.innerHTML = `
@@ -670,6 +673,7 @@ function renderExtraDevices() {
         <th style="padding: 12px 16px; border: none;">${t("planMission.extraCol.owner")}</th>
         <th style="padding: 12px 16px; border: none;">${t("planMission.extraCol.location")}</th>
         <th style="padding: 12px 16px; border: none;">${t("planMission.extraCol.status")}</th>
+        ${!isReadOnly ? `<th style="padding: 12px 16px; border: none;">${t("pref.col.actions")}</th>` : ""}
       </tr>
     </thead>
     <tbody style="border: 1px solid var(--gray-200); background: var(--gray-50);"></tbody>
@@ -700,15 +704,42 @@ function renderExtraDevices() {
     row.innerHTML = `
       <td style="padding: 12px 16px; color: var(--gray-800);">${radio.frequency_band || "-"}</td>
       <td style="padding: 12px 16px; color: var(--gray-700);">${radio.device_type}</td>
-      <td style="padding: 12px 16px; color: var(--gray-600); direction: ltr;">${radio.frequency || "-"}</td>
+      <td style="padding: 12px 16px; color: var(--gray-600); direction: ltr;">${radio.frequency != null ? formatFrequency(radio.frequency, radio.frequency_band) : "-"}</td>
       <td style="padding: 12px 16px; color: var(--gray-600);">${radio.owner || "-"}</td>
       <td style="padding: 12px 16px; color: var(--gray-600);">${locationText}</td>
       <td style="padding: 12px 16px;"><span style="${statusStyle}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
+      ${!isReadOnly ? `<td style="padding: 8px 16px; white-space:nowrap;">
+        <button class="btn btn-sm btn-primary" title="${escapeHTML(t("planMission.extraCol.addToReqs"))}" onclick="addExtraDeviceToRequirements('${escapeHTML(radio.id)}')">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </td>` : ""}
     `;
     tbody.appendChild(row);
   });
 
   container.appendChild(table);
+}
+
+function addExtraDeviceToRequirements(radioId) {
+  const radio = (window.appState.radios || []).find((r) => r.id === radioId);
+  if (!radio) return;
+
+  const site = window.appState.sites.find((s) => s.id === radio.site_id);
+  const sector = site ? window.appState.sectors.find((s) => s.id === site.sector_id) : null;
+
+  missionRequirements.push({
+    frequencyBand: radio.frequency_band || "",
+    frequency: radio.frequency || null,
+    siteId: site ? site.id : null,
+    siteName: site ? site.name : null,
+    sectorId: sector ? sector.id : null,
+    sectorName: sector ? sector.name : null,
+    role: radio.role || null,
+  });
+
+  markModalDirty("planMissionModal");
+  renderRequirementsList();
+  renderExtraDevices();
 }
 
 function removeMissionRequirement(index) {
@@ -723,6 +754,7 @@ window.openMissionModal = openMissionModal;
 window.openPlanMissionModal = openPlanMissionModal;
 window.addMissionRequirement = addMissionRequirement;
 window.removeMissionRequirement = removeMissionRequirement;
+window.addExtraDeviceToRequirements = addExtraDeviceToRequirements;
 window.editMissionRequirement = editMissionRequirement;
 window.setSortOrder = setSortOrder;
 window.renderRequirementsList = renderRequirementsList;

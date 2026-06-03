@@ -20,10 +20,13 @@ function updateFrequencyBandDisplay() {
 
   const limits = getFrequencyBandLimits(band);
   if (limits) {
-    limitsDiv.textContent = t("validator.validRange", {
-      min: limits.min,
-      max: limits.max,
-    });
+    const dec = limits.decimals ?? 0;
+    const min = Number(limits.min).toFixed(dec);
+    const max = Number(limits.max).toFixed(dec);
+    const stepPart = limits.step != null
+      ? "  |  " + t("validator.step", { step: limits.step })
+      : "";
+    limitsDiv.textContent = t("validator.validRange", { min, max }) + stepPart;
   }
 
   frequencyInput.value = "";
@@ -50,18 +53,17 @@ function validateFrequency() {
     frequencyInput.classList.remove("invalid");
     return true;
   }
-  const isValid = frequency >= limits.min && frequency <= limits.max;
+  const inRange = frequency >= limits.min && frequency <= limits.max;
+  const alignedToStep = isFreqAlignedToStep(frequency, band);
 
-  if (isValid) {
+  if (inRange && alignedToStep) {
     errorDiv.classList.remove("show");
     frequencyInput.classList.remove("invalid");
     return true;
   } else {
-    errorDiv.textContent = t("error.freqOutOfRange", {
-      min: limits.min,
-      max: limits.max,
-      band,
-    });
+    errorDiv.textContent = !inRange
+      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
+      : t("error.freqNotAligned", { step: limits.step, band });
     errorDiv.classList.add("show");
     frequencyInput.classList.add("invalid");
     return false;
@@ -89,20 +91,95 @@ function validateStandbyFrequency() {
     frequencyInput.classList.remove("invalid");
     return true;
   }
-  const isValid = frequency >= limits.min && frequency <= limits.max;
+  const inRange = frequency >= limits.min && frequency <= limits.max;
+  const alignedToStep = isFreqAlignedToStep(frequency, band);
 
-  if (isValid) {
+  if (inRange && alignedToStep) {
     errorDiv.classList.remove("show");
     frequencyInput.classList.remove("invalid");
     return true;
   } else {
-    errorDiv.textContent = t("error.freqOutOfRange", {
-      min: limits.min,
-      max: limits.max,
-      band,
-    });
+    errorDiv.textContent = !inRange
+      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
+      : t("error.freqNotAligned", { step: limits.step, band });
     errorDiv.classList.add("show");
     frequencyInput.classList.add("invalid");
+    return false;
+  }
+}
+
+function validateLinkFrequency(freqInputId, bandInputId, errorDivId) {
+  const freqInput = document.getElementById(freqInputId);
+  const errorDiv = document.getElementById(errorDivId);
+  if (!freqInput || !errorDiv) return true;
+
+  const band = document.getElementById(bandInputId)?.value || "";
+  const frequency = parseFloat(freqInput.value);
+
+  if (!freqInput.value || isNaN(frequency) || !band) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+
+  const limits = getFrequencyBandLimits(band);
+  if (!limits) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+
+  const inRange = frequency >= limits.min && frequency <= limits.max;
+  const alignedToStep = isFreqAlignedToStep(frequency, band);
+
+  if (inRange && alignedToStep) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  } else {
+    errorDiv.textContent = !inRange
+      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
+      : t("error.freqNotAligned", { step: limits.step, band });
+    errorDiv.classList.add("show");
+    freqInput.classList.add("invalid");
+    return false;
+  }
+}
+
+function validateReqFrequency() {
+  const freqInput = document.getElementById("reqFrequency");
+  const errorDiv = document.getElementById("reqFrequencyError");
+  if (!freqInput || !errorDiv) return true;
+
+  const band = document.getElementById("reqFrequencyBand")?.value || "";
+  const frequency = parseFloat(freqInput.value);
+
+  if (!freqInput.value || isNaN(frequency) || !band) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+
+  const limits = getFrequencyBandLimits(band);
+  if (!limits) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+
+  const inRange = frequency >= limits.min && frequency <= limits.max;
+  const alignedToStep = isFreqAlignedToStep(frequency, band);
+
+  if (inRange && alignedToStep) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  } else {
+    errorDiv.textContent = !inRange
+      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
+      : t("error.freqNotAligned", { step: limits.step, band });
+    errorDiv.classList.add("show");
+    freqInput.classList.add("invalid");
     return false;
   }
 }
@@ -111,3 +188,5 @@ function validateStandbyFrequency() {
 window.updateFrequencyBandDisplay = updateFrequencyBandDisplay;
 window.validateFrequency = validateFrequency;
 window.validateStandbyFrequency = validateStandbyFrequency;
+window.validateLinkFrequency = validateLinkFrequency;
+window.validateReqFrequency = validateReqFrequency;

@@ -249,6 +249,11 @@ async function handleLinkExcelUpload(input) {
           );
           continue;
         }
+        if (!isFreqAlignedToStep(frequency, frequencyBand)) {
+          const step = (limits || {}).step;
+          errors.push(t("error.freqNotAlignedRow", { row: i + 1, freq: frequency, step, band: frequencyBand }));
+          continue;
+        }
 
         // Check duplicate link name (existing DB + current batch)
         const nameLower = linkName.toLowerCase();

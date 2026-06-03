@@ -194,6 +194,19 @@ function formatFrequency(freq, bandName) {
 
 window.formatFrequency = formatFrequency;
 
+function isFreqAlignedToStep(freq, bandName) {
+  if (freq === null || freq === undefined || freq === "") return true;
+  const num = Number(freq);
+  if (isNaN(num)) return true;
+  const band = (window.appState?.config?.frequency_bands || {})[bandName];
+  const step = band && typeof band.step === "number" ? band.step : null;
+  if (!step || step <= 0) return true;
+  const ratio = num / step;
+  return Math.abs(Math.round(ratio) - ratio) < 1e-9;
+}
+
+window.isFreqAlignedToStep = isFreqAlignedToStep;
+
 // ==================== Undo Toast ====================
 
 let _undoTimer = null;

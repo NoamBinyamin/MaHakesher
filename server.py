@@ -74,13 +74,35 @@ def migrate_config(data):
         config['missions'] = [m['name'] for m in planned if m.get('status') == 'active']
         changed = True
 
-    # Migrate frequency bands: add "decimals" field if missing
+    # Migrate frequency bands: add "decimals", "color", "step" fields if missing
     for band_cfg in config.get('frequency_bands', {}).values():
         if 'decimals' not in band_cfg:
             band_cfg['decimals'] = 3
             changed = True
+        if 'color' not in band_cfg:
+            band_cfg['color'] = '#6366f1'
+            changed = True
+        if 'step' not in band_cfg:
+            band_cfg['step'] = 0.025
+            changed = True
 
     return changed
+
+def _is_freq_aligned(freq, step):
+    """Return True if freq is an exact multiple of step (within float tolerance)."""
+    if freq is None or not step or step <= 0:
+        return True
+    ratio = freq / step
+    return abs(round(ratio) - ratio) < 1e-9
+
+def _validate_freq_step(freq, band_cfg):
+    """Return an error string if freq violates the band's step, else None."""
+    if freq is None:
+        return None
+    step = band_cfg.get('step') if band_cfg else None
+    if not _is_freq_aligned(freq, step):
+        return f'Frequency must be a multiple of {step}'
+    return None
 
 def _radio_types_lookup(config):
     """Return a {name: band} dict from config.radio_types regardless of format."""
@@ -94,9 +116,9 @@ def _make_default_data():
     return {
         "config": {
             "frequency_bands": {
-                "UHF":  {"min": 255.0, "max": 395.5, "decimals": 3},
-                "HVHF": {"min": 120.0, "max": 140.0, "decimals": 3},
-                "LVHF": {"min": 33.0,  "max": 95.0,  "decimals": 3},
+                "UHF":  {"min": 255.0, "max": 395.5, "decimals": 3, "color": "#6366f1", "step": 0.025},
+                "HVHF": {"min": 120.0, "max": 140.0, "decimals": 3, "color": "#10b981", "step": 0.025},
+                "LVHF": {"min": 33.0,  "max": 95.0,  "decimals": 3, "color": "#f59e0b", "step": 0.025},
             },
             "radio_types": [],
             "missions": [],
@@ -867,6 +889,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         except (ValueError, TypeError):
             standby_frequency = None
 
+        # Step validation
+        rt_lookup = _radio_types_lookup(data['config'])
+        device_type = post_data.get('device_type', '')
+        band_name = rt_lookup.get(device_type)
+        band_cfg = data['config'].get('frequency_bands', {}).get(band_name, {})
+        err = _validate_freq_step(frequency, band_cfg) or _validate_freq_step(standby_frequency, band_cfg)
+        if err:
+            return self.send_json_response(400, {'error': err})
+
         new_radio = {
             'id': generate_id('radio'),
             'site_id': post_data.get('site_id', ''),
@@ -949,6 +980,20 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                         post_data['standby_frequency'] = float(standby_freq) if standby_freq is not None else None
                     except (ValueError, TypeError):
                         post_data['standby_frequency'] = None
+
+                # Step validation
+                rt_lookup = _radio_types_lookup(data['config'])
+                device_type = post_data.get('device_type') or radio.get('device_type', '')
+                band_name = rt_lookup.get(device_type)
+                band_cfg = data['config'].get('frequency_bands', {}).get(band_name, {})
+                if 'frequency' in post_data:
+                    err = _validate_freq_step(post_data.get('frequency'), band_cfg)
+                    if err:
+                        return self.send_json_response(400, {'error': err})
+                if 'standby_frequency' in post_data:
+                    err = _validate_freq_step(post_data.get('standby_frequency'), band_cfg)
+                    if err:
+                        return self.send_json_response(400, {'error': err})
 
                 _tracked = ('frequency', 'owner', 'mission_name', 'role', 'status',
                             'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role')
@@ -1354,12 +1399,20 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_create_link(self, post_data):
         """POST /api/links"""
+        data = load_data()
+        frequency = post_data.get('frequency', 0.0)
+        band_name = post_data.get('frequency_band')
+        band_cfg = data['config'].get('frequency_bands', {}).get(band_name, {})
+        err = _validate_freq_step(float(frequency) if frequency else None, band_cfg)
+        if err:
+            return self.send_json_response(400, {'error': err})
+
         mapping = load_mapping()
         new_link = {
             'id': generate_id('link'),
             'link_name': post_data.get('link_name', ''),
-            'frequency': post_data.get('frequency', 0.0),
-            'frequency_band': post_data.get('frequency_band', None),
+            'frequency': frequency,
+            'frequency_band': band_name,
             'owner': post_data.get('owner', ''),
             'generic_role': post_data.get('generic_role', '') or ''
         }
@@ -1370,10 +1423,18 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_update_link(self, link_id, post_data):
         """POST /api/links/<id>"""
+        data = load_data()
         mapping = load_mapping()
         post_data.pop('id', None)
         for link in mapping['mappings']:
             if link['id'] == link_id:
+                frequency = post_data.get('frequency', link.get('frequency'))
+                band_name = post_data.get('frequency_band', link.get('frequency_band'))
+                band_cfg = data['config'].get('frequency_bands', {}).get(band_name, {})
+                err = _validate_freq_step(float(frequency) if frequency else None, band_cfg)
+                if err:
+                    return self.send_json_response(400, {'error': err})
+
                 before = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner', 'generic_role')}
                 link.update(post_data)
                 save_mapping(mapping)
@@ -1449,6 +1510,17 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                         payload[freq_key] = float(raw) if raw is not None else None
                     except (ValueError, TypeError):
                         payload[freq_key] = None
+
+            # Step validation
+            rt_lookup = _radio_types_lookup(data['config'])
+            device_type = payload.get('device_type') or radio.get('device_type', '')
+            band_name = rt_lookup.get(device_type)
+            band_cfg = data['config'].get('frequency_bands', {}).get(band_name, {})
+            for freq_key in ('frequency', 'standby_frequency'):
+                if freq_key in payload:
+                    err = _validate_freq_step(payload.get(freq_key), band_cfg)
+                    if err:
+                        return self.send_json_response(400, {'error': err})
 
             before = {k: radio.get(k) for k in _tracked}
             radio.update(payload)

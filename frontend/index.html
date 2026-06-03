@@ -8,6 +8,9 @@
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -960,41 +963,43 @@
               Enter the sector identifier below
             </p>
           </div>
-          <div class="form-group">
-            <label for="sectorIdDisplay">
-              <i
-                class="fa-solid fa-fingerprint"
-                style="color: var(--gray-400); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="sector.idLabel">Sector ID</span>
-            </label>
-            <input
-              type="text"
-              id="sectorIdDisplay"
-              readonly
-              style="
-                color: var(--gray-500);
-                font-family: monospace;
-                font-size: 0.85rem;
-              "
-            />
-          </div>
-          <div class="form-group">
-            <label for="sectorName">
-              <i
-                class="fa-solid fa-signature"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="sector.nameLabel">Sector Name</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="text"
-              id="sectorName"
-              data-i18n-placeholder="sector.namePlaceholder"
-              placeholder="e.g., Northern Zone, Region A"
-              required
-            />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+            <div class="form-group">
+              <label for="sectorIdDisplay">
+                <i
+                  class="fa-solid fa-fingerprint"
+                  style="color: var(--gray-400); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="sector.idLabel">Sector ID</span>
+              </label>
+              <input
+                type="text"
+                id="sectorIdDisplay"
+                readonly
+                style="
+                  color: var(--gray-500);
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                "
+              />
+            </div>
+            <div class="form-group">
+              <label for="sectorName">
+                <i
+                  class="fa-solid fa-signature"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="sector.nameLabel">Sector Name</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <input
+                type="text"
+                id="sectorName"
+                data-i18n-placeholder="sector.namePlaceholder"
+                placeholder="e.g., Northern Zone, Region A"
+                required
+              />
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -1047,32 +1052,7 @@
           <input type="hidden" id="siteId" />
           <input type="hidden" id="sectorId" />
 
-          <!-- Basic Information Section -->
-          <div style="margin-bottom: 1.75rem">
-            <div
-              style="
-                padding: 0.5rem 0;
-                border-bottom: 2px solid var(--gray-200);
-                margin-bottom: 1.25rem;
-              "
-            >
-              <h4
-                style="
-                  color: var(--gray-900);
-                  font-size: 1rem;
-                  margin: 0;
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                "
-              >
-                <i
-                  class="fa-solid fa-info-circle"
-                  style="color: var(--info-color)"
-                ></i>
-                <span data-i18n="site.basicInfo">Basic Information</span>
-              </h4>
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
             <div class="form-group">
               <label for="siteIdDisplay">
                 <i
@@ -1128,34 +1108,6 @@
                 <option value="Fixed" data-i18n="site.typeFixed">Fixed</option>
               </select>
             </div>
-          </div>
-
-          <!-- Location Section -->
-          <div style="margin-bottom: 1.75rem">
-            <div
-              style="
-                padding: 0.5rem 0;
-                border-bottom: 2px solid var(--gray-200);
-                margin-bottom: 1.25rem;
-              "
-            >
-              <h4
-                style="
-                  color: var(--gray-900);
-                  font-size: 1rem;
-                  margin: 0;
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                "
-              >
-                <i
-                  class="fa-solid fa-map"
-                  style="color: var(--warning-color)"
-                ></i>
-                <span data-i18n="site.coordsSection">Coordinates</span>
-              </h4>
-            </div>
             <div class="form-group">
               <label for="siteCoordinates">
                 <i
@@ -1170,20 +1122,9 @@
                 data-i18n-placeholder="site.utmPlaceholder"
                 placeholder="e.g., 31U ES 500000 4500000"
               />
-              <small
-                style="
-                  color: var(--gray-600);
-                  display: block;
-                  margin-top: 0.4rem;
-                "
-              >
-                <i
-                  class="fa-solid fa-question-circle"
-                  style="margin-right: 0.3rem"
-                ></i>
-                <span data-i18n="site.utmHelp"
-                  >Format: Zone Letter + Easting Northing</span
-                >
+              <small style="color: var(--gray-600); display: block; margin-top: 0.4rem;">
+                <i class="fa-solid fa-question-circle" style="margin-right: 0.3rem"></i>
+                <span data-i18n="site.utmHelp">Format: Zone Letter + Easting Northing</span>
               </small>
             </div>
           </div>
@@ -1223,7 +1164,7 @@
 
     <!-- Radio Modal -->
     <div id="radioModal" class="modal hidden">
-      <div class="modal-content modal-lg">
+      <div class="modal-content modal-lg" style="max-width:1050px">
         <div class="modal-header">
           <h3 id="radioModalTitle">
             <i
@@ -1264,9 +1205,9 @@
               <span data-i18n="radio.deviceInfo">Device Information</span>
             </h4>
             <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem"
+              style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem"
             >
-              <div class="form-group" style="grid-column: 1 / -1">
+              <div class="form-group">
                 <label for="radioIdDisplay">
                   <i
                     class="fa-solid fa-fingerprint"
@@ -1391,8 +1332,8 @@
               <div
                 style="
                   display: grid;
-                  grid-template-columns: 1fr 1fr;
-                  gap: 1.25rem;
+                  grid-template-columns: 1fr 1fr 1fr 1fr;
+                  gap: 1rem;
                 "
               >
                 <div class="form-group">
@@ -1415,7 +1356,8 @@
                         showRadioFreqSuggestions(
                           'radioFrequency',
                           'radioFreqSuggestions',
-                        )
+                        );
+                        validateFrequency();
                       "
                       onblur="hideRadioFreqSuggestions('radioFreqSuggestions')"
                       autocomplete="off"
@@ -1540,8 +1482,8 @@
               <div
                 style="
                   display: grid;
-                  grid-template-columns: 1fr 1fr;
-                  gap: 1.25rem;
+                  grid-template-columns: 1fr 1fr 1fr 1fr;
+                  gap: 1rem;
                 "
               >
                 <div class="form-group">
@@ -1564,7 +1506,8 @@
                         showRadioFreqSuggestions(
                           'radioStandbyFrequency',
                           'radioStandbyFreqSuggestions',
-                        )
+                        );
+                        validateStandbyFrequency();
                       "
                       onblur="
                         hideRadioFreqSuggestions('radioStandbyFreqSuggestions')
@@ -1749,39 +1692,40 @@
               Select the device type to add to this site
             </p>
           </div>
-          <div class="form-group">
-            <label for="addRadioDeviceType">
-              <i
-                class="fa-solid fa-layer-group"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="radio.deviceType">Device Type</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <select id="addRadioDeviceType" required>
-              <option value="" data-i18n="select.deviceType">
-                Select device type...
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="addRadioQuantity">
-              <i
-                class="fa-solid fa-hashtag"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="radio.quantity">Quantity</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="number"
-              id="addRadioQuantity"
-              min="1"
-              max="50"
-              value="1"
-              required
-            />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+            <div class="form-group">
+              <label for="addRadioDeviceType">
+                <i
+                  class="fa-solid fa-layer-group"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="radio.deviceType">Device Type</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <select id="addRadioDeviceType" required>
+                <option value="" data-i18n="select.deviceType">
+                  Select device type...
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="addRadioQuantity">
+                <i
+                  class="fa-solid fa-hashtag"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
+                <span data-i18n="radio.quantity">Quantity</span>
+                <span style="color: var(--danger-color)">*</span>
+              </label>
+              <input
+                type="number"
+                id="addRadioQuantity"
+                min="1"
+                max="50"
+                value="1"
+                required
+              />
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -1811,7 +1755,7 @@
 
     <!-- Add Link Modal -->
     <div id="addLinkModal" class="modal hidden">
-      <div class="modal-content">
+      <div class="modal-content modal-lg">
         <div class="modal-header">
           <h3>
             <i
@@ -1839,86 +1783,50 @@
               Create a new link mapping for frequency management
             </p>
           </div>
-          <div class="form-group">
-            <label for="linkName">
-              <i
-                class="fa-solid fa-signature"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.name">Link Name</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="text"
-              id="linkName"
-              data-i18n-placeholder="addLink.namePlaceholder"
-              placeholder="e.g., Primary Network, Backup Link"
-              required
-            />
+          <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+            <div class="form-group">
+              <label for="linkName">
+                <i class="fa-solid fa-signature" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.name">Link Name</span>
+                <span style="color:var(--danger-color)">*</span>
+              </label>
+              <input type="text" id="linkName" data-i18n-placeholder="addLink.namePlaceholder" placeholder="e.g., Primary Network" required />
+            </div>
+            <div class="form-group">
+              <label for="linkFrequency">
+                <i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.frequency">Frequency</span>
+                <span style="color:var(--danger-color)">*</span>
+              </label>
+              <input type="text" id="linkFrequency" data-i18n-placeholder="addLink.freqPlaceholder" placeholder="e.g., 120.5" required
+                oninput="updateLinkBand('linkFrequency', 'linkFrequencyBand'); validateLinkFrequency('linkFrequency', 'linkFrequencyBand', 'linkFrequencyError')" />
+              <div id="linkFrequencyError" class="error-message"></div>
+            </div>
+            <div class="form-group">
+              <label for="linkFrequencyBand">
+                <i class="fa-solid fa-signal" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.band">Frequency Band</span>
+              </label>
+              <input type="text" id="linkFrequencyBand" readonly data-i18n-placeholder="addLink.bandPlaceholder" placeholder="Auto-detected" style="color:var(--gray-500)" />
+            </div>
           </div>
-          <div class="form-group">
-            <label for="linkFrequency">
-              <i
-                class="fa-solid fa-wave-square"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.frequency">Frequency</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="text"
-              id="linkFrequency"
-              data-i18n-placeholder="addLink.freqPlaceholder"
-              placeholder="e.g., 120.5"
-              required
-              oninput="updateLinkBand('linkFrequency', 'linkFrequencyBand')"
-            />
-          </div>
-          <div class="form-group">
-            <label for="linkFrequencyBand">
-              <i
-                class="fa-solid fa-signal"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.band">Frequency Band</span>
-            </label>
-            <input
-              type="text"
-              id="linkFrequencyBand"
-              readonly
-              data-i18n-placeholder="addLink.bandPlaceholder"
-              placeholder="Auto-detected from frequency"
-              style="color: var(--gray-500)"
-            />
-          </div>
-          <div class="form-group">
-            <label for="linkOwner">
-              <i
-                class="fa-solid fa-user"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.owner">Owner</span>
-            </label>
-            <select id="linkOwner">
-              <option value="" data-i18n="select.owner">
-                Select an owner...
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="linkGenericRole">
-              <i
-                class="fa-solid fa-briefcase"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.genericRole">Generic Role</span>
-            </label>
-            <input
-              type="text"
-              id="linkGenericRole"
-              data-i18n-placeholder="links.genericRolePlaceholder"
-              placeholder="e.g., Commander"
-            />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+            <div class="form-group">
+              <label for="linkOwner">
+                <i class="fa-solid fa-user" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.owner">Owner</span>
+              </label>
+              <select id="linkOwner">
+                <option value="" data-i18n="select.owner">Select an owner...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="linkGenericRole">
+                <i class="fa-solid fa-briefcase" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.genericRole">Generic Role</span>
+              </label>
+              <input type="text" id="linkGenericRole" data-i18n-placeholder="links.genericRolePlaceholder" placeholder="e.g., Commander" />
+            </div>
           </div>
           <div class="modal-footer">
             <div></div>
@@ -1947,7 +1855,7 @@
 
     <!-- Edit Link Modal -->
     <div id="editLinkModal" class="modal hidden">
-      <div class="modal-content">
+      <div class="modal-content modal-lg">
         <div class="modal-header">
           <h3>
             <i
@@ -1976,88 +1884,50 @@
               Update the link mapping details
             </p>
           </div>
-          <div class="form-group">
-            <label for="editLinkName">
-              <i
-                class="fa-solid fa-signature"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.name">Link Name</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="text"
-              id="editLinkName"
-              data-i18n-placeholder="addLink.namePlaceholder"
-              placeholder="e.g., Primary Network, Backup Link"
-              required
-            />
+          <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+            <div class="form-group">
+              <label for="editLinkName">
+                <i class="fa-solid fa-signature" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.name">Link Name</span>
+                <span style="color:var(--danger-color)">*</span>
+              </label>
+              <input type="text" id="editLinkName" data-i18n-placeholder="addLink.namePlaceholder" placeholder="e.g., Primary Network" required />
+            </div>
+            <div class="form-group">
+              <label for="editLinkFrequency">
+                <i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.frequency">Frequency</span>
+                <span style="color:var(--danger-color)">*</span>
+              </label>
+              <input type="text" id="editLinkFrequency" data-i18n-placeholder="addLink.freqPlaceholder" placeholder="e.g., 120.5" required
+                oninput="updateLinkBand('editLinkFrequency', 'editLinkFrequencyBand'); validateLinkFrequency('editLinkFrequency', 'editLinkFrequencyBand', 'editLinkFrequencyError');" />
+              <div id="editLinkFrequencyError" class="error-message"></div>
+            </div>
+            <div class="form-group">
+              <label for="editLinkFrequencyBand">
+                <i class="fa-solid fa-signal" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.band">Frequency Band</span>
+              </label>
+              <input type="text" id="editLinkFrequencyBand" readonly data-i18n-placeholder="addLink.bandPlaceholder" placeholder="Auto-detected" style="color:var(--gray-500)" />
+            </div>
           </div>
-          <div class="form-group">
-            <label for="editLinkFrequency">
-              <i
-                class="fa-solid fa-wave-square"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.frequency">Frequency</span>
-              <span style="color: var(--danger-color)">*</span>
-            </label>
-            <input
-              type="text"
-              id="editLinkFrequency"
-              data-i18n-placeholder="addLink.freqPlaceholder"
-              placeholder="e.g., 120.5"
-              required
-              oninput="
-                updateLinkBand('editLinkFrequency', 'editLinkFrequencyBand')
-              "
-            />
-          </div>
-          <div class="form-group">
-            <label for="editLinkFrequencyBand">
-              <i
-                class="fa-solid fa-signal"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.band">Frequency Band</span>
-            </label>
-            <input
-              type="text"
-              id="editLinkFrequencyBand"
-              readonly
-              data-i18n-placeholder="addLink.bandPlaceholder"
-              placeholder="Auto-detected from frequency"
-              style="color: var(--gray-500)"
-            />
-          </div>
-          <div class="form-group">
-            <label for="editLinkOwner">
-              <i
-                class="fa-solid fa-user"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.owner">Owner</span>
-            </label>
-            <select id="editLinkOwner">
-              <option value="" data-i18n="select.owner">
-                Select an owner...
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editLinkGenericRole">
-              <i
-                class="fa-solid fa-briefcase"
-                style="color: var(--primary-color); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="links.col.genericRole">Generic Role</span>
-            </label>
-            <input
-              type="text"
-              id="editLinkGenericRole"
-              data-i18n-placeholder="links.genericRolePlaceholder"
-              placeholder="e.g., Commander"
-            />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+            <div class="form-group">
+              <label for="editLinkOwner">
+                <i class="fa-solid fa-user" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.owner">Owner</span>
+              </label>
+              <select id="editLinkOwner">
+                <option value="" data-i18n="select.owner">Select an owner...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editLinkGenericRole">
+                <i class="fa-solid fa-briefcase" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <span data-i18n="links.col.genericRole">Generic Role</span>
+              </label>
+              <input type="text" id="editLinkGenericRole" data-i18n-placeholder="links.genericRolePlaceholder" placeholder="e.g., Commander" />
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" onclick="deleteLink()">
@@ -2483,6 +2353,7 @@
                       autoFillReqBand();
                       showFreqLinkSuggestions();
                       checkFreqOwnerMismatch();
+                      validateReqFrequency();
                     "
                     onblur="hideFreqLinkSuggestions()"
                     autocomplete="off"
@@ -2557,6 +2428,7 @@
                 </button>
               </div>
             </div>
+            <div id="reqFrequencyError" class="error-message" style="margin-top:0.5rem;"></div>
           </div>
 
           <!-- Planned Requirements List -->

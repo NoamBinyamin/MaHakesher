@@ -60,6 +60,13 @@ function validateInlineFrequency(value, radio) {
     };
   }
 
+  if (!isFreqAlignedToStep(frequency, band)) {
+    return {
+      valid: false,
+      error: t("error.freqNotAligned", { step: limits.step, band }),
+    };
+  }
+
   return { valid: true, value: frequency };
 }
 
@@ -186,15 +193,12 @@ function createEditor(cell, radio, columnIndex) {
       "width: 100%; height: 100%; padding: 4px; font-size: inherit; border: 2px solid var(--primary-color);";
 
     if (config.type === "number") {
-      input.step = "0.025";
-      // Set min/max from device type constraints
       const band = getFrequencyBandForDevice(radio.device_type);
-      if (band) {
-        const limits = getFrequencyBandLimits(band);
-        if (limits) {
-          input.min = limits.min;
-          input.max = limits.max;
-        }
+      const limits = band ? getFrequencyBandLimits(band) : null;
+      input.step = limits?.step ?? 0.025;
+      if (limits) {
+        input.min = limits.min;
+        input.max = limits.max;
       }
     }
   }
@@ -324,7 +328,7 @@ function saveInlineEdit(cell, radioId, columnIndex, input, radio) {
   if (!config) return;
 
   // Check if still the active editor (might have been closed)
-  if (activeInlineEditor && activeInlineEditor.input !== input) return;
+  if (!activeInlineEditor || activeInlineEditor.input !== input) return;
 
   const newValue = input.value;
 

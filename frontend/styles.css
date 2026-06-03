@@ -1,11 +1,11 @@
 /* ==================== CSS Variables & Reset ==================== */
 
 :root {
-  /* Primary Colors - Modern Blue with Purple Accent */
+  /* Primary Colors */
   --primary-color: #2563eb;
   --primary-dark: #1d4ed8;
   --primary-light: #3b82f6;
-  --primary-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --primary-gradient: linear-gradient(155deg, #1d4ed8 0%, #2563eb 100%);
   --primary-glow: rgba(37, 99, 235, 0.15);
 
   /* Success Colors - Modern Green with Glow */
@@ -43,11 +43,11 @@
   /* UI Elements - Enhanced */
   --border-radius: 12px;
   --border-radius-sm: 8px;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --box-shadow: 0 2px 8px rgba(30, 64, 175, 0.07);
+  --box-shadow-sm: 0 1px 3px rgba(30, 64, 175, 0.05);
   --box-shadow-lg:
-    0 12px 24px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.08);
-  --box-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    0 12px 24px rgba(30, 64, 175, 0.1), 0 6px 12px rgba(30, 64, 175, 0.07);
+  --box-shadow-xl: 0 20px 40px rgba(30, 64, 175, 0.13);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-sm: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-lg: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -64,12 +64,13 @@ body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  background-attachment: fixed;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #eef2f7;
   color: var(--gray-900);
   line-height: 1.6;
 }
@@ -702,12 +703,8 @@ html.dark #searchModePill {
 .summary-value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--primary-color);
   margin-bottom: 0.75rem;
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* ── Summary card icon ── */
@@ -739,10 +736,9 @@ html.dark #searchModePill {
 
 .summary-label {
   font-size: 0.85rem;
-  color: var(--gray-600);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
+  color: var(--gray-500);
+  font-weight: 500;
+  letter-spacing: 0.1px;
 }
 
 /* ==================== Buttons ==================== */
@@ -798,7 +794,7 @@ html.dark #searchModePill {
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-secondary {
@@ -825,6 +821,10 @@ html.dark #searchModePill {
   box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
 }
 
+.btn-danger:active {
+  transform: translateY(0) scale(0.97);
+}
+
 .btn-warning {
   background: var(--warning-gradient);
   color: white;
@@ -834,6 +834,10 @@ html.dark #searchModePill {
 .btn-warning:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+}
+
+.btn-warning:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-sm {
@@ -871,6 +875,10 @@ html.dark #searchModePill {
   box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
 }
 
+.btn-success:active {
+  transform: translateY(0) scale(0.97);
+}
+
 .btn-info {
   background: var(--info-gradient);
   color: white;
@@ -880,6 +888,10 @@ html.dark #searchModePill {
 .btn-info:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+}
+
+.btn-info:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-edit:hover {
@@ -918,6 +930,10 @@ html.dark #searchModePill {
 .btn:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 /* ==================== Forms ==================== */
@@ -998,6 +1014,9 @@ html.dark #searchModePill {
   margin-top: 0.35rem;
   font-weight: 500;
   display: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .error-message.show {
@@ -2877,6 +2896,8 @@ html.view-mode:not(.user-role) .missions-actions-cell {
 
 .ownerfreq-band-section {
   margin-bottom: 1.75rem;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .ownerfreq-band-header {
@@ -2884,7 +2905,6 @@ html.view-mode:not(.user-role) .missions-actions-cell {
   align-items: center;
   gap: 0.6rem;
   padding: 0.55rem 0.85rem;
-  border-right: 4px solid var(--primary-color);
   background: var(--gray-100);
   border-radius: 8px 8px 0 0;
   margin-bottom: 0;

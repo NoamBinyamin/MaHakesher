@@ -446,7 +446,9 @@ function openMissionSelectForDevice(radioId, isStandby = false) {
   );
   if (!missionSelect) return;
 
-  const activeMissionNames = window.appState.plannedMissions.map((m) => m.name);
+  const activeMissionNames = (window.appState.plannedMissions || [])
+    .filter((m) => m.status === "active")
+    .map((m) => m.name);
   const allMissionOptions = window.appState.config.missions || [];
 
   const optionsHTML =
@@ -914,6 +916,7 @@ async function allocateMission(missionId) {
   );
   const usedIds = new Set();
   const toFulfill = [];
+  const roleUpdates = [];
 
   for (const req of freshMission.requirements) {
     const match = allocatedRadios.find((r) => {
@@ -922,12 +925,15 @@ async function allocateMission(missionId) {
     });
     if (match) {
       usedIds.add(match.id);
+      if (req.role != null && match.role !== req.role) {
+        roleUpdates.push({ radio: match, role: req.role });
+      }
     } else {
       toFulfill.push(req);
     }
   }
 
-  if (toFulfill.length === 0) {
+  if (toFulfill.length === 0 && roleUpdates.length === 0) {
     showNotification(t("error.missionFulfilled"), "info");
     await _refreshAfterMissionAction();
     return;
@@ -981,6 +987,17 @@ async function allocateMission(missionId) {
         t("notify.missionAllocFailed", { error: error.message }),
         "error",
       );
+    }
+  }
+
+  if (roleUpdates.length > 0) {
+    try {
+      await apiCall("/batch/update_radios", "POST", {
+        updates: roleUpdates.map(({ radio, role }) => ({ ...radio, role })),
+      });
+      showNotification(t("notify.roleUpdated", { count: roleUpdates.length }), "success");
+    } catch (error) {
+      showNotification(t("notify.roleUpdateFailed"), "error");
     }
   }
 
@@ -1974,6 +1991,11 @@ async function handleMissionExcelUpload(input) {
                 max: limits.max,
               }),
             );
+            continue;
+          }
+          if (!isFreqAlignedToStep(frequency, frequencyBand)) {
+            const step = (limits || {}).step;
+            errors.push(t("error.freqNotAlignedRow", { row: i + 1, freq: frequency, step, band: frequencyBand }));
             continue;
           }
         }
