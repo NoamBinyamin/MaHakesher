@@ -1414,3 +1414,4 @@
 {"timestamp": "2026-06-03T12:14:19.481440+00:00", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"standby_frequency": 128.5}, "after": {"standby_frequency": null}}, "changed_by": "נועם"}
 {"timestamp": "2026-06-03T12:14:23.655374+00:00", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"standby_frequency": null}, "after": {"standby_frequency": 128.5}}, "changed_by": "נועם"}
 {"timestamp": "2026-06-03T12:14:25.638899+00:00", "action": "update", "entity_type": "radio", "entity_id": "radio-dfaa46fa", "details": {"before": {"standby_frequency": 128.5}, "after": {"standby_frequency": null}}, "changed_by": "נועם"}
+{"timestamp": "2026-06-04T06:05:09.334713+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}

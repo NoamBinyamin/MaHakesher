@@ -1023,6 +1023,14 @@ html.dark #searchModePill {
   display: block;
 }
 
+.id-display-input {
+  color: var(--gray-500);
+  font-size: 0.85rem;
+}
+.id-display-input:not(:placeholder-shown) {
+  font-family: monospace;
+}
+
 /* Small Toggle Switch */
 .small-toggle {
   position: relative;

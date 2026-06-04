@@ -10,7 +10,10 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -27,7 +30,14 @@
   <body>
     <header class="navbar">
       <div class="navbar-container">
-        <h1 class="navbar-title">📡 מה הקשר?</h1>
+        <h1
+          class="navbar-title"
+          id="appTitle"
+          onclick="_eggClick()"
+          style="cursor: default; user-select: none"
+        >
+          📡 מה הקשר?
+        </h1>
         <div
           class="navbar-info"
           style="display: flex; align-items: center; gap: 1rem"
@@ -40,13 +50,10 @@
           >
             <i class="fa-solid fa-pen-to-square"></i> Edit Mode
           </button>
-          <button
-            id="userInfoBtn"
-            onclick="confirmLogout()"
-          >
+          <button id="userInfoBtn" onclick="confirmLogout()">
             <i class="fa-solid fa-circle-user"></i>
             <span id="userInfoName"></span>
-            <span id="userInfoOwner" style="display:none;"></span>
+            <span id="userInfoOwner" style="display: none"></span>
           </button>
           <button
             id="navPresentationBtn"
@@ -78,21 +85,57 @@
 
       <!-- Tab Navigation -->
       <div class="tabs">
-        <button class="tab-button active" data-tab="overview" data-i18n="tab.overview">Overview</button>
-        <button class="tab-button" data-tab="missions" data-i18n="tab.missions">Missions</button>
-        <button class="tab-button" data-tab="timeline" data-i18n="tab.timeline">Timeline</button>
-        <button class="tab-button" data-tab="links" data-i18n="tab.links">Link Dictionary</button>
-        <button class="tab-button" data-tab="ownerfreqs" data-i18n="tab.ownerfreqs">Owner Frequencies</button>
-        <button class="tab-button" data-tab="search" data-i18n="tab.search">Search</button>
-        <button class="tab-button" data-tab="summary" data-i18n="tab.summary">Summary</button>
-        <button class="tab-button" data-tab="history" data-i18n="tab.history">History</button>
-        <button class="tab-button view-mode-hide" data-tab="preferences" data-i18n="tab.preferences">Preferences</button>
+        <button
+          class="tab-button active"
+          data-tab="overview"
+          data-i18n="tab.overview"
+        >
+          Overview
+        </button>
+        <button class="tab-button" data-tab="missions" data-i18n="tab.missions">
+          Missions
+        </button>
+        <button class="tab-button" data-tab="timeline" data-i18n="tab.timeline">
+          Timeline
+        </button>
+        <button class="tab-button" data-tab="links" data-i18n="tab.links">
+          Link Dictionary
+        </button>
+        <button
+          class="tab-button"
+          data-tab="ownerfreqs"
+          data-i18n="tab.ownerfreqs"
+        >
+          Owner Frequencies
+        </button>
+        <button class="tab-button" data-tab="search" data-i18n="tab.search">
+          Search
+        </button>
+        <button class="tab-button" data-tab="summary" data-i18n="tab.summary">
+          Summary
+        </button>
+        <button class="tab-button" data-tab="history" data-i18n="tab.history">
+          History
+        </button>
+        <button
+          class="tab-button view-mode-hide"
+          data-tab="preferences"
+          data-i18n="tab.preferences"
+        >
+          Preferences
+        </button>
       </div>
 
       <!-- Overview Tab: Unified Table -->
       <div id="overview" class="tab-content active">
         <div class="tab-header">
-          <h2 data-i18n="overview.title"><i class="fa-solid fa-tower-broadcast" style="color:var(--primary-color);margin-left:0.5rem;"></i> Deployment Overview</h2>
+          <h2 data-i18n="overview.title">
+            <i
+              class="fa-solid fa-tower-broadcast"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Deployment Overview
+          </h2>
           <div style="display: flex; gap: 0.75rem; align-items: center">
             <div style="display: flex; gap: 0.5rem">
               <button
@@ -135,9 +178,7 @@
         </div>
 
         <div class="table-responsive">
-          <table
-            class="overview-table"
-          >
+          <table class="overview-table">
             <colgroup>
               <col style="width: 6%" />
               <col style="width: 7%" />
@@ -209,7 +250,13 @@
       <!-- Missions Tab -->
       <div id="missions" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="missions.title"><i class="fa-solid fa-rocket" style="color:var(--primary-color);margin-left:0.5rem;"></i> Missions Management</h2>
+          <h2 data-i18n="missions.title">
+            <i
+              class="fa-solid fa-rocket"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Missions Management
+          </h2>
           <button
             class="btn btn-primary user-edit-allowed"
             onclick="openPlanMissionModal()"
@@ -228,7 +275,13 @@
       <!-- Link Dictionary Tab (NEW) -->
       <div id="links" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="links.title"><i class="fa-solid fa-link" style="color:var(--primary-color);margin-left:0.5rem;"></i> Link Dictionary</h2>
+          <h2 data-i18n="links.title">
+            <i
+              class="fa-solid fa-link"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Link Dictionary
+          </h2>
           <div style="display: flex; gap: 0.75rem; align-items: center">
             <button
               class="btn btn-secondary"
@@ -287,7 +340,13 @@
               id="linkLookupInput"
               placeholder="Search by link name or frequency…"
               data-i18n-placeholder="links.searchPlaceholder"
-              oninput="lookupLink()"
+              oninput="
+                lookupLink();
+                showKeyboardSuggestion(
+                  'linkLookupInput',
+                  'linkKeyboardSuggestion',
+                );
+              "
               style="
                 flex: 1;
                 border: none;
@@ -307,6 +366,20 @@
             </button>
           </div>
           <div
+            id="linkKeyboardSuggestion"
+            style="
+              display: none;
+              align-items: center;
+              gap: 0.6rem;
+              margin-top: 0.4rem;
+              padding: 0.4rem 0.75rem;
+              background: var(--gray-100);
+              border: 1px solid var(--gray-200);
+              border-radius: 6px;
+              flex-wrap: wrap;
+            "
+          ></div>
+          <div
             id="linkLookupResults"
             style="
               display: none;
@@ -318,14 +391,17 @@
         </div>
 
         <div class="table-responsive">
-          <table class="data-table" style="table-layout: fixed; word-break: break-word;">
+          <table
+            class="data-table"
+            style="table-layout: fixed; word-break: break-word"
+          >
             <colgroup>
-              <col style="width: 22%">
-              <col style="width: 9rem">
-              <col style="width: 8rem">
-              <col style="width: 14%">
-              <col style="width: 14%">
-              <col style="width: 7rem">
+              <col style="width: 22%" />
+              <col style="width: 9rem" />
+              <col style="width: 8rem" />
+              <col style="width: 14%" />
+              <col style="width: 14%" />
+              <col style="width: 7rem" />
             </colgroup>
             <thead>
               <tr>
@@ -371,9 +447,15 @@
       <!-- Search Tab -->
       <div id="search" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="search.title"><i class="fa-solid fa-magnifying-glass" style="color:var(--primary-color);margin-left:0.5rem;"></i> Search & Filter</h2>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <div style="display: flex; gap: 0.5rem;">
+          <h2 data-i18n="search.title">
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Search & Filter
+          </h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center">
+            <div style="display: flex; gap: 0.5rem">
               <button
                 id="searchFreqModeBtn"
                 class="btn btn-primary"
@@ -426,9 +508,29 @@
               data-i18n-placeholder="search.placeholder"
               class="search-box"
               style="width: 100%; padding-right: 2.75rem"
-              oninput="performSearch()"
+              oninput="
+                performSearch();
+                showKeyboardSuggestion(
+                  'searchQuery',
+                  'searchKeyboardSuggestion',
+                );
+              "
             />
           </div>
+          <div
+            id="searchKeyboardSuggestion"
+            style="
+              display: none;
+              align-items: center;
+              gap: 0.6rem;
+              margin-top: 0.4rem;
+              padding: 0.4rem 0.75rem;
+              background: var(--gray-100);
+              border: 1px solid var(--gray-200);
+              border-radius: 6px;
+              flex-wrap: wrap;
+            "
+          ></div>
 
           <!-- Filter row -->
           <div
@@ -558,27 +660,99 @@
             </colgroup>
             <thead>
               <tr class="global-header">
-                <th class="col-site" style="text-align: center;" data-i18n="overview.col.site">Site</th>
-                <th class="col-band" style="text-align: center;" data-i18n="overview.col.band">Frequency Band</th>
-                <th class="col-device" style="text-align: center;" data-i18n="overview.col.device">Device Type</th>
-                <th colspan="4" class="state-header" style="text-align: center;" data-i18n="overview.col.current">Current State</th>
-                <th colspan="4" class="state-header" style="text-align: center;" data-i18n="overview.col.standby">Standby State</th>
-                <th class="col-status" style="text-align: center;" data-i18n="overview.col.status">Status</th>
-                <th class="col-notes" style="text-align: center;" data-i18n="overview.col.notes">Notes</th>
-                <th class="col-actions" style="text-align: center;" data-i18n="overview.col.actions">Actions</th>
+                <th
+                  class="col-site"
+                  style="text-align: center"
+                  data-i18n="overview.col.site"
+                >
+                  Site
+                </th>
+                <th
+                  class="col-band"
+                  style="text-align: center"
+                  data-i18n="overview.col.band"
+                >
+                  Frequency Band
+                </th>
+                <th
+                  class="col-device"
+                  style="text-align: center"
+                  data-i18n="overview.col.device"
+                >
+                  Device Type
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  style="text-align: center"
+                  data-i18n="overview.col.current"
+                >
+                  Current State
+                </th>
+                <th
+                  colspan="4"
+                  class="state-header"
+                  style="text-align: center"
+                  data-i18n="overview.col.standby"
+                >
+                  Standby State
+                </th>
+                <th
+                  class="col-status"
+                  style="text-align: center"
+                  data-i18n="overview.col.status"
+                >
+                  Status
+                </th>
+                <th
+                  class="col-notes"
+                  style="text-align: center"
+                  data-i18n="overview.col.notes"
+                >
+                  Notes
+                </th>
+                <th
+                  class="col-actions"
+                  style="text-align: center"
+                  data-i18n="overview.col.actions"
+                >
+                  Actions
+                </th>
               </tr>
               <tr class="sub-header">
                 <th></th>
                 <th></th>
                 <th></th>
-                <th style="text-align: center;" data-i18n="overview.col.frequency">Frequency</th>
-                <th style="text-align: center;" data-i18n="overview.col.owner">Owner</th>
-                <th style="text-align: center;" data-i18n="overview.col.mission">Mission</th>
-                <th style="text-align: center;" data-i18n="overview.col.role">Role</th>
-                <th style="text-align: center;" data-i18n="overview.col.frequency">Frequency</th>
-                <th style="text-align: center;" data-i18n="overview.col.owner">Owner</th>
-                <th style="text-align: center;" data-i18n="overview.col.mission">Mission</th>
-                <th style="text-align: center;" data-i18n="overview.col.role">Role</th>
+                <th
+                  style="text-align: center"
+                  data-i18n="overview.col.frequency"
+                >
+                  Frequency
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.owner">
+                  Owner
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.mission">
+                  Mission
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.role">
+                  Role
+                </th>
+                <th
+                  style="text-align: center"
+                  data-i18n="overview.col.frequency"
+                >
+                  Frequency
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.owner">
+                  Owner
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.mission">
+                  Mission
+                </th>
+                <th style="text-align: center" data-i18n="overview.col.role">
+                  Role
+                </th>
                 <th></th>
                 <th></th>
                 <th class="col-actions"></th>
@@ -600,7 +774,13 @@
             align-items: center;
           "
         >
-          <h2 data-i18n="summary.title"><i class="fa-solid fa-chart-pie" style="color:var(--primary-color);margin-left:0.5rem;"></i> Summary Statistics</h2>
+          <h2 data-i18n="summary.title">
+            <i
+              class="fa-solid fa-chart-pie"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Summary Statistics
+          </h2>
           <div style="display: flex; gap: 0.75rem">
             <button class="btn btn-secondary" onclick="exportData()">
               <i class="fa-solid fa-download"></i>
@@ -624,34 +804,58 @@
         </div>
         <div class="summary-grid">
           <div class="summary-card summary-accent-blue">
-            <div class="summary-card-icon summary-icon-blue"><i class="fa-solid fa-map"></i></div>
+            <div class="summary-card-icon summary-icon-blue">
+              <i class="fa-solid fa-map"></i>
+            </div>
             <div class="summary-value" id="totalSectors">0</div>
-            <div class="summary-label" data-i18n="summary.totalSectors">Total Sectors</div>
+            <div class="summary-label" data-i18n="summary.totalSectors">
+              Total Sectors
+            </div>
           </div>
           <div class="summary-card summary-accent-purple">
-            <div class="summary-card-icon summary-icon-purple"><i class="fa-solid fa-location-dot"></i></div>
+            <div class="summary-card-icon summary-icon-purple">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
             <div class="summary-value" id="totalSites">0</div>
-            <div class="summary-label" data-i18n="summary.totalSites">Total Sites</div>
+            <div class="summary-label" data-i18n="summary.totalSites">
+              Total Sites
+            </div>
           </div>
           <div class="summary-card summary-accent-teal">
-            <div class="summary-card-icon summary-icon-teal"><i class="fa-solid fa-tower-cell"></i></div>
+            <div class="summary-card-icon summary-icon-teal">
+              <i class="fa-solid fa-tower-cell"></i>
+            </div>
             <div class="summary-value" id="totalRadios">0</div>
-            <div class="summary-label" data-i18n="summary.totalRadios">Total Radios</div>
+            <div class="summary-label" data-i18n="summary.totalRadios">
+              Total Radios
+            </div>
           </div>
           <div class="summary-card summary-accent-green">
-            <div class="summary-card-icon summary-icon-green"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="summary-card-icon summary-icon-green">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
             <div class="summary-value" id="usableRadios">0</div>
-            <div class="summary-label" data-i18n="summary.usable">Usable Devices</div>
+            <div class="summary-label" data-i18n="summary.usable">
+              Usable Devices
+            </div>
           </div>
           <div class="summary-card summary-accent-red">
-            <div class="summary-card-icon summary-icon-red"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="summary-card-icon summary-icon-red">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </div>
             <div class="summary-value" id="unusableRadios">0</div>
-            <div class="summary-label" data-i18n="summary.unusable">Unusable Devices</div>
+            <div class="summary-label" data-i18n="summary.unusable">
+              Unusable Devices
+            </div>
           </div>
           <div class="summary-card summary-accent-amber">
-            <div class="summary-card-icon summary-icon-amber"><i class="fa-solid fa-wave-square"></i></div>
+            <div class="summary-card-icon summary-icon-amber">
+              <i class="fa-solid fa-wave-square"></i>
+            </div>
             <div class="summary-value" id="frequencyBands">0</div>
-            <div class="summary-label" data-i18n="summary.activeBands">Active Bands</div>
+            <div class="summary-label" data-i18n="summary.activeBands">
+              Active Bands
+            </div>
           </div>
         </div>
 
@@ -792,7 +996,13 @@
       <!-- History Tab -->
       <div id="history" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="history.title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary-color);margin-left:0.5rem;"></i> History</h2>
+          <h2 data-i18n="history.title">
+            <i
+              class="fa-solid fa-clock-rotate-left"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            History
+          </h2>
           <button
             class="btn btn-secondary"
             onclick="refreshHistory()"
@@ -896,7 +1106,13 @@
       <!-- Timeline Tab -->
       <div id="timeline" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="timeline.title"><i class="fa-solid fa-calendar-days" style="color:var(--primary-color);margin-left:0.5rem;"></i> Mission Timeline</h2>
+          <h2 data-i18n="timeline.title">
+            <i
+              class="fa-solid fa-calendar-days"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Mission Timeline
+          </h2>
         </div>
         <div id="timelineContent">
           <!-- Populated by JavaScript -->
@@ -906,7 +1122,13 @@
       <!-- Owner Frequencies Tab -->
       <div id="ownerfreqs" class="tab-content">
         <div class="tab-header">
-          <h2 data-i18n="ownerfreqs.title"><i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-left:0.5rem;"></i> Owner Frequencies</h2>
+          <h2 data-i18n="ownerfreqs.title">
+            <i
+              class="fa-solid fa-wave-square"
+              style="color: var(--primary-color); margin-left: 0.5rem"
+            ></i>
+            Owner Frequencies
+          </h2>
         </div>
         <div class="missions-container">
           <div id="ownerFreqsContent">
@@ -963,7 +1185,9 @@
               Enter the sector identifier below
             </p>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem"
+          >
             <div class="form-group">
               <label for="sectorIdDisplay">
                 <i
@@ -976,11 +1200,9 @@
                 type="text"
                 id="sectorIdDisplay"
                 readonly
-                style="
-                  color: var(--gray-500);
-                  font-family: monospace;
-                  font-size: 0.85rem;
-                "
+                data-i18n-placeholder="id.autoFilled"
+                placeholder="filled automatically"
+                class="id-display-input"
               />
             </div>
             <div class="form-group">
@@ -1052,7 +1274,14 @@
           <input type="hidden" id="siteId" />
           <input type="hidden" id="sectorId" />
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 1.25rem;
+              margin-bottom: 1.25rem;
+            "
+          >
             <div class="form-group">
               <label for="siteIdDisplay">
                 <i
@@ -1065,11 +1294,9 @@
                 type="text"
                 id="siteIdDisplay"
                 readonly
-                style="
-                  color: var(--gray-500);
-                  font-family: monospace;
-                  font-size: 0.85rem;
-                "
+                data-i18n-placeholder="id.autoFilled"
+                placeholder="filled automatically"
+                class="id-display-input"
               />
             </div>
             <div class="form-group">
@@ -1122,9 +1349,20 @@
                 data-i18n-placeholder="site.utmPlaceholder"
                 placeholder="e.g., 31U ES 500000 4500000"
               />
-              <small style="color: var(--gray-600); display: block; margin-top: 0.4rem;">
-                <i class="fa-solid fa-question-circle" style="margin-right: 0.3rem"></i>
-                <span data-i18n="site.utmHelp">Format: Zone Letter + Easting Northing</span>
+              <small
+                style="
+                  color: var(--gray-600);
+                  display: block;
+                  margin-top: 0.4rem;
+                "
+              >
+                <i
+                  class="fa-solid fa-question-circle"
+                  style="margin-right: 0.3rem"
+                ></i>
+                <span data-i18n="site.utmHelp"
+                  >Format: Zone Letter + Easting Northing</span
+                >
               </small>
             </div>
           </div>
@@ -1164,7 +1402,7 @@
 
     <!-- Radio Modal -->
     <div id="radioModal" class="modal hidden">
-      <div class="modal-content modal-lg" style="max-width:1050px">
+      <div class="modal-content modal-lg" style="max-width: 1050px">
         <div class="modal-header">
           <h3 id="radioModalTitle">
             <i
@@ -1205,7 +1443,11 @@
               <span data-i18n="radio.deviceInfo">Device Information</span>
             </h4>
             <div
-              style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem"
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 1.25rem;
+              "
             >
               <div class="form-group">
                 <label for="radioIdDisplay">
@@ -1219,11 +1461,10 @@
                   type="text"
                   id="radioIdDisplay"
                   readonly
-                  style="
-                    color: var(--gray-500);
-                    font-family: monospace;
-                    font-size: 0.85rem;
-                  "
+                  data-i18n-placeholder="id.autoFilled"
+                  placeholder="filled automatically"
+                  class="id-display-input"
+                  style="color: var(--gray-500); font-size: 0.85rem"
                 />
               </div>
               <div class="form-group">
@@ -1692,7 +1933,9 @@
               Select the device type to add to this site
             </p>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem"
+          >
             <div class="form-group">
               <label for="addRadioDeviceType">
                 <i
@@ -1783,49 +2026,106 @@
               Create a new link mapping for frequency management
             </p>
           </div>
-          <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1.2fr 1fr 1fr;
+              gap: 1.25rem;
+              margin-bottom: 1.25rem;
+            "
+          >
             <div class="form-group">
               <label for="linkName">
-                <i class="fa-solid fa-signature" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-signature"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.name">Link Name</span>
-                <span style="color:var(--danger-color)">*</span>
+                <span style="color: var(--danger-color)">*</span>
               </label>
-              <input type="text" id="linkName" data-i18n-placeholder="addLink.namePlaceholder" placeholder="e.g., Primary Network" required />
+              <input
+                type="text"
+                id="linkName"
+                data-i18n-placeholder="addLink.namePlaceholder"
+                placeholder="e.g., Primary Network"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="linkFrequency">
-                <i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-wave-square"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.frequency">Frequency</span>
-                <span style="color:var(--danger-color)">*</span>
+                <span style="color: var(--danger-color)">*</span>
               </label>
-              <input type="text" id="linkFrequency" data-i18n-placeholder="addLink.freqPlaceholder" placeholder="e.g., 120.5" required
-                oninput="updateLinkBand('linkFrequency', 'linkFrequencyBand'); validateLinkFrequency('linkFrequency', 'linkFrequencyBand', 'linkFrequencyError')" />
+              <input
+                type="text"
+                id="linkFrequency"
+                data-i18n-placeholder="addLink.freqPlaceholder"
+                placeholder="e.g., 120.5"
+                required
+                oninput="
+                  updateLinkBand('linkFrequency', 'linkFrequencyBand');
+                  validateLinkFrequency(
+                    'linkFrequency',
+                    'linkFrequencyBand',
+                    'linkFrequencyError',
+                  );
+                "
+              />
               <div id="linkFrequencyError" class="error-message"></div>
             </div>
             <div class="form-group">
               <label for="linkFrequencyBand">
-                <i class="fa-solid fa-signal" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-signal"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.band">Frequency Band</span>
               </label>
-              <input type="text" id="linkFrequencyBand" readonly data-i18n-placeholder="addLink.bandPlaceholder" placeholder="Auto-detected" style="color:var(--gray-500)" />
+              <input
+                type="text"
+                id="linkFrequencyBand"
+                readonly
+                data-i18n-placeholder="addLink.bandPlaceholder"
+                placeholder="Auto-detected"
+                style="color: var(--gray-500)"
+              />
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem"
+          >
             <div class="form-group">
               <label for="linkOwner">
-                <i class="fa-solid fa-user" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-user"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.owner">Owner</span>
               </label>
               <select id="linkOwner">
-                <option value="" data-i18n="select.owner">Select an owner...</option>
+                <option value="" data-i18n="select.owner">
+                  Select an owner...
+                </option>
               </select>
             </div>
             <div class="form-group">
               <label for="linkGenericRole">
-                <i class="fa-solid fa-briefcase" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-briefcase"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.genericRole">Generic Role</span>
               </label>
-              <input type="text" id="linkGenericRole" data-i18n-placeholder="links.genericRolePlaceholder" placeholder="e.g., Commander" />
+              <input
+                type="text"
+                id="linkGenericRole"
+                data-i18n-placeholder="links.genericRolePlaceholder"
+                placeholder="e.g., Commander"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -1884,49 +2184,106 @@
               Update the link mapping details
             </p>
           </div>
-          <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1.2fr 1fr 1fr;
+              gap: 1.25rem;
+              margin-bottom: 1.25rem;
+            "
+          >
             <div class="form-group">
               <label for="editLinkName">
-                <i class="fa-solid fa-signature" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-signature"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.name">Link Name</span>
-                <span style="color:var(--danger-color)">*</span>
+                <span style="color: var(--danger-color)">*</span>
               </label>
-              <input type="text" id="editLinkName" data-i18n-placeholder="addLink.namePlaceholder" placeholder="e.g., Primary Network" required />
+              <input
+                type="text"
+                id="editLinkName"
+                data-i18n-placeholder="addLink.namePlaceholder"
+                placeholder="e.g., Primary Network"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="editLinkFrequency">
-                <i class="fa-solid fa-wave-square" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-wave-square"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.frequency">Frequency</span>
-                <span style="color:var(--danger-color)">*</span>
+                <span style="color: var(--danger-color)">*</span>
               </label>
-              <input type="text" id="editLinkFrequency" data-i18n-placeholder="addLink.freqPlaceholder" placeholder="e.g., 120.5" required
-                oninput="updateLinkBand('editLinkFrequency', 'editLinkFrequencyBand'); validateLinkFrequency('editLinkFrequency', 'editLinkFrequencyBand', 'editLinkFrequencyError');" />
+              <input
+                type="text"
+                id="editLinkFrequency"
+                data-i18n-placeholder="addLink.freqPlaceholder"
+                placeholder="e.g., 120.5"
+                required
+                oninput="
+                  updateLinkBand('editLinkFrequency', 'editLinkFrequencyBand');
+                  validateLinkFrequency(
+                    'editLinkFrequency',
+                    'editLinkFrequencyBand',
+                    'editLinkFrequencyError',
+                  );
+                "
+              />
               <div id="editLinkFrequencyError" class="error-message"></div>
             </div>
             <div class="form-group">
               <label for="editLinkFrequencyBand">
-                <i class="fa-solid fa-signal" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-signal"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.band">Frequency Band</span>
               </label>
-              <input type="text" id="editLinkFrequencyBand" readonly data-i18n-placeholder="addLink.bandPlaceholder" placeholder="Auto-detected" style="color:var(--gray-500)" />
+              <input
+                type="text"
+                id="editLinkFrequencyBand"
+                readonly
+                data-i18n-placeholder="addLink.bandPlaceholder"
+                placeholder="Auto-detected"
+                style="color: var(--gray-500)"
+              />
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem"
+          >
             <div class="form-group">
               <label for="editLinkOwner">
-                <i class="fa-solid fa-user" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-user"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.owner">Owner</span>
               </label>
               <select id="editLinkOwner">
-                <option value="" data-i18n="select.owner">Select an owner...</option>
+                <option value="" data-i18n="select.owner">
+                  Select an owner...
+                </option>
               </select>
             </div>
             <div class="form-group">
               <label for="editLinkGenericRole">
-                <i class="fa-solid fa-briefcase" style="color:var(--primary-color);margin-right:0.4rem"></i>
+                <i
+                  class="fa-solid fa-briefcase"
+                  style="color: var(--primary-color); margin-right: 0.4rem"
+                ></i>
                 <span data-i18n="links.col.genericRole">Generic Role</span>
               </label>
-              <input type="text" id="editLinkGenericRole" data-i18n-placeholder="links.genericRolePlaceholder" placeholder="e.g., Commander" />
+              <input
+                type="text"
+                id="editLinkGenericRole"
+                data-i18n-placeholder="links.genericRolePlaceholder"
+                placeholder="e.g., Commander"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -2049,7 +2406,10 @@
                 </label>
                 <select
                   id="planMissionOwner"
-                  onchange="updatePlanMissionHeaderColor(); checkFreqOwnerMismatch()"
+                  onchange="
+                    updatePlanMissionHeaderColor();
+                    checkFreqOwnerMismatch();
+                  "
                   required
                 >
                   <option value="" data-i18n="planMission.ownerSelect">
@@ -2073,7 +2433,7 @@
                   type="text"
                   id="missionCreatedAt"
                   readonly
-                  style="color: var(--gray-500);"
+                  style="color: var(--gray-500)"
                 />
               </div>
               <div
@@ -2092,7 +2452,7 @@
                   type="text"
                   id="missionCreatedBy"
                   readonly
-                  style="color: var(--gray-500);"
+                  style="color: var(--gray-500)"
                 />
               </div>
             </div>
@@ -2133,7 +2493,10 @@
                 />
               </div>
             </div>
-            <div id="missionExcelBtns" style="display: flex; gap: 0.75rem; margin-top: 1.25rem">
+            <div
+              id="missionExcelBtns"
+              style="display: flex; gap: 0.75rem; margin-top: 1.25rem"
+            >
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -2227,10 +2590,16 @@
               <div
                 id="freqOwnerWarning"
                 class="freq-owner-warning"
-                style="display:none;"
+                style="display: none"
               >
-                <i class="fa-solid fa-triangle-exclamation" style="flex-shrink:0;"></i>
-                <span data-i18n="planMission.freqOwnerMismatch">Pay attention — the selected frequency belongs to a different owner than this mission</span>
+                <i
+                  class="fa-solid fa-triangle-exclamation"
+                  style="flex-shrink: 0"
+                ></i>
+                <span data-i18n="planMission.freqOwnerMismatch"
+                  >Pay attention — the selected frequency belongs to a different
+                  owner than this mission</span
+                >
               </div>
               <div
                 style="
@@ -2379,7 +2748,10 @@
                 </div>
 
                 <!-- Role -->
-                <div class="form-group" style="margin-bottom: 0; position: relative;">
+                <div
+                  class="form-group"
+                  style="margin-bottom: 0; position: relative"
+                >
                   <label for="reqRole" style="font-size: 0.8rem">
                     <i
                       class="fa-solid fa-briefcase"
@@ -2428,7 +2800,11 @@
                 </button>
               </div>
             </div>
-            <div id="reqFrequencyError" class="error-message" style="margin-top:0.5rem;"></div>
+            <div
+              id="reqFrequencyError"
+              class="error-message"
+              style="margin-top: 0.5rem"
+            ></div>
           </div>
 
           <!-- Planned Requirements List -->
@@ -2512,11 +2888,19 @@
                     font-size: 12px;
                     font-weight: 600;
                     cursor: pointer;
-                    transition: background 0.15s, color 0.15s;
+                    transition:
+                      background 0.15s,
+                      color 0.15s;
                     white-space: nowrap;
                   "
-                  onmouseover="this.style.background='var(--danger-color)';this.style.color='white'"
-                  onmouseout="this.style.background='none';this.style.color='var(--danger-color)'"
+                  onmouseover="
+                    this.style.background = 'var(--danger-color)';
+                    this.style.color = 'white';
+                  "
+                  onmouseout="
+                    this.style.background = 'none';
+                    this.style.color = 'var(--danger-color)';
+                  "
                   data-i18n="planMission.removeAllReqs"
                 >
                   Remove All
@@ -2624,15 +3008,23 @@
       <div class="modal-content" style="max-width: 360px">
         <div class="modal-header">
           <h3>
-            <i class="fa-solid fa-right-to-bracket" style="color:var(--primary-color);margin-right:0.5rem"></i>
+            <i
+              class="fa-solid fa-right-to-bracket"
+              style="color: var(--primary-color); margin-right: 0.5rem"
+            ></i>
             <span data-i18n="login.title">Login</span>
           </h3>
-          <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+          <button class="modal-close" onclick="closeLoginModal()">
+            &times;
+          </button>
         </div>
         <div class="modal-form">
           <div class="form-group">
             <label for="loginUsername">
-              <i class="fa-solid fa-user" style="color:var(--gray-400);margin-right:0.4rem"></i>
+              <i
+                class="fa-solid fa-user"
+                style="color: var(--gray-400); margin-right: 0.4rem"
+              ></i>
               <span data-i18n="login.username">Username</span>
             </label>
             <input
@@ -2641,12 +3033,18 @@
               data-i18n-placeholder="login.usernamePlaceholder"
               placeholder="Username"
               autocomplete="username"
-              onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()"
+              onkeydown="
+                if (event.key === 'Enter')
+                  document.getElementById('loginPassword').focus();
+              "
             />
           </div>
           <div class="form-group">
             <label for="loginPassword">
-              <i class="fa-solid fa-lock" style="color:var(--gray-400);margin-right:0.4rem"></i>
+              <i
+                class="fa-solid fa-lock"
+                style="color: var(--gray-400); margin-right: 0.4rem"
+              ></i>
               <span data-i18n="login.password">Password</span>
             </label>
             <input
@@ -2655,21 +3053,35 @@
               data-i18n-placeholder="login.passwordPlaceholder"
               placeholder="••••••••"
               autocomplete="current-password"
-              onkeydown="if(event.key==='Enter') submitLogin()"
+              onkeydown="if (event.key === 'Enter') submitLogin();"
             />
           </div>
           <p
             id="loginError"
-            style="display:none; color:var(--danger-color); font-size:0.83rem; margin-top:0.5rem;"
+            style="
+              display: none;
+              color: var(--danger-color);
+              font-size: 0.83rem;
+              margin-top: 0.5rem;
+            "
           ></p>
         </div>
         <div class="modal-footer">
           <div></div>
           <div>
-            <button type="button" class="btn btn-secondary" onclick="closeLoginModal()" data-i18n="btn.cancel">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeLoginModal()"
+              data-i18n="btn.cancel"
+            >
               Cancel
             </button>
-            <button type="button" class="btn btn-primary" onclick="submitLogin()">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="submitLogin()"
+            >
               <i class="fa-solid fa-right-to-bracket"></i>
               <span data-i18n="login.submit">Login</span>
             </button>
@@ -2733,28 +3145,40 @@
 
     <!-- Floating freq/link mode pill (overview tab) -->
     <div id="overviewModePill" aria-hidden="true">
-      <button id="overviewModePillFreq" class="btn btn-primary"
+      <button
+        id="overviewModePillFreq"
+        class="btn btn-primary"
         onclick="setOverviewFreqMode('frequency')"
-        data-i18n="overview.modeFrequency">
+        data-i18n="overview.modeFrequency"
+      >
         <i class="fa-solid fa-wave-square"></i> Frequency
       </button>
-      <button id="overviewModePillLink" class="btn btn-secondary"
+      <button
+        id="overviewModePillLink"
+        class="btn btn-secondary"
         onclick="setOverviewFreqMode('link')"
-        data-i18n="overview.modeLink">
+        data-i18n="overview.modeLink"
+      >
         <i class="fa-solid fa-link"></i> Link
       </button>
     </div>
 
     <!-- Floating freq/link mode pill (search tab) -->
     <div id="searchModePill" aria-hidden="true">
-      <button id="searchModePillFreq" class="btn btn-primary"
+      <button
+        id="searchModePillFreq"
+        class="btn btn-primary"
         onclick="setOverviewFreqMode('frequency')"
-        data-i18n="overview.modeFrequency">
+        data-i18n="overview.modeFrequency"
+      >
         <i class="fa-solid fa-wave-square"></i> Frequency
       </button>
-      <button id="searchModePillLink" class="btn btn-secondary"
+      <button
+        id="searchModePillLink"
+        class="btn btn-secondary"
         onclick="setOverviewFreqMode('link')"
-        data-i18n="overview.modeLink">
+        data-i18n="overview.modeLink"
+      >
         <i class="fa-solid fa-link"></i> Link
       </button>
     </div>
@@ -2762,11 +3186,76 @@
     <!-- Presentation Modal -->
     <div id="presentationModal">
       <div class="pres-frame-wrapper">
-        <button class="pres-close" onclick="closePresentationModal()" title="סגור מצגת">
+        <button
+          class="pres-close"
+          onclick="closePresentationModal()"
+          title="סגור מצגת"
+        >
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <iframe id="presentationFrame" src="" title="מצגת מערכת מה הקשר?"></iframe>
+        <iframe
+          id="presentationFrame"
+          src=""
+          title="מצגת מערכת מה הקשר?"
+        ></iframe>
       </div>
     </div>
+    <script>
+      (function () {
+        let _clicks = 0,
+          _timer = null,
+          _typing = false;
+        const ORIGINAL = "📡 מה הקשר?";
+        const SECRET = '📡 פותח ועוצב ע"י נועם בנימין — 2026';
+
+        const _pool = "אבגדהוזחטיכלמנסעפצקרשת!?><[]()/*";
+
+        function typeText(el, text, done) {
+          const chars = [...text]; // handles emoji as single units
+          let resolved = 0,
+            frame = 0;
+          (function tick() {
+            if (resolved >= chars.length) {
+              el.textContent = text;
+              if (done) done();
+              return;
+            }
+            let display = chars.slice(0, resolved).join("");
+            for (let i = resolved; i < chars.length; i++) {
+              const cp = chars[i].codePointAt(0);
+              if (chars[i].trim() === "" || cp > 0x2000) {
+                display += chars[i]; // keep spaces and emoji as-is
+              } else {
+                display += _pool[Math.floor(Math.random() * _pool.length)];
+              }
+            }
+            el.textContent = display;
+            frame++;
+            if (frame % 5 === 0) resolved++;
+            setTimeout(tick, 55 + Math.random() * 30);
+          })();
+        }
+
+        window._eggClick = function () {
+          if (_typing) return;
+          _clicks++;
+          clearTimeout(_timer);
+          _timer = setTimeout(() => {
+            _clicks = 0;
+          }, 600);
+          if (_clicks < 6) return;
+          _clicks = 0;
+          _typing = true;
+          const el = document.getElementById("appTitle");
+          typeText(el, SECRET, () => {
+            setTimeout(() => {
+              typeText(el, ORIGINAL, () => {
+                _typing = false;
+              });
+            }, 4000);
+          });
+        };
+      })();
+    </script>
   </body>
 </html>

@@ -194,6 +194,54 @@ function formatFrequency(freq, bandName) {
 
 window.formatFrequency = formatFrequency;
 
+// ==================== Hebrew Keyboard Layout Fix ====================
+
+const _HE_KEYBOARD_MAP = {
+  a:'ש',b:'נ',c:'ב',d:'ג',e:'ק',f:'כ',g:'ע',h:'י',i:'ן',j:'ח',
+  k:'ל',l:'ך',m:'צ',n:'מ',o:'ם',p:'פ',q:'/',r:'ר',s:'ד',t:'א',
+  u:'ו',v:'ה',w:"'",x:'ס',y:'ט',z:'ז',',':'ת','.':'ץ',';':'ף'
+};
+
+function latinToHebrew(str) {
+  return str.toLowerCase().split('').map(c => _HE_KEYBOARD_MAP[c] ?? c).join('');
+}
+
+function isLatinOnly(str) {
+  return str.length > 1 && /^[a-zA-Z,.; ]+$/.test(str.trim());
+}
+
+function showKeyboardSuggestion(inputId, suggestionId, applyCallback) {
+  const input = document.getElementById(inputId);
+  const box   = document.getElementById(suggestionId);
+  if (!input || !box) return;
+
+  const val = input.value;
+  if (!isLatinOnly(val)) { box.style.display = 'none'; return; }
+
+  const converted = latinToHebrew(val);
+  box.style.display = 'flex';
+  box.innerHTML = `
+    <span style="font-size:0.82rem;color:var(--gray-600);">${t('keyboard.suggestion')} <strong style="color:var(--gray-900);direction:rtl;">${escapeHTML(converted)}</strong></span>
+    <button onclick="applyKeyboardSuggestion('${escapeHTML(inputId)}','${escapeHTML(suggestionId)}')" class="btn btn-sm btn-primary" style="padding:0.15rem 0.6rem;font-size:0.78rem;">${t('keyboard.apply')}</button>
+    <button onclick="document.getElementById('${escapeHTML(suggestionId)}').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:1rem;line-height:1;padding:0 0.2rem;">&times;</button>
+  `;
+  box._applyCallback = applyCallback;
+}
+
+function applyKeyboardSuggestion(inputId, suggestionId) {
+  const input = document.getElementById(inputId);
+  const box   = document.getElementById(suggestionId);
+  if (!input) return;
+  input.value = latinToHebrew(input.value);
+  box.style.display = 'none';
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+window.latinToHebrew = latinToHebrew;
+window.isLatinOnly = isLatinOnly;
+window.showKeyboardSuggestion = showKeyboardSuggestion;
+window.applyKeyboardSuggestion = applyKeyboardSuggestion;
+
 function isFreqAlignedToStep(freq, bandName) {
   if (freq === null || freq === undefined || freq === "") return true;
   const num = Number(freq);

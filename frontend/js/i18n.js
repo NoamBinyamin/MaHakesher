@@ -671,6 +671,7 @@ const TRANSLATIONS = {
 
     // ── Link Dictionary extra ─────────────────────────────────
     "links.noMatches": "No matches found.",
+    "links.results": "{count} results",
     "links.edit": "Edit",
 
     // ── Owner Frequencies tab ─────────────────────────────────
@@ -716,6 +717,9 @@ const TRANSLATIONS = {
 
     // ── Validators ────────────────────────────────────────────
     "validator.validRange": "Valid range: {min} – {max}",
+    "keyboard.suggestion": "Did you mean:",
+    "id.autoFilled": "filled automatically",
+    "keyboard.apply": "Search in Hebrew",
     "validator.step": "Step: {step}",
     "inline.freqConflict": "Frequency {frequency} already in use by: {types}",
     "inline.invalidNumber": "Invalid number",
@@ -1444,6 +1448,7 @@ const TRANSLATIONS = {
 
     // ── Link Dictionary extra ─────────────────────────────────
     "links.noMatches": "לא נמצאו התאמות",
+    "links.results": "{count} תוצאות",
     "links.edit": "עריכה",
 
     // ── Owner Frequencies tab ─────────────────────────────────
@@ -1489,6 +1494,9 @@ const TRANSLATIONS = {
 
     // ── Validators ────────────────────────────────────────────
     "validator.validRange": "תחום תדר אפשרי: {min} – {max}",
+    "keyboard.suggestion": "האם התכוונת ל:",
+    "id.autoFilled": "נוצר אוטומטית",
+    "keyboard.apply": "חפש בעברית",
     "validator.step": "צעד: {step}",
     "inline.freqConflict": "תדר {frequency} כבר בשימוש על ידי: {types}",
     "inline.invalidNumber": "מספר לא תקין",

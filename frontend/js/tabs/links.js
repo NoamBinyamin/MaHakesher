@@ -138,7 +138,7 @@ function lookupLink() {
 
   resultsEl.innerHTML = `
     <p style="margin: 0 0 0.6rem 0; font-size: 0.8rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px;">
-      ${matches.length} result${matches.length !== 1 ? "s" : ""}
+      ${t("links.results", { count: matches.length })}
     </p>
     ${items}
   `;
@@ -147,6 +147,8 @@ function lookupLink() {
 function clearLinkLookup() {
   document.getElementById("linkLookupInput").value = "";
   document.getElementById("linkLookupResults").style.display = "none";
+  const sug = document.getElementById("linkKeyboardSuggestion");
+  if (sug) sug.style.display = "none";
   _linkFilter = null;
   renderLinksTab();
 }

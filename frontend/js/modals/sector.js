@@ -17,6 +17,7 @@ function openSectorModal(sectorId) {
 
 function openAddSectorModal() {
   document.getElementById("sectorId").value = "";
+  document.getElementById("sectorIdDisplay").value = "";
   document.getElementById("sectorName").value = "";
   document.getElementById("sectorModalTitle").textContent =
     t("sector.addTitle");

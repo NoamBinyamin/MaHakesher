@@ -81,6 +81,7 @@ async function deleteSite() {
 function openAddSiteModalForSector(sectorId) {
   document.getElementById("sectorId").value = sectorId;
   document.getElementById("siteId").value = "";
+  document.getElementById("siteIdDisplay").value = "";
   document.getElementById("siteName").value = "";
   document.getElementById("siteCoordinates").value = "";
   document.getElementById("siteType").value = "Fixed";
