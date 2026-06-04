@@ -20,7 +20,11 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\User\\\\Desktop\\\\Noam\\\\MaHakesher\" -Force | Select-Object Name, Mode, @{Name=\"Size\";Expression={$_.Length}} | Format-Table -AutoSize)",
       "Bash(Select-Object FullName)",
       "Bash(python3 -c ' *)",
-      "PowerShell(head -100)"
+      "PowerShell(head -100)",
+      "Bash(dir)",
+      "Bash(py --version)",
+      "Bash(python server.py)",
+      "Bash(curl -s http://localhost:8000/)"
     ]
   }
 }

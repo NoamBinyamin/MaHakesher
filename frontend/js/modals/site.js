@@ -10,17 +10,11 @@ function openSiteModal(siteId) {
   document.getElementById("siteType").value = site.site_type;
   document.getElementById("siteModalTitle").textContent = t("site.editTitle");
   document.getElementById("deleteSiteBtn").style.display = "block";
-  document.getElementById("siteModal").classList.remove("hidden");
-  watchModalSaveBtn("siteModal");
-  checkModalSaveBtn("siteModal");
-  disableBodyScroll();
+  openModal("siteModal");
 }
 
 function closeSiteModal() {
-  if (!confirmCloseModal("siteModal")) return;
-  markModalClean("siteModal");
-  document.getElementById("siteModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("siteModal");
 }
 
 async function saveSite() {
@@ -87,10 +81,7 @@ function openAddSiteModalForSector(sectorId) {
   document.getElementById("siteType").value = "Fixed";
   document.getElementById("siteModalTitle").textContent = t("site.addTitle");
   document.getElementById("deleteSiteBtn").style.display = "none";
-  document.getElementById("siteModal").classList.remove("hidden");
-  watchModalSaveBtn("siteModal");
-  checkModalSaveBtn("siteModal");
-  disableBodyScroll();
+  openModal("siteModal");
 }
 
 // Export for inline onclick handlers

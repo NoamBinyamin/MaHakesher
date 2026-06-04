@@ -156,6 +156,27 @@ function enableBodyScroll() {
 window.disableBodyScroll = disableBodyScroll;
 window.enableBodyScroll = enableBodyScroll;
 
+function openModal(modalId, checkSaveBtn = true) {
+  const el = document.getElementById(modalId);
+  if (!el) return;
+  el.classList.remove("hidden");
+  watchModalSaveBtn(modalId);
+  if (checkSaveBtn) checkModalSaveBtn(modalId);
+  disableBodyScroll();
+}
+
+function closeModal(modalId, checkDirty = true) {
+  if (checkDirty) {
+    if (!window.confirmCloseModal(modalId)) return;
+    window.markModalClean(modalId);
+  }
+  document.getElementById(modalId).classList.add("hidden");
+  enableBodyScroll();
+}
+
+window.openModal = openModal;
+window.closeModal = closeModal;
+
 // ==================== Color Utilities ====================
 
 // Returns a dark or light text color that contrasts well against a hex background.

@@ -5,35 +5,24 @@ function openSectorModal(sectorId) {
   document.getElementById("sectorId").value = sector.id;
   document.getElementById("sectorIdDisplay").value = sector.id;
   document.getElementById("sectorName").value = sector.name;
-  document.getElementById("sectorModalTitle").textContent =
-    t("sector.editTitle");
+  document.getElementById("sectorModalTitle").textContent = t("sector.editTitle");
   const deleteBtn = document.querySelector("#sectorModal .btn-danger");
   if (deleteBtn) deleteBtn.style.display = "block";
-  document.getElementById("sectorModal").classList.remove("hidden");
-  watchModalSaveBtn("sectorModal");
-  checkModalSaveBtn("sectorModal");
-  disableBodyScroll();
+  openModal("sectorModal");
 }
 
 function openAddSectorModal() {
   document.getElementById("sectorId").value = "";
   document.getElementById("sectorIdDisplay").value = "";
   document.getElementById("sectorName").value = "";
-  document.getElementById("sectorModalTitle").textContent =
-    t("sector.addTitle");
+  document.getElementById("sectorModalTitle").textContent = t("sector.addTitle");
   const deleteBtn = document.querySelector("#sectorModal .btn-danger");
   if (deleteBtn) deleteBtn.style.display = "none";
-  document.getElementById("sectorModal").classList.remove("hidden");
-  watchModalSaveBtn("sectorModal");
-  checkModalSaveBtn("sectorModal");
-  disableBodyScroll();
+  openModal("sectorModal");
 }
 
 function closeSectorModal() {
-  if (!confirmCloseModal("sectorModal")) return;
-  markModalClean("sectorModal");
-  document.getElementById("sectorModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("sectorModal");
 }
 
 async function saveSector() {

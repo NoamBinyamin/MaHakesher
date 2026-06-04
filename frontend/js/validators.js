@@ -1,5 +1,29 @@
 // ==================== Frequency Validation ====================
 
+// Core validator: applies range + step checks to a parsed frequency value.
+// Returns true if valid, false if not (and updates the UI accordingly).
+function _applyFreqValidation(frequency, band, freqInput, errorDiv) {
+  const limits = getFrequencyBandLimits(band);
+  if (!limits) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+  const inRange = frequency >= limits.min && frequency <= limits.max;
+  const alignedToStep = isFreqAlignedToStep(frequency, band);
+  if (inRange && alignedToStep) {
+    errorDiv.classList.remove("show");
+    freqInput.classList.remove("invalid");
+    return true;
+  }
+  errorDiv.textContent = !inRange
+    ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
+    : t("error.freqNotAligned", { step: limits.step, band });
+  errorDiv.classList.add("show");
+  freqInput.classList.add("invalid");
+  return false;
+}
+
 function updateFrequencyBandDisplay() {
   const deviceType = document.getElementById("radioDeviceType").value;
   const bandInput = document.getElementById("radioFrequencyBand");
@@ -37,9 +61,9 @@ function updateFrequencyBandDisplay() {
 function validateFrequency() {
   const deviceType = document.getElementById("radioDeviceType").value;
   const band = getFrequencyBandForDevice(deviceType);
-  const frequency = parseFloat(document.getElementById("radioFrequency").value);
   const frequencyInput = document.getElementById("radioFrequency");
   const errorDiv = document.getElementById("frequencyError");
+  const frequency = parseFloat(frequencyInput.value);
 
   if (!deviceType || !frequency) {
     errorDiv.classList.remove("show");
@@ -47,65 +71,21 @@ function validateFrequency() {
     return true;
   }
 
-  const limits = getFrequencyBandLimits(band);
-  if (!limits) {
-    errorDiv.classList.remove("show");
-    frequencyInput.classList.remove("invalid");
-    return true;
-  }
-  const inRange = frequency >= limits.min && frequency <= limits.max;
-  const alignedToStep = isFreqAlignedToStep(frequency, band);
-
-  if (inRange && alignedToStep) {
-    errorDiv.classList.remove("show");
-    frequencyInput.classList.remove("invalid");
-    return true;
-  } else {
-    errorDiv.textContent = !inRange
-      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
-      : t("error.freqNotAligned", { step: limits.step, band });
-    errorDiv.classList.add("show");
-    frequencyInput.classList.add("invalid");
-    return false;
-  }
+  return _applyFreqValidation(frequency, band, frequencyInput, errorDiv);
 }
 
 function validateStandbyFrequency() {
-  const standbyFreqValue = document.getElementById(
-    "radioStandbyFrequency",
-  ).value;
-  if (!standbyFreqValue) {
-    document.getElementById("standbyFrequencyError").classList.remove("show");
-    return true;
-  }
-
-  const deviceType = document.getElementById("radioDeviceType").value;
-  const band = getFrequencyBandForDevice(deviceType);
-  const frequency = parseFloat(standbyFreqValue);
   const frequencyInput = document.getElementById("radioStandbyFrequency");
   const errorDiv = document.getElementById("standbyFrequencyError");
-
-  const limits = getFrequencyBandLimits(band);
-  if (!limits) {
+  if (!frequencyInput.value) {
     errorDiv.classList.remove("show");
-    frequencyInput.classList.remove("invalid");
     return true;
   }
-  const inRange = frequency >= limits.min && frequency <= limits.max;
-  const alignedToStep = isFreqAlignedToStep(frequency, band);
 
-  if (inRange && alignedToStep) {
-    errorDiv.classList.remove("show");
-    frequencyInput.classList.remove("invalid");
-    return true;
-  } else {
-    errorDiv.textContent = !inRange
-      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
-      : t("error.freqNotAligned", { step: limits.step, band });
-    errorDiv.classList.add("show");
-    frequencyInput.classList.add("invalid");
-    return false;
-  }
+  const band = getFrequencyBandForDevice(
+    document.getElementById("radioDeviceType").value,
+  );
+  return _applyFreqValidation(parseFloat(frequencyInput.value), band, frequencyInput, errorDiv);
 }
 
 function validateLinkFrequency(freqInputId, bandInputId, errorDivId) {
@@ -122,28 +102,7 @@ function validateLinkFrequency(freqInputId, bandInputId, errorDivId) {
     return true;
   }
 
-  const limits = getFrequencyBandLimits(band);
-  if (!limits) {
-    errorDiv.classList.remove("show");
-    freqInput.classList.remove("invalid");
-    return true;
-  }
-
-  const inRange = frequency >= limits.min && frequency <= limits.max;
-  const alignedToStep = isFreqAlignedToStep(frequency, band);
-
-  if (inRange && alignedToStep) {
-    errorDiv.classList.remove("show");
-    freqInput.classList.remove("invalid");
-    return true;
-  } else {
-    errorDiv.textContent = !inRange
-      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
-      : t("error.freqNotAligned", { step: limits.step, band });
-    errorDiv.classList.add("show");
-    freqInput.classList.add("invalid");
-    return false;
-  }
+  return _applyFreqValidation(frequency, band, freqInput, errorDiv);
 }
 
 function validateReqFrequency() {
@@ -160,28 +119,7 @@ function validateReqFrequency() {
     return true;
   }
 
-  const limits = getFrequencyBandLimits(band);
-  if (!limits) {
-    errorDiv.classList.remove("show");
-    freqInput.classList.remove("invalid");
-    return true;
-  }
-
-  const inRange = frequency >= limits.min && frequency <= limits.max;
-  const alignedToStep = isFreqAlignedToStep(frequency, band);
-
-  if (inRange && alignedToStep) {
-    errorDiv.classList.remove("show");
-    freqInput.classList.remove("invalid");
-    return true;
-  } else {
-    errorDiv.textContent = !inRange
-      ? t("error.freqOutOfRange", { min: limits.min, max: limits.max, band })
-      : t("error.freqNotAligned", { step: limits.step, band });
-    errorDiv.classList.add("show");
-    freqInput.classList.add("invalid");
-    return false;
-  }
+  return _applyFreqValidation(frequency, band, freqInput, errorDiv);
 }
 
 // Export for inline onclick handlers

@@ -13,15 +13,11 @@ function openAddLinkModal() {
   document.getElementById("linkOwner").value = "";
   document.getElementById("linkGenericRole").value = "";
   if (window.populateSelects) window.populateSelects();
-  document.getElementById("addLinkModal").classList.remove("hidden");
-  watchModalSaveBtn("addLinkModal");
-  checkModalSaveBtn("addLinkModal");
-  disableBodyScroll();
+  openModal("addLinkModal");
 }
 
 function closeAddLinkModal() {
-  document.getElementById("addLinkModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("addLinkModal", false);
 }
 
 async function saveNewLink() {
@@ -92,15 +88,11 @@ function openEditLinkModal(linkId) {
   document.getElementById("editLinkOwner").value = link.owner || "";
   document.getElementById("editLinkGenericRole").value =
     link.generic_role || "";
-  document.getElementById("editLinkModal").classList.remove("hidden");
-  watchModalSaveBtn("editLinkModal");
-  checkModalSaveBtn("editLinkModal");
-  disableBodyScroll();
+  openModal("editLinkModal");
 }
 
 function closeEditLinkModal() {
-  document.getElementById("editLinkModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("editLinkModal", false);
 }
 
 async function saveEditLink() {

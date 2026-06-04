@@ -624,10 +624,7 @@ async function _reloadConfig() {
 }
 
 function _fullRefresh() {
-  renderPreferencesTab();
-  if (window.renderOverview) renderOverview();
-  if (window.renderMissionsTab) renderMissionsTab();
-  if (window.renderLinksTab) renderLinksTab();
+  window.refreshAllData().catch(() => {});
 }
 
 // ── Band hover tooltip ───────────────────────────────────────────────────────

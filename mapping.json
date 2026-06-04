@@ -13,7 +13,8 @@
       "link_name": "מקל",
       "frequency": 132,
       "frequency_band": "HVHF",
-      "owner": "בעלים שלא מסגיר"
+      "owner": "בעלים שלא מסגיר",
+      "generic_role": "יחידה מסוימת"
     },
     {
       "id": "link-18289fb0",

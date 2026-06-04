@@ -299,13 +299,7 @@ function openPlanMissionModal() {
   updatePlanMissionHeaderColor();
   _resetReqFormBox();
 
-  const modal = document.getElementById("planMissionModal");
-  if (modal) {
-    modal.classList.remove("hidden");
-    watchModalSaveBtn("planMissionModal");
-    checkModalSaveBtn("planMissionModal");
-    disableBodyScroll();
-  }
+  openModal("planMissionModal");
 }
 
 function addMissionRequirement() {

@@ -115,16 +115,11 @@ function openRadioModal(radioId) {
   missionSelect.addEventListener("change", _missionChangeHandler);
   standbyMissionSelect.addEventListener("change", _standbyMissionChangeHandler);
 
-  document.getElementById("radioModal").classList.remove("hidden");
-  watchModalSaveBtn("radioModal");
-  disableBodyScroll();
+  openModal("radioModal", false);
 }
 
 function closeRadioModal() {
-  if (!confirmCloseModal("radioModal")) return;
-  markModalClean("radioModal");
-  document.getElementById("radioModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("radioModal");
 }
 
 async function saveRadio() {
@@ -211,15 +206,11 @@ async function deleteRadio() {
 
 function openAddRadioModal() {
   document.getElementById("addRadioForm").reset();
-  document.getElementById("addRadioModal").classList.remove("hidden");
-  watchModalSaveBtn("addRadioModal");
-  checkModalSaveBtn("addRadioModal");
-  disableBodyScroll();
+  openModal("addRadioModal");
 }
 
 function closeAddRadioModal() {
-  document.getElementById("addRadioModal").classList.add("hidden");
-  enableBodyScroll();
+  closeModal("addRadioModal", false);
 }
 
 async function saveNewRadio() {

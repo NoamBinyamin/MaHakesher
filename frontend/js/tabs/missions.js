@@ -8,112 +8,6 @@ function markMissionsForAnimation() {
 }
 window.markMissionsForAnimation = markMissionsForAnimation;
 
-// ----- Helper: Check if a radio satisfies a mission requirement -----
-function radioSatisfiesRequirement(radio, mission, requirement) {
-  // Check frequency band match
-  const radioBand =
-    radio.frequency_band || getFrequencyBandForDevice(radio.device_type);
-  if (radioBand !== requirement.frequencyBand) return false;
-
-  // Check sector match (if requirement specifies a sector)
-  if (requirement.sectorId) {
-    const site = window.appState.sites.find((s) => s.id === radio.site_id);
-    if (!site || site.sector_id !== requirement.sectorId) return false;
-  }
-
-  // Check site match (if requirement specifies a site)
-  if (requirement.siteId && radio.site_id !== requirement.siteId) return false;
-
-  // Check frequency match (if requirement specifies a frequency)
-  if (requirement.frequency && radio.frequency) {
-    if (Math.abs(radio.frequency - requirement.frequency) > 0.01) return false;
-  }
-
-  return true;
-}
-
-// ----- Helper: Check if a radio is an allocated device for a mission -----
-function isAllocatedToMission(radio, mission) {
-  // Must have the mission name
-  if (radio.mission_name !== mission.name) return false;
-  // Must be usable
-  if (radio.status !== "Usable") return false;
-
-  // Must satisfy ALL requirements: band, location (site/sector), AND frequency
-  for (const req of mission.requirements || []) {
-    // Check frequency band match
-    const radioBand =
-      radio.frequency_band || getFrequencyBandForDevice(radio.device_type);
-    if (radioBand !== req.frequencyBand) continue;
-
-    // Check location match (sector or site)
-    if (req.sectorId) {
-      const site = window.appState.sites.find((s) => s.id === radio.site_id);
-      if (!site || site.sector_id !== req.sectorId) continue;
-    }
-    if (req.siteId && radio.site_id !== req.siteId) continue;
-
-    // Check frequency match (exact frequency required)
-    if (req.frequency && radio.frequency) {
-      if (Math.abs(radio.frequency - req.frequency) > 0.01) continue;
-    } else {
-      // If requirement has no frequency, it must not have a frequency set
-      if (radio.frequency) continue;
-    }
-
-    // All checks passed for this requirement
-    return true;
-  }
-  return false;
-}
-
-// ----- Helper: Check if a radio is an extra device for a mission -----
-function isExtraDeviceForMission(radio, mission) {
-  // Has this mission name but doesn't satisfy ALL requirements
-  if (radio.mission_name !== mission.name) return false;
-  if (radio.status !== "Usable") return false;
-  // Extra = has mission name, is usable, but NOT allocated
-  return !isAllocatedToMission(radio, mission);
-}
-
-// ----- Helper: Check if a radio is available for mission assignment -----
-function isAvailableForMission(radio) {
-  // Must be usable
-  if (radio.status !== "Usable") return false;
-  // Must not have any mission assignment
-  if (radio.mission_name && radio.mission_name !== "Routine") return false;
-  // Must not have owner
-  if (radio.owner) return false;
-  // Must not have frequency
-  if (radio.frequency) return false;
-  return true;
-}
-
-// ----- Strict helper: ALL current-state fields must be completely empty -----
-// Used by Activate Standby to avoid touching any device that has ANY data.
-function _currentStateIsEmpty(radio) {
-  if (radio.status !== "Usable") return false;
-  if (radio.mission_name) return false; // any value including "Routine"
-  if (radio.owner) return false;
-  if (radio.role) return false;
-  if (radio.frequency != null && radio.frequency !== 0) return false;
-  return true;
-}
-
-// ----- Helper: Check if a radio is available for standby mission assignment -----
-function isAvailableForStandbyMission(radio) {
-  // Must be usable
-  if (radio.status !== "Usable") return false;
-  // Must not have any standby mission assignment
-  if (radio.standby_mission && radio.standby_mission !== "Routine")
-    return false;
-  // Must not have standby owner
-  if (radio.standby_owner) return false;
-  // Must not have standby frequency
-  if (radio.standby_frequency) return false;
-  return true;
-}
-
 function _missionProgressCell(count, total, colorVar) {
   if (total === 0) return `<td style="color:var(--gray-400)">-</td>`;
   const capped = Math.min(count, total);
@@ -157,22 +51,13 @@ function _buildMissionRow(mission, actions) {
     ? `border-right: 4px solid ${ownerColor};`
     : "";
 
-  const allocatedCell = _missionProgressCell(
-    allocatedDevices,
-    reqCount,
-    "var(--success-color)",
-  );
-  const standbyCell = _missionProgressCell(
-    standbyDevices,
-    reqCount,
-    "var(--warning-color)",
-  );
+  const allocatedCell = _missionProgressCell(allocatedDevices, reqCount, "var(--success-color)");
+  const standbyCell = _missionProgressCell(standbyDevices, reqCount, "var(--warning-color)");
   const extraCell =
     extraDevices > 0
       ? `<td><span class="mission-extra-badge">+${extraDevices}</span></td>`
       : `<td style="color:var(--gray-400)">-</td>`;
 
-  const isFullyAllocated = reqCount > 0 && allocatedDevices >= reqCount;
   const row = document.createElement("tr");
   if (isOverdue) row.style.backgroundColor = "rgba(239,68,68,0.06)";
   const _mCreatedBy = mission.created_by
@@ -185,7 +70,7 @@ function _buildMissionRow(mission, actions) {
     ${allocatedCell}
     ${standbyCell}
     ${extraCell}
-    <td class="missions-actions-cell">${actions}</td>
+    <td class="missions-actions-cell"><div>${actions}</div></td>
   `;
   return row;
 }
@@ -261,8 +146,6 @@ function renderMissionsTab() {
   container.innerHTML = "";
 
   // Suppress progress-bar animations when data hasn't changed.
-  // When animating: remove the lock, then re-add it after all animations finish
-  // so tab switches don't restart them (CSS animations replay on display:none→block).
   if (_missionsAnimatePending) {
     container.classList.remove("missions-no-anim");
     _missionsAnimatePending = false;
@@ -310,14 +193,12 @@ function renderMissionsTab() {
     planned.forEach((m) => {
       const reqCount = m.requirements ? m.requirements.length : 0;
       const ownerColor = m.owner ? getOwnerColor(m.owner) : null;
-      const borderStyle = ownerColor
-        ? `border-right:4px solid ${ownerColor};`
-        : "";
+      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
       const row = document.createElement("tr");
       const isOwnMission = isAdminRole() || m.owner === getCurrentUserOwner();
       const plannedActions = isAdminRole()
         ? `<button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-           <button class="mission-btn admin-only" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.finishPlanning"))}" onclick="finishMissionPlanning('${m.id}')"><i class="fa-solid fa-check"></i></button>
+           <button class="mission-btn" style="background:var(--success-color);" data-tooltip="${escapeHTML(t("missions.btn.finishPlanning"))}" onclick="finishMissionPlanning('${m.id}')"><i class="fa-solid fa-check"></i></button>
            <button class="mission-btn btn-secondary" data-tooltip="${escapeHTML(t("missions.btn.archive"))}" onclick="archiveMission('${m.id}')"><i class="fa-solid fa-box-archive"></i></button>`
         : isOwnMission
           ? `<button class="mission-btn btn-primary" data-tooltip="${escapeHTML(t("missions.btn.editMission"))}" onclick="editMission('${m.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -336,7 +217,7 @@ function renderMissionsTab() {
     container.appendChild(plannedTable);
   }
 
-  // ----- Active Missions — admin only -----
+  // ----- Active Missions -----
   _appendMissionSection(
     container,
     "missions.activeMissions",
@@ -394,9 +275,7 @@ function renderMissionsTab() {
     archived.forEach((mission) => {
       const reqCount = mission.requirements ? mission.requirements.length : 0;
       const ownerColor = mission.owner ? getOwnerColor(mission.owner) : null;
-      const borderStyle = ownerColor
-        ? `border-right:4px solid ${ownerColor};`
-        : "";
+      const borderStyle = ownerColor ? `border-right:4px solid ${ownerColor};` : "";
       const row = document.createElement("tr");
       const _archCreatedBy = mission.created_by
         ? `<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.65rem;margin-left:0.25rem;"></i>${escapeHTML(t("planMission.createdBy"))} ${escapeHTML(mission.created_by)}</div>`
@@ -417,1111 +296,6 @@ function renderMissionsTab() {
       tbody.appendChild(row);
     });
     container.appendChild(table);
-  }
-}
-
-// ----- Helper: Check if a device matches a band requirement -----
-function deviceMatchesBand(device, frequencyBand) {
-  const deviceBand =
-    device.frequency_band || getFrequencyBandForDevice(device.device_type);
-  return deviceBand === frequencyBand;
-}
-
-// ----- Shared post-action refresh -----
-// Every mission action that mutates server state ends with this sequence.
-async function _refreshAfterMissionAction() {
-  await loadAllData();
-  await loadConfiguration();
-  populateSelects();
-  renderMissionsTab();
-  renderOverview();
-}
-
-// ----- Mission Actions -----
-
-function openMissionSelectForDevice(radioId, isStandby = false) {
-  // Populate mission dropdown with only active missions
-  const missionSelect = document.getElementById(
-    isStandby ? "radioStandbyMission" : "radioMission",
-  );
-  if (!missionSelect) return;
-
-  const activeMissionNames = (window.appState.plannedMissions || [])
-    .filter((m) => m.status === "active")
-    .map((m) => m.name);
-  const allMissionOptions = window.appState.config.missions || [];
-
-  const optionsHTML =
-    '<option value="">No Mission</option>' +
-    allMissionOptions
-      .map((m) => {
-        const isActive = activeMissionNames.includes(m);
-        return `<option value="${m}" ${!isActive ? "disabled" : ""}>${m}${!isActive ? " (Archived)" : ""}</option>`;
-      })
-      .join("");
-
-  missionSelect.innerHTML = optionsHTML;
-}
-
-async function startMission(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-
-  if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error");
-    return;
-  }
-
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  // Get devices already allocated (satisfying requirements)
-  const allocatedRadios = window.appState.radios.filter((r) =>
-    isAllocatedToMission(r, mission),
-  );
-  const allocatedRadioIds = new Set(allocatedRadios.map((r) => r.id));
-
-  // Track which allocated devices are being "used" for which requirement
-  const usedAllocatedIds = new Set();
-
-  // Build list of requirements that still need allocation
-  const requirementsToFulfill = [];
-  const roleUpdates = [];
-
-  for (const req of mission.requirements) {
-    const band = req.frequencyBand;
-
-    // Check if there's an already-allocated device that could satisfy this requirement
-    const matchingAllocated = allocatedRadios.find((r) => {
-      if (usedAllocatedIds.has(r.id)) return false;
-      if (!radioSatisfiesRequirement(r, mission, req)) return false;
-      return true;
-    });
-
-    if (matchingAllocated) {
-      usedAllocatedIds.add(matchingAllocated.id);
-      // If the requirement's role changed, queue an update
-      if (req.role != null && matchingAllocated.role !== req.role) {
-        roleUpdates.push({ radio: matchingAllocated, role: req.role });
-      }
-    } else {
-      requirementsToFulfill.push(req);
-    }
-  }
-
-  if (requirementsToFulfill.length === 0 && roleUpdates.length === 0) {
-    // All requirements already satisfied — still activate the mission status
-    try {
-      await apiCall(`/planned_missions/${missionId}/activate`, "POST");
-    } catch (_) {}
-    await _refreshAfterMissionAction();
-    showNotification(t("error.missionFulfilled"), "info");
-    return;
-  }
-
-  // Get available radios — exclude any radio whose standby state already carries this mission
-  let availableRadios = window.appState.radios.filter(
-    (r) => isAvailableForMission(r) && r.standby_mission !== missionName,
-  );
-
-  const assignments = [];
-  const failedRequirements = [];
-
-  // Try to fulfill remaining requirements
-  for (const req of requirementsToFulfill) {
-    const band = req.frequencyBand;
-    const siteId = req.siteId;
-    const sectorId = req.sectorId;
-
-    // Find available device matching band and site/sector
-    const deviceIndex = availableRadios.findIndex((r) => {
-      if (!deviceMatchesBand(r, band)) return false;
-      if (siteId && r.site_id !== siteId) return false;
-      if (sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== sectorId) return false;
-      }
-      return true;
-    });
-
-    if (deviceIndex !== -1) {
-      const deviceToAssign = availableRadios[deviceIndex];
-      assignments.push({
-        radio: deviceToAssign,
-        requirement: req,
-      });
-      availableRadios.splice(deviceIndex, 1);
-    } else {
-      failedRequirements.push(req);
-    }
-  }
-
-  // Execute successful assignments regardless of partial failures
-  if (assignments.length > 0) {
-    try {
-      for (const assignment of assignments) {
-        const { radio, requirement } = assignment;
-        const newFrequency = requirement.frequency || radio.frequency;
-
-        await apiCall(`/radios/${radio.id}`, "POST", {
-          ...radio,
-          mission_name: missionName,
-          owner: missionOwner || radio.owner,
-          frequency: newFrequency,
-          role: requirement.role || null,
-        });
-      }
-      showNotification(
-        t("notify.missionAllocated", {
-          count: assignments.length,
-          name: missionName,
-        }),
-        "success",
-      );
-    } catch (error) {
-      showNotification(
-        "Failed to allocate some devices: " + error.message,
-        "error",
-      );
-    }
-  }
-
-  // Update roles for already-allocated devices whose requirement role changed
-  if (roleUpdates.length > 0) {
-    try {
-      for (const { radio, role } of roleUpdates) {
-        await apiCall(`/radios/${radio.id}`, "POST", { ...radio, role });
-      }
-      showNotification(
-        `${roleUpdates.length} device role(s) updated`,
-        "success",
-      );
-    } catch (error) {
-      showNotification(t("notify.roleUpdateFailed"), "error");
-    }
-  }
-
-  // Activate mission status (assignments done client-side, status updated server-side)
-  try {
-    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
-  } catch (_) {}
-
-  // Show popup for failed requirements if any
-  if (failedRequirements.length > 0) {
-    showFailedRequirementsModal(failedRequirements);
-  }
-
-  await _refreshAfterMissionAction();
-}
-
-// ── Finish Mission Planning: planned → active (status only, no allocation) ──
-
-async function finishMissionPlanning(missionId) {
-  if (guardAdminOnly()) return;
-  try {
-    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
-    showNotification(t("notify.missionActivated"), "success");
-    await _refreshAfterMissionAction();
-  } catch (_) {}
-}
-
-// ── Return to Planning: active → planned (clears all assignments server-side) ──
-
-async function returnToPlanning(missionId) {
-  if (guardAdminOnly()) return;
-  if (!confirm(t("confirm.returnToPlanning"))) return;
-  try {
-    await apiCall(`/planned_missions/${missionId}/deactivate`, "POST");
-    showNotification(t("notify.missionDeactivated"), "success");
-    await _refreshAfterMissionAction();
-  } catch (_) {}
-}
-
-// ── Activate Standby: internal helper used by both the button and Allocate ──
-// For each radio with standby_mission === mission.name, tries to promote to
-// Current on the same radio (if free) or another matching free radio.
-
-async function _activateStandbyInternal(mission) {
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  const standbyRadios = (window.appState.radios || []).filter(
-    (r) => r.standby_mission === missionName && r.status === "Usable",
-  );
-  if (standbyRadios.length === 0) return { promoted: 0, failed: 0 };
-
-  let promoted = 0;
-  let failed = 0;
-  const usedIds = new Set();
-  const batchUpdates = [];
-
-  for (const standby of standbyRadios) {
-    const band =
-      standby.frequency_band || getFrequencyBandForDevice(standby.device_type);
-
-    // Option 1: promote on the same radio if ALL its current-state fields are free
-    if (_currentStateIsEmpty(standby)) {
-      batchUpdates.push({
-        ...standby,
-        mission_name: missionName,
-        frequency: standby.standby_frequency,
-        owner: missionOwner || standby.standby_owner,
-        role: standby.standby_role,
-        standby_mission: null,
-        standby_frequency: null,
-        standby_owner: null,
-        standby_role: null,
-      });
-      promoted++;
-      usedIds.add(standby.id);
-      continue;
-    }
-
-    // Option 2: find another fully free radio at the same site with the same band
-    const freeRadio = (window.appState.radios || []).find(
-      (r) =>
-        r.id !== standby.id &&
-        !usedIds.has(r.id) &&
-        _currentStateIsEmpty(r) &&
-        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) ===
-          band &&
-        r.site_id === standby.site_id,
-    );
-
-    if (freeRadio) {
-      batchUpdates.push({
-        ...freeRadio,
-        mission_name: missionName,
-        frequency: standby.standby_frequency,
-        owner: missionOwner || standby.standby_owner,
-        role: standby.standby_role,
-      });
-      batchUpdates.push({
-        ...standby,
-        standby_mission: null,
-        standby_frequency: null,
-        standby_owner: null,
-        standby_role: null,
-      });
-      promoted++;
-      usedIds.add(freeRadio.id);
-    } else {
-      failed++;
-    }
-  }
-
-  if (batchUpdates.length > 0) {
-    try {
-      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
-    } catch (_) {
-      failed += promoted;
-      promoted = 0;
-    }
-  }
-
-  return { promoted, failed };
-}
-
-// ── Strict helper: ALL standby-state fields must be completely empty ──
-function _standbyStateIsEmpty(radio) {
-  if (radio.status !== "Usable") return false;
-  if (radio.standby_mission) return false;
-  if (radio.standby_owner) return false;
-  if (radio.standby_role) return false;
-  if (radio.standby_frequency != null && radio.standby_frequency !== 0) return false;
-  return true;
-}
-
-// ── Demote to Standby: internal — mirror of _activateStandbyInternal ──
-// For each radio with mission_name === mission.name, moves current → standby.
-
-async function _demoteToStandbyInternal(mission) {
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  const currentRadios = (window.appState.radios || []).filter(
-    (r) => r.mission_name === missionName && r.status === "Usable",
-  );
-  if (currentRadios.length === 0) return { demoted: 0, failed: 0 };
-
-  let demoted = 0;
-  let failed = 0;
-  const usedIds = new Set();
-  const batchUpdates = [];
-
-  for (const radio of currentRadios) {
-    const band = radio.frequency_band || getFrequencyBandForDevice(radio.device_type);
-
-    // Option 1: demote in-place if standby state is completely empty
-    if (_standbyStateIsEmpty(radio)) {
-      batchUpdates.push({
-        ...radio,
-        standby_mission: missionName,
-        standby_frequency: radio.frequency,
-        standby_owner: missionOwner || radio.owner,
-        standby_role: radio.role,
-        mission_name: null,
-        frequency: null,
-        owner: null,
-        role: null,
-      });
-      demoted++;
-      usedIds.add(radio.id);
-      continue;
-    }
-
-    // Option 2: find another free radio at same site/band with empty standby
-    const freeRadio = (window.appState.radios || []).find(
-      (r) =>
-        r.id !== radio.id &&
-        !usedIds.has(r.id) &&
-        _standbyStateIsEmpty(r) &&
-        (r.frequency_band || getFrequencyBandForDevice(r.device_type)) === band &&
-        r.site_id === radio.site_id,
-    );
-
-    if (freeRadio) {
-      batchUpdates.push({
-        ...freeRadio,
-        standby_mission: missionName,
-        standby_frequency: radio.frequency,
-        standby_owner: missionOwner || radio.owner,
-        standby_role: radio.role,
-      });
-      batchUpdates.push({
-        ...radio,
-        mission_name: null,
-        frequency: null,
-        owner: null,
-        role: null,
-      });
-      demoted++;
-      usedIds.add(freeRadio.id);
-    } else {
-      failed++;
-    }
-  }
-
-  if (batchUpdates.length > 0) {
-    try {
-      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
-    } catch (_) {
-      failed += demoted;
-      demoted = 0;
-    }
-  }
-
-  return { demoted, failed };
-}
-
-// ── Demote to Standby button ──
-
-async function demoteToStandby(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find((m) => m.id === missionId);
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-
-  const { demoted, failed } = await _demoteToStandbyInternal(mission);
-
-  if (demoted === 0 && failed === 0) {
-    showNotification(t("notify.noCurrentDevices"), "info");
-  } else {
-    if (demoted > 0)
-      showNotification(
-        t("notify.demotedToStandby", { count: demoted, name: mission.name }),
-        "success",
-      );
-    if (failed > 0)
-      showNotification(
-        t("notify.demoteToStandbyFailed", { count: failed }),
-        "warning",
-      );
-  }
-
-  await _refreshAfterMissionAction();
-}
-
-// ── Activate Standby button ──
-
-async function activateStandbyBtn(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-
-  const { promoted, failed } = await _activateStandbyInternal(mission);
-
-  if (promoted === 0 && failed === 0) {
-    showNotification(t("notify.noStandbyDevices"), "info");
-  } else {
-    if (promoted > 0)
-      showNotification(
-        t("notify.standbyActivated", { count: promoted, name: mission.name }),
-        "success",
-      );
-    if (failed > 0)
-      showNotification(
-        t("notify.standbyActivateFailed", { count: failed }),
-        "warning",
-      );
-  }
-
-  await _refreshAfterMissionAction();
-}
-
-// ── Allocate: Activate Standby first, then allocate remaining to Current ──
-
-async function allocateMission(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-  if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error");
-    return;
-  }
-
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  // Step 1: promote standby devices to current first
-  await _activateStandbyInternal(mission);
-  await loadAllData();
-
-  const freshMission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!freshMission) return;
-
-  // Step 2: find which requirements are still unmet in Current
-  const allocatedRadios = window.appState.radios.filter((r) =>
-    isAllocatedToMission(r, freshMission),
-  );
-  const usedIds = new Set();
-  const toFulfill = [];
-  const roleUpdates = [];
-
-  for (const req of freshMission.requirements) {
-    const match = allocatedRadios.find((r) => {
-      if (usedIds.has(r.id)) return false;
-      return radioSatisfiesRequirement(r, freshMission, req);
-    });
-    if (match) {
-      usedIds.add(match.id);
-      if (req.role != null && match.role !== req.role) {
-        roleUpdates.push({ radio: match, role: req.role });
-      }
-    } else {
-      toFulfill.push(req);
-    }
-  }
-
-  if (toFulfill.length === 0 && roleUpdates.length === 0) {
-    showNotification(t("error.missionFulfilled"), "info");
-    await _refreshAfterMissionAction();
-    return;
-  }
-
-  // Step 3: assign remaining requirements to free devices (Current field)
-  let available = window.appState.radios.filter((r) =>
-    isAvailableForMission(r),
-  );
-  const assignments = [];
-  const failedReqs = [];
-
-  for (const req of toFulfill) {
-    const idx = available.findIndex((r) => {
-      if (!deviceMatchesBand(r, req.frequencyBand)) return false;
-      if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== req.sectorId) return false;
-      }
-      return true;
-    });
-    if (idx !== -1) {
-      assignments.push({ radio: available[idx], requirement: req });
-      available.splice(idx, 1);
-    } else {
-      failedReqs.push(req);
-    }
-  }
-
-  if (assignments.length > 0) {
-    try {
-      await apiCall("/batch/update_radios", "POST", {
-        updates: assignments.map(({ radio, requirement }) => ({
-          ...radio,
-          mission_name: missionName,
-          frequency: requirement.frequency || radio.frequency,
-          owner: missionOwner || radio.owner,
-          role: requirement.role || null,
-        })),
-      });
-      showNotification(
-        t("notify.missionAllocated", {
-          count: assignments.length,
-          name: missionName,
-        }),
-        "success",
-      );
-    } catch (error) {
-      showNotification(
-        t("notify.missionAllocFailed", { error: error.message }),
-        "error",
-      );
-    }
-  }
-
-  if (roleUpdates.length > 0) {
-    try {
-      await apiCall("/batch/update_radios", "POST", {
-        updates: roleUpdates.map(({ radio, role }) => ({ ...radio, role })),
-      });
-      showNotification(t("notify.roleUpdated", { count: roleUpdates.length }), "success");
-    } catch (error) {
-      showNotification(t("notify.roleUpdateFailed"), "error");
-    }
-  }
-
-  if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
-
-  await _refreshAfterMissionAction();
-}
-
-// ── Allocate to Standby: only assigns to devices with NO current allocation ──
-
-async function allocateToStandby(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-  if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error");
-    return;
-  }
-
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  // Determine which requirements are already satisfied (current or standby)
-  const currentRadios = window.appState.radios.filter(
-    (r) => r.mission_name === mission.name && r.status === "Usable",
-  );
-  const standbyRadios = window.appState.radios.filter(
-    (r) => r.standby_mission === mission.name && r.status === "Usable",
-  );
-  const usedCurrent = new Set();
-  const usedStandby = new Set();
-  const toFulfill = [];
-
-  for (const req of mission.requirements) {
-    const matchCurrent = currentRadios.find((r) => {
-      if (usedCurrent.has(r.id)) return false;
-      return radioSatisfiesRequirement(r, mission, req);
-    });
-    if (matchCurrent) {
-      usedCurrent.add(matchCurrent.id);
-      continue;
-    }
-
-    const matchStandby = standbyRadios.find((r) => {
-      if (usedStandby.has(r.id)) return false;
-      const band = r.frequency_band || getFrequencyBandForDevice(r.device_type);
-      if (band !== req.frequencyBand) return false;
-      if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== req.sectorId) return false;
-      }
-      if (
-        req.frequency &&
-        r.standby_frequency &&
-        Math.abs(r.standby_frequency - req.frequency) > 0.01
-      )
-        return false;
-      return true;
-    });
-    if (matchStandby) {
-      usedStandby.add(matchStandby.id);
-      continue;
-    }
-
-    toFulfill.push(req);
-  }
-
-  if (toFulfill.length === 0) {
-    showNotification(t("error.missionFulfilled"), "info");
-    return;
-  }
-
-  // Only block devices already assigned to THIS mission in current state
-  let available = window.appState.radios.filter(
-    (r) => isAvailableForStandbyMission(r) && r.mission_name !== missionName,
-  );
-  const assignments = [];
-  const failedReqs = [];
-
-  for (const req of toFulfill) {
-    const idx = available.findIndex((r) => {
-      if (!deviceMatchesBand(r, req.frequencyBand)) return false;
-      if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== req.sectorId) return false;
-      }
-      return true;
-    });
-    if (idx !== -1) {
-      assignments.push({ radio: available[idx], requirement: req });
-      available.splice(idx, 1);
-    } else failedReqs.push(req);
-  }
-
-  if (assignments.length > 0) {
-    try {
-      await apiCall("/batch/update_radios", "POST", {
-        updates: assignments.map(({ radio, requirement }) => ({
-          ...radio,
-          standby_mission: missionName,
-          standby_owner: missionOwner || radio.standby_owner,
-          standby_frequency: requirement.frequency || radio.standby_frequency,
-          standby_role: requirement.role || null,
-        })),
-      });
-      showNotification(
-        t("notify.missionStandby", {
-          count: assignments.length,
-          name: missionName,
-        }),
-        "success",
-      );
-    } catch (error) {
-      showNotification(
-        t("notify.missionAllocFailed", { error: error.message }),
-        "error",
-      );
-    }
-  }
-
-  if (failedReqs.length > 0) showFailedRequirementsModal(failedReqs);
-
-  await _refreshAfterMissionAction();
-}
-
-// ----- Place Mission on Standby (similar to Start, but for standby state) -----
-
-async function placeOnStandby(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-
-  if (!mission.requirements || mission.requirements.length === 0) {
-    showNotification(t("error.missionHasNoReqs"), "error");
-    return;
-  }
-
-  const missionName = mission.name;
-  const missionOwner = mission.owner;
-
-  // Get devices already allocated to CURRENT state for this mission
-  const currentAllocatedRadios = window.appState.radios.filter(
-    (r) => r.mission_name === mission.name && r.status === "Usable",
-  );
-  const usedCurrentAllocatedIds = new Set();
-
-  // Get devices already allocated to STANDBY state for this mission
-  const standbyAllocatedRadios = window.appState.radios.filter(
-    (r) => r.standby_mission === mission.name && r.status === "Usable",
-  );
-  const usedStandbyAllocatedIds = new Set();
-
-  // Build list of requirements that still need allocation
-  const requirementsToFulfill = [];
-
-  for (const req of mission.requirements) {
-    // 1. Check if satisfied by CURRENT state
-    const matchingCurrent = currentAllocatedRadios.find((r) => {
-      if (usedCurrentAllocatedIds.has(r.id)) return false;
-      return radioSatisfiesRequirement(r, mission, req);
-    });
-
-    if (matchingCurrent) {
-      usedCurrentAllocatedIds.add(matchingCurrent.id);
-      continue; // Skip this requirement, it's already fulfilled in current state
-    }
-
-    // 2. Check if satisfied by STANDBY state
-    const matchingStandby = standbyAllocatedRadios.find((r) => {
-      if (usedStandbyAllocatedIds.has(r.id)) return false;
-
-      const radioBand =
-        r.frequency_band || getFrequencyBandForDevice(r.device_type);
-      if (radioBand !== req.frequencyBand) return false;
-
-      if (req.siteId && r.site_id !== req.siteId) return false;
-      if (req.sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== req.sectorId) return false;
-      }
-
-      if (req.frequency && r.standby_frequency) {
-        if (Math.abs(r.standby_frequency - req.frequency) > 0.01) return false;
-      } else if (!req.frequency && r.standby_frequency) {
-        return false;
-      }
-
-      return true;
-    });
-
-    if (matchingStandby) {
-      usedStandbyAllocatedIds.add(matchingStandby.id);
-      continue; // Skip this requirement, it's already fulfilled in standby state
-    }
-
-    // 3. Needs allocation
-    requirementsToFulfill.push(req);
-  }
-
-  if (requirementsToFulfill.length === 0) {
-    showNotification(t("error.missionFulfilled"), "info");
-    return;
-  }
-
-  // Get available radios for standby allocation.
-  // Sort so devices with no current mission come first — they get priority over
-  // devices that already carry an active mission in their current-state slot.
-  let availableRadios = window.appState.radios
-    .filter((r) => isAvailableForStandbyMission(r))
-    .sort((a, b) => (a.mission_name ? 1 : 0) - (b.mission_name ? 1 : 0));
-
-  const assignments = [];
-  const failedRequirements = [];
-
-  // Try to fulfill remaining requirements
-  for (const req of requirementsToFulfill) {
-    const band = req.frequencyBand;
-    const siteId = req.siteId;
-    const sectorId = req.sectorId;
-
-    // Find available device matching band and site/sector
-    const deviceIndex = availableRadios.findIndex((r) => {
-      // Ensure we don't assign standby on a device that already has this mission actively
-      if (r.mission_name === missionName) return false;
-
-      if (!deviceMatchesBand(r, band)) return false;
-      if (siteId && r.site_id !== siteId) return false;
-      if (sectorId) {
-        const site = window.appState.sites.find((s) => s.id === r.site_id);
-        if (!site || site.sector_id !== sectorId) return false;
-      }
-      return true;
-    });
-
-    if (deviceIndex !== -1) {
-      const deviceToAssign = availableRadios[deviceIndex];
-      assignments.push({
-        radio: deviceToAssign,
-        requirement: req,
-      });
-      availableRadios.splice(deviceIndex, 1);
-    } else {
-      failedRequirements.push(req);
-    }
-  }
-
-  // Execute successful assignments regardless of partial failures
-  if (assignments.length > 0) {
-    try {
-      for (const assignment of assignments) {
-        const { radio, requirement } = assignment;
-        const newStandbyFrequency =
-          requirement.frequency || radio.standby_frequency;
-
-        await apiCall(`/radios/${radio.id}`, "POST", {
-          ...radio,
-          standby_mission: missionName,
-          standby_owner: missionOwner || radio.standby_owner,
-          standby_frequency: newStandbyFrequency,
-          standby_role: requirement.role || null,
-        });
-      }
-      showNotification(
-        t("notify.missionStandby", {
-          count: assignments.length,
-          name: missionName,
-        }),
-        "success",
-      );
-    } catch (error) {
-      showNotification(
-        "Failed to place some devices on standby: " + error.message,
-        "error",
-      );
-    }
-  }
-
-  // Show popup for failed requirements if any
-  if (failedRequirements.length > 0) {
-    showFailedRequirementsModal(failedRequirements);
-  }
-
-  // Mark mission as active (standby = active status)
-  try {
-    await apiCall(`/planned_missions/${missionId}/activate`, "POST");
-  } catch (_) {}
-
-  await loadAllData();
-  renderMissionsTab();
-  renderOverview();
-}
-
-async function deletePlannedMission(missionId, missionName) {
-  if (guardViewMode()) return;
-  if (!confirm(t("confirm.deleteMission", { name: missionName }))) return;
-  try {
-    await apiCall(`/planned_missions/${missionId}`, "DELETE");
-    showNotification(
-      t("notify.missionDeleted", { name: missionName }),
-      "success",
-    );
-    await _refreshAfterMissionAction();
-  } catch (e) {
-    showNotification(t("notify.missionDeleteFailed"), "error");
-  }
-}
-
-window.deletePlannedMission = deletePlannedMission;
-window.finishMissionPlanning = finishMissionPlanning;
-window.returnToPlanning = returnToPlanning;
-window.activateStandbyBtn = activateStandbyBtn;
-window.demoteToStandby = demoteToStandby;
-
-function _closeStandbyMenu() {
-  document.querySelectorAll(".standby-dropdown-menu.open").forEach((m) => m.classList.remove("open"));
-}
-
-function _toggleStandbyMenu(missionId, event) {
-  event.stopPropagation();
-  const menu = document.getElementById(`standby-menu-${missionId}`);
-  if (!menu) return;
-  const isOpen = menu.classList.contains("open");
-  _closeStandbyMenu();
-  if (!isOpen) menu.classList.add("open");
-}
-
-document.addEventListener("click", _closeStandbyMenu);
-
-window._toggleStandbyMenu = _toggleStandbyMenu;
-window._closeStandbyMenu = _closeStandbyMenu;
-window.allocateMission = allocateMission;
-window.allocateToStandby = allocateToStandby;
-
-function showFailedRequirementsModal(failedRequirements) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.id = "failedRequirementsModal";
-  modal.style.cssText =
-    "position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;";
-
-  let tableRows = "";
-  failedRequirements.forEach((req) => {
-    let locationText = t("planMission.anyLocation");
-    if (req.siteName) {
-      locationText = req.siteName;
-    } else if (req.sectorName) {
-      locationText = `Sector: ${req.sectorName}`;
-    }
-    tableRows += `
-      <tr>
-        <td>${req.frequencyBand}</td>
-        <td>${locationText}</td>
-        <td>${req.frequency ? formatFrequency(req.frequency, req.frequencyBand) + " MHz" : "-"}</td>
-      </tr>
-    `;
-  });
-
-  modal.innerHTML = `
-    <div class="modal-content" style="padding: 2rem; border-radius: 8px; max-width: 500px; max-height: 80vh; overflow-y: auto;">
-      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin: 0;">${t("missions.failedReqs.title")}</h3>
-        <button onclick="closeFailedRequirementsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-      </div>
-      <p style="margin-bottom: 1rem;">${t("missions.failedReqs.desc")}</p>
-      <table class="data-table" style="width: 100%;">
-        <thead>
-          <tr>
-            <th>${t("missions.failedReqs.col.band")}</th>
-            <th>${t("missions.failedReqs.col.loc")}</th>
-            <th>${t("missions.failedReqs.col.freq")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
-      <div style="margin-top: 1rem; text-align: center;">
-        <button class="btn btn-primary" onclick="closeFailedRequirementsModal()">OK</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  // Close on background click
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      closeFailedRequirementsModal();
-    }
-  });
-}
-
-function closeFailedRequirementsModal() {
-  const modal = document.getElementById("failedRequirementsModal");
-  if (modal) {
-    modal.remove();
-  }
-}
-
-async function endMission(missionId) {
-  if (guardAdminOnly()) return;
-  const mission = window.appState.plannedMissions.find(
-    (m) => m.id === missionId,
-  );
-  if (!mission) {
-    showNotification(t("error.missionNotFound"), "error");
-    return;
-  }
-
-  // Find devices with this mission (either current or standby)
-  const allMissionDevices = window.appState.radios.filter(
-    (r) =>
-      (r.mission_name === mission.name || r.standby_mission === mission.name) &&
-      r.status === "Usable",
-  );
-  const allocatedDevices = allMissionDevices.filter((r) =>
-    isAllocatedToMission(r, mission),
-  );
-  const extraDevices = allMissionDevices.filter((r) =>
-    isExtraDeviceForMission(r, mission),
-  );
-  const totalDevices = allMissionDevices.length;
-
-  const confirmMessage =
-    (totalDevices > 0
-      ? t("missions.endConfirmDevices", {
-          total: totalDevices,
-          allocated: allocatedDevices.length,
-          extra: extraDevices.length,
-        })
-      : "") + t("missions.endConfirmMsg");
-
-  if (!confirm(confirmMessage)) return;
-
-  try {
-    // First, clear all devices with this mission (both allocated and extra, current and standby)
-    for (const radio of allMissionDevices) {
-      await apiCall(`/radios/${radio.id}`, "POST", {
-        ...radio,
-        frequency: null,
-        owner: null,
-        mission_name: null,
-        role: null,
-        standby_frequency: null,
-        standby_owner: null,
-        standby_mission: null,
-        standby_role: null,
-      });
-    }
-
-    // Then end the mission on the backend
-    await apiCall(`/planned_missions/${missionId}/end`, "POST");
-    showNotification(t("notify.missionEnded"), "success");
-    await loadAllData();
-    renderMissionsTab();
-    renderOverview();
-    if (window.renderTimelineTab) renderTimelineTab();
-  } catch (error) {
-    showNotification(
-      t("notify.missionEndFailed", { error: error.message }),
-      "error",
-    );
-  }
-}
-
-async function archiveMission(missionId) {
-  if (guardViewMode()) return;
-  // Note: Archive is now only allowed if mission has no allocated devices
-  // This is enforced on backend
-  if (!confirm(t("confirm.archiveMission"))) return;
-  try {
-    await apiCall(`/planned_missions/${missionId}/archive`, "POST");
-    showNotification(t("notify.missionArchived"), "success");
-    await loadAllData();
-    renderMissionsTab();
-  } catch (error) {
-    showNotification(
-      t("notify.missionArchiveFailed", { error: error.message }),
-      "error",
-    );
-  }
-}
-
-async function restoreMission(missionId) {
-  if (guardViewMode()) return;
-  if (!confirm(t("confirm.restoreMission"))) return;
-  try {
-    await apiCall(`/archived_missions/${missionId}/restore`, "POST");
-    showNotification(t("notify.missionRestored"), "success");
-    await loadAllData();
-    renderMissionsTab();
-  } catch (error) {
-    showNotification(
-      t("notify.missionRestoreFailed", { error: error.message }),
-      "error",
-    );
-  }
-}
-
-async function deleteArchivedMission(missionId) {
-  if (guardAdminOnly()) return;
-  if (!confirm(t("confirm.deleteArchived"))) return;
-  try {
-    await apiCall(`/archived_missions/${missionId}`, "DELETE");
-    showNotification(t("notify.missionDeleted"), "success");
-    await loadAllData();
-    renderMissionsTab();
-  } catch (error) {
-    showNotification(
-      "Failed to delete archived mission: " + error.message,
-      "error",
-    );
   }
 }
 
@@ -1546,49 +320,37 @@ function editMission(missionId, readOnly = false) {
   const timeStartEl = document.getElementById("planMissionTimeStart");
   const timeEndEl = document.getElementById("planMissionTimeEnd");
   if (timeStartEl)
-    timeStartEl.value = mission.time_start
-      ? mission.time_start.slice(0, 16)
-      : "";
+    timeStartEl.value = mission.time_start ? mission.time_start.slice(0, 16) : "";
   if (timeEndEl)
     timeEndEl.value = mission.time_end ? mission.time_end.slice(0, 16) : "";
 
-  // Show creation metadata (read-only, only visible when editing)
-  const createdAtGroup  = document.getElementById("missionCreatedAtGroup");
-  const createdByGroup  = document.getElementById("missionCreatedByGroup");
-  const createdAtInput  = document.getElementById("missionCreatedAt");
-  const createdByInput  = document.getElementById("missionCreatedBy");
+  const createdAtGroup = document.getElementById("missionCreatedAtGroup");
+  const createdByGroup = document.getElementById("missionCreatedByGroup");
+  const createdAtInput = document.getElementById("missionCreatedAt");
+  const createdByInput = document.getElementById("missionCreatedBy");
   if (mission.created_at) {
     const d = new Date(mission.created_at);
     createdAtInput.value = d.toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
     if (createdByInput) createdByInput.value = mission.created_by || "—";
     createdAtGroup.style.display = "block";
     if (createdByGroup) createdByGroup.style.display = "block";
-    document.getElementById("missionInfoGrid").style.gridTemplateColumns =
-      "2fr 2fr 1fr 1fr";
+    document.getElementById("missionInfoGrid").style.gridTemplateColumns = "2fr 2fr 1fr 1fr";
   } else {
     createdAtInput.value = "";
     if (createdByInput) createdByInput.value = "";
     createdAtGroup.style.display = "none";
     if (createdByGroup) createdByGroup.style.display = "none";
-    document.getElementById("missionInfoGrid").style.gridTemplateColumns =
-      "1fr 1fr";
+    document.getElementById("missionInfoGrid").style.gridTemplateColumns = "1fr 1fr";
   }
 
-  // Populate selectors first (before showing modal)
-  if (window.populateSelects) {
-    window.populateSelects();
-  }
+  if (window.populateSelects) window.populateSelects();
 
-  // Initialize location toggle to Site (true) by default
   const toggle = document.getElementById("reqLocationToggle");
   if (toggle) {
     toggle.checked = true;
-    if (window.toggleLocationType) {
-      window.toggleLocationType();
-    }
+    if (window.toggleLocationType) window.toggleLocationType();
   }
 
-  // Load requirements - convert from stored format to display format
   missionRequirements = (mission.requirements || []).map((req) => ({
     sectorId: req.sectorId || req.sector_id || null,
     sectorName: req.sectorName || req.sector_name || null,
@@ -1601,14 +363,12 @@ function editMission(missionId, readOnly = false) {
   renderRequirementsList();
   renderExtraDevices();
 
-  // Change modal title
   const modalTitle = document.querySelector("#planMissionModal h3");
   if (modalTitle) {
     modalTitle.childNodes[modalTitle.childNodes.length - 1].textContent =
       " " + t(readOnly ? "planMission.viewTitle" : "planMission.editTitle");
   }
 
-  // Apply/remove read-only mode
   const modal = document.getElementById("planMissionModal");
   if (readOnly) {
     modal.classList.add("plan-mission-readonly");
@@ -1616,11 +376,7 @@ function editMission(missionId, readOnly = false) {
     modal.classList.remove("plan-mission-readonly");
   }
 
-  // Show modal
-  modal.classList.remove("hidden");
-  watchModalSaveBtn("planMissionModal");
-  checkModalSaveBtn("planMissionModal");
-  disableBodyScroll();
+  openModal("planMissionModal");
 }
 
 function closePlanMissionModal() {
@@ -1635,7 +391,6 @@ function closePlanMissionModal() {
   missionRequirements = [];
   editingMissionId = null;
 
-  // Reset modal title
   const modalTitle = document.querySelector("#planMissionModal h3");
   if (modalTitle) {
     modalTitle.childNodes[modalTitle.childNodes.length - 1].textContent =
@@ -1648,25 +403,21 @@ async function savePlannedMission() {
   const missionName = document.getElementById("planMissionName").value.trim();
   const missionOwner = document.getElementById("planMissionOwner").value.trim();
 
-  // Validation: Name is required
   if (!missionName) {
     showNotification(t("error.missionNameRequired"), "error");
     return;
   }
 
-  // Validation: Owner is required
   if (!missionOwner) {
     showNotification(t("error.missionOwnerRequired"), "error");
     return;
   }
 
-  // Validation: At least one requirement
   if (missionRequirements.length === 0) {
     showNotification(t("error.missionNoReqs"), "error");
     return;
   }
 
-  // Check for duplicate name (excluding current mission when editing)
   const existingInActive = window.appState.plannedMissions.find(
     (m) =>
       m.name.toLowerCase() === missionName.toLowerCase() &&
@@ -1680,7 +431,6 @@ async function savePlannedMission() {
     return;
   }
 
-  // Capture old mission data before the API call so we can update radios if name/owner changed
   let oldMission = null;
   if (editingMissionId) {
     oldMission = window.appState.plannedMissions.find(
@@ -1689,7 +439,6 @@ async function savePlannedMission() {
   }
 
   await withSaveSpinner("planMissionModal", async () => {
-    // Convert to API format
     const requirementsForApi = missionRequirements.map((req) => ({
       sectorId: req.sectorId,
       sectorName: req.sectorName,
@@ -1700,10 +449,8 @@ async function savePlannedMission() {
       role: req.role,
     }));
 
-    const timeStart =
-      document.getElementById("planMissionTimeStart")?.value || null;
-    const timeEnd =
-      document.getElementById("planMissionTimeEnd")?.value || null;
+    const timeStart = document.getElementById("planMissionTimeStart")?.value || null;
+    const timeEnd = document.getElementById("planMissionTimeEnd")?.value || null;
 
     const missionData = {
       name: missionName,
@@ -1714,14 +461,8 @@ async function savePlannedMission() {
     };
 
     if (editingMissionId) {
-      // Update existing mission
-      await apiCall(
-        `/planned_missions/${editingMissionId}`,
-        "POST",
-        missionData,
-      );
+      await apiCall(`/planned_missions/${editingMissionId}`, "POST", missionData);
 
-      // If the mission name or owner changed, propagate to all allocated radios
       if (
         oldMission &&
         (oldMission.name !== missionName || oldMission.owner !== missionOwner)
@@ -1755,7 +496,6 @@ async function savePlannedMission() {
 
       showNotification(t("notify.missionUpdated"), "success");
     } else {
-      // Create new mission
       await apiCall("/planned_missions", "POST", missionData);
       showNotification(t("notify.missionSaved"), "success");
     }
@@ -1770,7 +510,6 @@ async function savePlannedMission() {
   ));
 }
 
-// Export for inline onclick handlers
 function openMissionAllocHelp() {
   const existing = document.getElementById("missionAllocHelpModal");
   if (existing) existing.remove();
@@ -1871,24 +610,13 @@ function closeMissionAllocHelp() {
   enableBodyScroll();
 }
 
-window.openMissionAllocHelp = openMissionAllocHelp;
-window.closeMissionAllocHelp = closeMissionAllocHelp;
+// Export for inline onclick handlers
 window.renderMissionsTab = renderMissionsTab;
-window.startMission = startMission;
-window.placeOnStandby = placeOnStandby;
-window.endMission = endMission;
-window.archiveMission = archiveMission;
-window.restoreMission = restoreMission;
-window.deleteArchivedMission = deleteArchivedMission;
 window.editMission = editMission;
 window.closePlanMissionModal = closePlanMissionModal;
 window.savePlannedMission = savePlannedMission;
-window.removeMissionRequirement = removeMissionRequirement;
-window.radioSatisfiesRequirement = radioSatisfiesRequirement;
-window.isAllocatedToMission = isAllocatedToMission;
-window.isExtraDeviceForMission = isExtraDeviceForMission;
-window.isAvailableForMission = isAvailableForMission;
-window.closeFailedRequirementsModal = closeFailedRequirementsModal;
+window.openMissionAllocHelp = openMissionAllocHelp;
+window.closeMissionAllocHelp = closeMissionAllocHelp;
 window.handleMissionExcelUpload = handleMissionExcelUpload;
 
 // ==================== Excel Import for Mission Requirements ====================
@@ -1911,9 +639,7 @@ async function handleMissionExcelUpload(input) {
       }
 
       const header = rows[0].map((h) =>
-        String(h || "")
-          .trim()
-          .toLowerCase(),
+        String(h || "").trim().toLowerCase(),
       );
       const bandIdx = header.findIndex((h) => h.includes("band"));
       const sectorIdx = header.findIndex(
@@ -1945,8 +671,7 @@ async function handleMissionExcelUpload(input) {
         if (!row || row.length === 0 || !row[bandIdx]) continue;
 
         const frequencyBand = String(row[bandIdx] || "").trim();
-        const sectorName =
-          sectorIdx >= 0 ? String(row[sectorIdx] || "").trim() : "";
+        const sectorName = sectorIdx >= 0 ? String(row[sectorIdx] || "").trim() : "";
         const siteName = siteIdx >= 0 ? String(row[siteIdx] || "").trim() : "";
         const role = roleIdx >= 0 ? String(row[roleIdx] || "").trim() : "";
 
@@ -1971,10 +696,7 @@ async function handleMissionExcelUpload(input) {
         );
         if (!validBands.includes(frequencyBand)) {
           errors.push(
-            t("import.mission.unknownBand", {
-              row: i + 1,
-              band: frequencyBand,
-            }),
+            t("import.mission.unknownBand", { row: i + 1, band: frequencyBand }),
           );
           continue;
         }
@@ -2013,9 +735,7 @@ async function handleMissionExcelUpload(input) {
             siteId = site.id;
             resolvedSiteName = site.name;
             sectorId = site.sector_id;
-            const sector = window.appState.sectors.find(
-              (s) => s.id === sectorId,
-            );
+            const sector = window.appState.sectors.find((s) => s.id === sectorId);
             resolvedSectorName = sector ? sector.name : null;
           } else {
             errors.push(
@@ -2032,10 +752,7 @@ async function handleMissionExcelUpload(input) {
             resolvedSectorName = sector.name;
           } else {
             errors.push(
-              t("import.mission.sectorNotFound", {
-                row: i + 1,
-                name: sectorName,
-              }),
+              t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }),
             );
             continue;
           }
@@ -2060,10 +777,7 @@ async function handleMissionExcelUpload(input) {
       if (errors.length > 0) {
         showExcelImportErrorsModal(errors, imported);
       } else if (imported > 0) {
-        showNotification(
-          t("notify.reqsImported", { count: imported }),
-          "success",
-        );
+        showNotification(t("notify.reqsImported", { count: imported }), "success");
       } else {
         showNotification(t("notify.noValidReqs"), "error");
       }

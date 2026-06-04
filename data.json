@@ -40,17 +40,22 @@
         "band": "LVHF"
       },
       {
-        "id": "device-cf7fee5f",
+        "id": "device-40f7b226",
         "name": "מכשיר 120",
         "band": "LVHF"
+      },
+      {
+        "id": "device-21f9588e",
+        "name": "מכשיר 345",
+        "band": "UHF"
       }
     ],
     "missions": [
       "סופת חול",
       "סוף עונה",
       "חתונת השנה",
-      "רעמים וברקים",
-      "מצילים את ווילי"
+      "מצילים את ווילי",
+      "רעמים וברקים"
     ],
     "owners": [
       {
@@ -142,6 +147,13 @@
         "name": "אשדוד",
         "coordinates_utm": "",
         "site_type": "Fixed"
+      },
+      {
+        "id": "site-f1a6fd75",
+        "sector_id": "sector-b010130f",
+        "name": "גבעתיים",
+        "coordinates_utm": "",
+        "site_type": "Fixed"
       }
     ],
     "radios": [
@@ -201,10 +213,10 @@
         "owner": null,
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 121.1,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "תיאום",
+        "standby_mission": "רעמים וברקים",
         "status": "Usable",
         "notes": "",
         "frequency_band": "HVHF"
@@ -392,10 +404,10 @@
         "owner": "בעלים שלא מסגיר",
         "mission_name": "מצילים את ווילי",
         "role": "תצפית קדמית",
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 35.5,
+        "standby_owner": "המדור היותר חזק",
+        "standby_role": "סיוע",
+        "standby_mission": "רעמים וברקים",
         "status": "Usable",
         "notes": null,
         "frequency_band": "LVHF"
@@ -848,12 +860,13 @@
         "owner": "",
         "mission_name": null,
         "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
+        "standby_frequency": 135.5,
+        "standby_owner": "בעלים שלא מסגיר",
+        "standby_role": "סיוע חזק",
+        "standby_mission": "מצילים את ווילי",
         "status": "Usable",
-        "notes": ""
+        "notes": "",
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-2155ccbc",
@@ -1274,6 +1287,37 @@
         "site_id": "site-ef4653df",
         "device_type": "מכשיר שלא מסגיר",
         "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": null,
+        "frequency_band": "UHF"
+      },
+      {
+        "id": "radio-23f6459a",
+        "site_id": "site-ef4653df",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-5509c80b",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר 120",
+        "frequency": null,
         "owner": "",
         "mission_name": null,
         "role": null,
@@ -1285,9 +1329,279 @@
         "notes": ""
       },
       {
-        "id": "radio-23f6459a",
-        "site_id": "site-ef4653df",
+        "id": "radio-18fdaf1b",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר 120",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-4a1ab117",
+        "site_id": "site-748505e4",
+        "device_type": "מכשיר 120",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-7482b2bb",
+        "site_id": "site-98c312bf",
+        "device_type": "מכשיר 345",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-6ad5b804",
+        "site_id": "site-98c312bf",
+        "device_type": "מכשיר 345",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-fd073519",
+        "site_id": "site-98c312bf",
+        "device_type": "מכשיר 345",
+        "frequency": null,
+        "owner": null,
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-be2f2f80",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-27612e76",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-85195082",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שלא מסגיר",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-a3d0a7d2",
+        "site_id": "site-f1a6fd75",
         "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-22fbdcfd",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-95bfa2d5",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-04cd3a6e",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-9b50d316",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-e38545a3",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר טוב",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-664ae8c8",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-b4191513",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-ca586802",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-0f864c24",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שהוא מכונה",
+        "frequency": null,
+        "owner": "",
+        "mission_name": null,
+        "role": null,
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
+        "status": "Usable",
+        "notes": ""
+      },
+      {
+        "id": "radio-83581fec",
+        "site_id": "site-f1a6fd75",
+        "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
         "owner": "",
         "mission_name": null,
@@ -1301,63 +1615,6 @@
       }
     ],
     "planned_missions": [
-      {
-        "id": "mission-3c434c48",
-        "name": "רעמים וברקים",
-        "owner": "המדור היותר חזק",
-        "status": "active",
-        "requirements": [
-          {
-            "sectorId": "sector-374d66fb",
-            "sectorName": "גזרת צפון",
-            "siteId": "site-ef4653df",
-            "siteName": "צפת",
-            "frequencyBand": "UHF",
-            "frequency": 350.2,
-            "role": "אבטחת אישים"
-          },
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-f9b55cfc",
-            "siteName": "אשדוד",
-            "frequencyBand": "UHF",
-            "frequency": 395,
-            "role": "תיאום מודיעין"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-748505e4",
-            "siteName": "באר שבע",
-            "frequencyBand": "UHF",
-            "frequency": 290,
-            "role": "לוחמים"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-c24276b5",
-            "siteName": "עפולה",
-            "frequencyBand": "LVHF",
-            "frequency": 60.6,
-            "role": "שמירת גבולות"
-          },
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-748505e4",
-            "siteName": "באר שבע",
-            "frequencyBand": "HVHF",
-            "frequency": 133.3,
-            "role": "הנדסה"
-          }
-        ],
-        "created_at": "2026-05-19T22:58:56.491079",
-        "created_by": "נועם",
-        "time_start": "2026-05-13T22:58",
-        "time_end": "2026-06-01T22:58"
-      },
       {
         "id": "mission-3c880ab5",
         "name": "חתונת השנה",
@@ -1385,8 +1642,8 @@
         ],
         "created_at": "2026-05-19T23:01:35.967105",
         "created_by": "נועם",
-        "time_start": "2026-05-20T23:01",
-        "time_end": "2026-05-23T23:01"
+        "time_start": "2026-06-05T23:01",
+        "time_end": "2026-06-12T23:01"
       },
       {
         "id": "mission-f86bd6e8",
@@ -1600,6 +1857,15 @@
             "frequencyBand": "HVHF",
             "frequency": 132,
             "role": "בת\"ק"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-98c312bf",
+            "siteName": "יבנה",
+            "frequencyBand": "HVHF",
+            "frequency": 135.5,
+            "role": "סיוע חזק"
           }
         ],
         "created_at": "2026-05-19T22:53:54.864298",
@@ -1630,12 +1896,123 @@
             "frequencyBand": "UHF",
             "frequency": 256,
             "role": null
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-f1a6fd75",
+            "siteName": "גבעתיים",
+            "frequencyBand": "UHF",
+            "frequency": 315.6,
+            "role": null
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "UHF",
+            "frequency": 330.4,
+            "role": null
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "HVHF",
+            "frequency": 125,
+            "role": null
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-f1a6fd75",
+            "siteName": "גבעתיים",
+            "frequencyBand": "HVHF",
+            "frequency": 139.5,
+            "role": null
           }
         ],
         "created_at": "2026-05-31T14:23:41.645287+00:00",
         "created_by": "משתמש מדורי",
         "time_start": null,
         "time_end": null
+      },
+      {
+        "id": "mission-3c434c48",
+        "name": "רעמים וברקים",
+        "owner": "המדור היותר חזק",
+        "status": "active",
+        "requirements": [
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "צפת",
+            "frequencyBand": "UHF",
+            "frequency": 350.2,
+            "role": "אבטחת אישים"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-f9b55cfc",
+            "siteName": "אשדוד",
+            "frequencyBand": "UHF",
+            "frequency": 395,
+            "role": "תיאום מודיעין"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "UHF",
+            "frequency": 290,
+            "role": "לוחמים"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 60.6,
+            "role": "שמירת גבולות"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "HVHF",
+            "frequency": 133.3,
+            "role": "הנדסה"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-ef4653df",
+            "siteName": "צפת",
+            "frequencyBand": "HVHF",
+            "frequency": 121.1,
+            "role": "תיאום"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 35.5,
+            "role": "סיוע"
+          }
+        ],
+        "created_at": "2026-05-19T22:58:56.491079",
+        "created_by": "נועם",
+        "time_start": "2026-06-04T22:58",
+        "time_end": "2026-06-08T22:58"
       }
     ],
     "archived_missions": [

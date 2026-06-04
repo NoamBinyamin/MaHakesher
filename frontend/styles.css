@@ -68,6 +68,10 @@ html {
   scroll-behavior: smooth;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 body {
   font-family: 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #eef2f7;
@@ -2773,6 +2777,10 @@ html.view-mode:not(.user-role) .missions-actions-cell {
 
 .missions-actions-cell {
   white-space: nowrap;
+  vertical-align: middle;
+}
+
+.missions-actions-cell > div {
   display: flex;
   gap: 0.3rem;
   align-items: center;
