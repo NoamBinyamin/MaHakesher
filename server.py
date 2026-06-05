@@ -1189,10 +1189,11 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                     'requirements_count': len(mission.get('requirements') or []),
                 }
                 changed_m = [k for k in before_m if before_m[k] != after_m[k]]
-                self._audit('update', 'mission', mission_id, {
-                    'before': {k: before_m[k] for k in changed_m},
-                    'after':  {k: after_m[k]  for k in changed_m},
-                })
+                if changed_m:
+                    self._audit('update', 'mission', mission_id, {
+                        'before': {k: before_m[k] for k in changed_m},
+                        'after':  {k: after_m[k]  for k in changed_m},
+                    })
                 return self.send_json_response(200, mission)
         return self.send_json_response(404, {'error': 'Mission not found'})
 

@@ -1118,8 +1118,24 @@
         <!-- Secondary filter bar: search, date, user -->
         <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; flex-wrap:wrap; align-items:center;">
           <input id="historySearchInput" type="text" placeholder="Search…" data-i18n-placeholder="history.search"
-            oninput="setHistorySearch(this.value)"
-            style="flex:1; min-width:180px; padding:0.35rem 0.65rem; border:1.5px solid var(--gray-200); border-radius:var(--border-radius-sm); font-size:0.85rem; background:var(--gray-50); color:var(--gray-900);" />
+            oninput="setHistorySearch(this.value); showKeyboardSuggestion('historySearchInput', 'historyKeyboardSuggestion');"
+            style="width:300px; flex-shrink:0; padding:0.22rem 0.55rem; border:1.5px solid var(--gray-200); border-radius:var(--border-radius-sm); font-size:0.85rem; background:var(--gray-50); color:var(--gray-900);" />
+          <div style="flex:1; min-width:80px; display:flex; align-items:center;">
+            <div
+              id="historyKeyboardSuggestion"
+              style="
+                display: none;
+                align-items: center;
+                gap: 0.6rem;
+                padding: 0.3rem 0.75rem;
+                background: var(--gray-100);
+                border: 1px solid var(--gray-200);
+                border-radius: 6px;
+                flex-wrap: wrap;
+                width: 100%;
+              "
+            ></div>
+          </div>
           <div style="display:flex; gap:0.35rem; flex-shrink:0;">
             <button id="hdf-all"   class="btn btn-sm btn-primary"    onclick="setHistoryDateFilter('all')"   data-i18n="history.date.all">All time</button>
             <button id="hdf-today" class="btn btn-sm btn-secondary"  onclick="setHistoryDateFilter('today')" data-i18n="history.date.today">Today</button>

@@ -52,3 +52,4 @@
 {"timestamp": "2026-06-05T09:45:44.237065+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-06-05T09:45:51.666071+00:00", "action": "update", "entity_type": "user", "details": {"username": "משתמש מדורי", "before": {"owner": "בעלים שלא מסגיר"}, "after": {"owner": "בעלים איכותי"}}, "changed_by": "נועם"}
 {"timestamp": "2026-06-05T09:52:35.513050+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-06-05T11:53:02.644231+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
