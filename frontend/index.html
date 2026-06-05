@@ -124,6 +124,42 @@
         >
           Preferences
         </button>
+
+        <!-- What's New bell — pushed to the left end of the tab bar in RTL -->
+        <button
+          id="changelogBtn"
+          onclick="openChangelogModal()"
+          data-i18n-title="changelog.btnTitle"
+          style="
+            margin-inline-start: auto;
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            border-radius: var(--border-radius-sm);
+            transition: color 0.15s;
+          "
+          onmouseover="this.style.color='var(--primary-color)'"
+          onmouseout="this.style.color='var(--gray-500)'"
+        >
+          <i class="fa-solid fa-bell"></i>
+          <span id="changelogBadge" style="
+            display: none;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            pointer-events: none;
+          "></span>
+        </button>
       </div>
 
       <!-- Overview Tab: Unified Table -->
@@ -1077,6 +1113,23 @@
           >
             Preferences
           </button>
+        </div>
+
+        <!-- Secondary filter bar: search, date, user -->
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; flex-wrap:wrap; align-items:center;">
+          <input id="historySearchInput" type="text" placeholder="Search…" data-i18n-placeholder="history.search"
+            oninput="setHistorySearch(this.value)"
+            style="flex:1; min-width:180px; padding:0.35rem 0.65rem; border:1.5px solid var(--gray-200); border-radius:var(--border-radius-sm); font-size:0.85rem; background:var(--gray-50); color:var(--gray-900);" />
+          <div style="display:flex; gap:0.35rem; flex-shrink:0;">
+            <button id="hdf-all"   class="btn btn-sm btn-primary"    onclick="setHistoryDateFilter('all')"   data-i18n="history.date.all">All time</button>
+            <button id="hdf-today" class="btn btn-sm btn-secondary"  onclick="setHistoryDateFilter('today')" data-i18n="history.date.today">Today</button>
+            <button id="hdf-24h"   class="btn btn-sm btn-secondary"  onclick="setHistoryDateFilter('24h')"   data-i18n="history.date.24h">24 h</button>
+            <button id="hdf-week"  class="btn btn-sm btn-secondary"  onclick="setHistoryDateFilter('week')"  data-i18n="history.date.week">Week</button>
+          </div>
+          <select id="historyUserSelect" onchange="setHistoryUserFilter(this.value)"
+            style="padding:0.35rem 0.5rem; border:1.5px solid var(--gray-200); border-radius:var(--border-radius-sm); font-size:0.85rem; background:var(--gray-50); color:var(--gray-900);">
+            <option value="all" data-i18n="history.user.all">All users</option>
+          </select>
         </div>
 
         <div
@@ -3143,6 +3196,7 @@
     <script src="js/tabs/preferences.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="js/changelog.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/sync.js"></script>
     <script src="app.js"></script>

@@ -53,9 +53,9 @@
     "missions": [
       "סופת חול",
       "סוף עונה",
-      "חתונת השנה",
       "מצילים את ווילי",
-      "רעמים וברקים"
+      "רעמים וברקים",
+      "חתונת השנה"
     ],
     "owners": [
       {
@@ -218,7 +218,7 @@
         "standby_role": "תיאום",
         "standby_mission": "רעמים וברקים",
         "status": "Usable",
-        "notes": "",
+        "notes": null,
         "frequency_band": "HVHF"
       },
       {
@@ -244,38 +244,6 @@
         "owner": "מקושקשים ומבולבלים",
         "mission_name": "סופת חול",
         "role": "חפ\"ק מפקד",
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": null,
-        "frequency_band": "LVHF"
-      },
-      {
-        "id": "radio-956e50e7",
-        "site_id": "site-ef4653df",
-        "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": null,
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": null,
-        "frequency_band": "LVHF"
-      },
-      {
-        "id": "radio-595d7dee",
-        "site_id": "site-ef4653df",
-        "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": null,
-        "mission_name": null,
-        "role": null,
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
@@ -702,52 +670,6 @@
         "id": "radio-77155986",
         "site_id": "site-7386869d",
         "device_type": "מכשיר שלא מסגיר",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": ""
-      },
-      {
-        "id": "radio-98c7d0a1",
-        "site_id": "site-7386869d",
-        "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": null,
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": "",
-        "frequency_band": "LVHF"
-      },
-      {
-        "id": "radio-b7cc8149",
-        "site_id": "site-7386869d",
-        "device_type": "מכשיר שהוא מכונה",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": ""
-      },
-      {
-        "id": "radio-5c2d59f3",
-        "site_id": "site-7386869d",
-        "device_type": "מכשיר שהוא מכונה",
         "frequency": null,
         "owner": "",
         "mission_name": null,
@@ -1271,16 +1193,17 @@
         "id": "radio-abd96b48",
         "site_id": "site-748505e4",
         "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
+        "frequency": 129.9,
+        "owner": "בעלים איכותי",
+        "mission_name": "חתונת השנה",
+        "role": "סיוע חשוב",
         "standby_frequency": null,
         "standby_owner": null,
         "standby_role": null,
         "standby_mission": null,
         "status": "Usable",
-        "notes": ""
+        "notes": "",
+        "frequency_band": "HVHF"
       },
       {
         "id": "radio-9e77fe21",
@@ -1297,21 +1220,6 @@
         "status": "Usable",
         "notes": null,
         "frequency_band": "UHF"
-      },
-      {
-        "id": "radio-23f6459a",
-        "site_id": "site-ef4653df",
-        "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": null,
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": null,
-        "standby_owner": null,
-        "standby_role": null,
-        "standby_mission": null,
-        "status": "Usable",
-        "notes": ""
       },
       {
         "id": "radio-5509c80b",
@@ -1615,36 +1523,6 @@
       }
     ],
     "planned_missions": [
-      {
-        "id": "mission-3c880ab5",
-        "name": "חתונת השנה",
-        "owner": "בעלים איכותי",
-        "status": "active",
-        "requirements": [
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-748505e4",
-            "siteName": "באר שבע",
-            "frequencyBand": "HVHF",
-            "frequency": 136.6,
-            "role": "סיור רכוב"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-c24276b5",
-            "siteName": "עפולה",
-            "frequencyBand": "LVHF",
-            "frequency": 55.5,
-            "role": "אבטחה"
-          }
-        ],
-        "created_at": "2026-05-19T23:01:35.967105",
-        "created_by": "נועם",
-        "time_start": "2026-06-05T23:01",
-        "time_end": "2026-06-12T23:01"
-      },
       {
         "id": "mission-f86bd6e8",
         "name": "סוף עונה",
@@ -2013,6 +1891,45 @@
         "created_by": "נועם",
         "time_start": "2026-06-04T22:58",
         "time_end": "2026-06-08T22:58"
+      },
+      {
+        "id": "mission-3c880ab5",
+        "name": "חתונת השנה",
+        "owner": "בעלים איכותי",
+        "status": "active",
+        "requirements": [
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "HVHF",
+            "frequency": 136.6,
+            "role": "סיור רכוב"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 55.5,
+            "role": "אבטחה"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "HVHF",
+            "frequency": 129.9,
+            "role": "סיוע חשוב"
+          }
+        ],
+        "created_at": "2026-05-19T23:01:35.967105",
+        "created_by": "נועם",
+        "time_start": "2026-06-07T23:01",
+        "time_end": "2026-06-20T23:01"
       }
     ],
     "archived_missions": [

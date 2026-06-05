@@ -483,7 +483,7 @@ async function savePlannedMission() {
             updates.standby_mission = missionName;
             updates.standby_owner = missionOwner;
           }
-          await apiCall(`/radios/${radio.id}`, "POST", updates);
+          await apiCall(`/radios/${radio.id}`, "POST", { ...updates, _trigger: 'mission_rename' });
         }
 
         if (affectedRadios.length > 0) {

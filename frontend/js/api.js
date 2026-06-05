@@ -10,7 +10,16 @@ const _API_ERROR_MAP = {
 
 function _translateApiError(msg) {
   const fn = _API_ERROR_MAP[msg];
-  return fn ? fn() : ("Error: " + msg);
+  if (fn) return fn();
+  // Network-level failures (server down, no connection) — message varies by browser
+  const lower = msg.toLowerCase();
+  if (lower.includes("failed to fetch") ||
+      lower.includes("networkerror") ||
+      lower.includes("network request failed") ||
+      lower.includes("load failed")) {
+    return t("error.serverUnreachable");
+  }
+  return "Error: " + msg;
 }
 
 async function apiCall(endpoint, method = "GET", data = null) {

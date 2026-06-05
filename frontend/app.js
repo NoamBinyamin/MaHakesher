@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupDirtyTracking();
   setupKeyboardShortcuts();
   restoreLastTab();
+  initChangelog();
 });
 
 // ==================== Dark Mode ====================

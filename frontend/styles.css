@@ -3376,3 +3376,32 @@ html.view-mode td[data-inline-editable] {
 .dark .timeline-card-meta {
   color: var(--gray-300);
 }
+
+/* ── Changelog party icon float ── */
+@keyframes changelogFloat {
+  0%, 100% { transform: translateY(0)     rotate(0deg);  }
+  25%       { transform: translateY(-10px) rotate(-8deg); }
+  75%       { transform: translateY(-5px)  rotate(6deg);  }
+}
+
+/* ── Changelog bell swing animation ── */
+@keyframes bell-swing {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(20deg); }
+  35%  { transform: rotate(-16deg); }
+  52%  { transform: rotate(11deg); }
+  67%  { transform: rotate(-7deg); }
+  80%  { transform: rotate(4deg); }
+  90%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+#changelogBtn i {
+  display: inline-block;
+  transform-origin: top center;
+  font-size: 1.25rem;
+}
+
+#changelogBtn:hover i {
+  animation: bell-swing 0.7s ease-in-out;
+}

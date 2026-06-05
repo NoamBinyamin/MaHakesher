@@ -550,11 +550,19 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         user = next((u for u in users if u['username'] == username), None)
         if not user:
             return self.send_json_response(404, {'error': 'User not found'})
-        old_role = user.get('role', 'admin')
-        user['role'] = new_role
+        old_role  = user.get('role', 'admin')
+        old_owner = user.get('owner') or None
+        user['role']  = new_role
         user['owner'] = new_owner
         save_users(users)
-        self._audit('update', 'user', details={'username': username, 'old_role': old_role, 'new_role': new_role, 'owner': new_owner})
+        before_u = {'role': old_role,  'owner': old_owner}
+        after_u  = {'role': new_role,  'owner': new_owner}
+        changed_u = [k for k in before_u if before_u[k] != after_u[k]]
+        self._audit('update', 'user', details={
+            'username': username,
+            'before': {k: before_u[k] for k in changed_u},
+            'after':  {k: after_u[k]  for k in changed_u},
+        })
         return self.send_json_response(200, {'username': username, 'role': new_role, 'owner': new_owner})
 
     def handle_reset_password(self, username, post_data):
@@ -720,7 +728,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 if link.get('owner') == old_name:
                     link['owner'] = new_name
             save_mapping(mapping)
-        self._audit('update', 'owner', owner_id, {'old_name': old_name, 'new_name': new_name})
+        self._audit('update', 'owner', owner_id, {
+            'old_name': old_name,
+            'new_name': new_name,
+            'before': {'name': old_name} if old_name != new_name else {},
+            'after':  {'name': new_name} if old_name != new_name else {},
+        })
         return self.send_json_response(200, owner)
 
     def handle_delete_owner(self, owner_id):
@@ -824,7 +837,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 if r.get('device_type') == old_name:
                     r['device_type'] = new_name
         save_data(data)
-        self._audit('update', 'device', device_id, {'old_name': old_name, 'new_name': new_name, 'old_band': old_band, 'new_band': new_band})
+        before_d = {'name': old_name, 'band': old_band}
+        after_d  = {'name': new_name, 'band': new_band}
+        changed_d = [k for k in before_d if before_d[k] != after_d[k]]
+        self._audit('update', 'device', device_id, {
+            'old_name': old_name,
+            'new_name': new_name,
+            'before': {k: before_d[k] for k in changed_d},
+            'after':  {k: after_d[k]  for k in changed_d},
+        })
         return self.send_json_response(200, device)
 
     def handle_delete_device(self, device_id):
@@ -870,7 +891,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         }
         data['data']['sites'].append(new_site)
         save_data(data)
-        self._audit('create', 'site', new_site['id'], {'name': new_site['name']})
+        sector_name = next((s.get('name', '') for s in data['data']['sectors'] if s['id'] == new_site['sector_id']), '')
+        self._audit('create', 'site', new_site['id'], {'name': new_site['name'], 'sector_name': sector_name})
         return self.send_json_response(201, new_site)
 
     def handle_create_radio(self, post_data):
@@ -916,10 +938,13 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data['data']['radios'].append(new_radio)
         save_data(data)
         site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == new_radio['site_id']), '')
+        rt_lookup = _radio_types_lookup(data['config'])
+        band = rt_lookup.get(new_radio['device_type'], '')
         self._audit('create', 'radio', new_radio['id'], {
-            'device_type': new_radio['device_type'],
-            'site_id':     new_radio['site_id'],
-            'site_name':   site_name,
+            'device_type':    new_radio['device_type'],
+            'frequency_band': band,
+            'site_id':        new_radio['site_id'],
+            'site_name':      site_name,
         })
         return self.send_json_response(201, new_radio)
 
@@ -935,6 +960,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 after = {k: sector.get(k) for k in ('name',)}
                 changed = [k for k in before if before[k] != after[k]]
                 self._audit('update', 'sector', sector_id, {
+                    'name':   before.get('name') or after.get('name', ''),
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -953,6 +979,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 after = {k: site.get(k) for k in ('name', 'coordinates_utm', 'site_type')}
                 changed = [k for k in before if before[k] != after[k]]
                 self._audit('update', 'site', site_id, {
+                    'name':   before.get('name') or after.get('name', ''),
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -996,23 +1023,33 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                         return self.send_json_response(400, {'error': err})
 
                 _tracked = ('frequency', 'owner', 'mission_name', 'role', 'status',
-                            'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role')
+                            'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role', 'notes')
                 before = {k: radio.get(k) for k in _tracked}
                 post_data.pop('id', None)
+                trigger = post_data.pop('_trigger', None)
                 radio.update(post_data)
                 save_data(data)
                 after = {k: radio.get(k) for k in _tracked}
                 changed = [k for k in _tracked if before[k] != after[k]]
-                self._audit('update', 'radio', radio_id, {
+                site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == radio.get('site_id')), '')
+                audit_details = {
+                    'device_type': radio.get('device_type', ''),
+                    'site_name':   site_name,
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
-                })
+                }
+                if trigger:
+                    audit_details['trigger'] = trigger
+                self._audit('update', 'radio', radio_id, audit_details)
                 return self.send_json_response(200, radio)
         return self.send_json_response(404, {'error': 'Radio not found'})
 
     def handle_delete_sector(self, sector_id):
         """DELETE /api/sectors/<id>"""
         data = load_data()
+        sector = next((s for s in data['data']['sectors'] if s['id'] == sector_id), None)
+        sector_name = sector.get('name', '') if sector else ''
+
         # Find sites in the sector to be deleted
         sites_in_sector = [s['id'] for s in data['data']['sites'] if s.get('sector_id') == sector_id]
 
@@ -1025,7 +1062,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         # Filter out the sector
         data['data']['sectors'] = [s for s in data['data']['sectors'] if s['id'] != sector_id]
         save_data(data)
-        self._audit('delete', 'sector', sector_id, {'cascaded_sites': sites_in_sector})
+        self._audit('delete', 'sector', sector_id, {'name': sector_name, 'cascaded_sites': sites_in_sector})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_site(self, site_id):
@@ -1033,19 +1070,35 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data = load_data()
         site = next((s for s in data['data']['sites'] if s['id'] == site_id), None)
         site_name = site.get('name', '') if site else ''
+        sector_name = ''
+        if site and site.get('sector_id'):
+            sector_name = next((sec.get('name', '') for sec in data['data']['sectors'] if sec['id'] == site['sector_id']), '')
 
         data['data']['radios'] = [r for r in data['data']['radios'] if r.get('site_id') != site_id]
         data['data']['sites']  = [s for s in data['data']['sites']  if s['id'] != site_id]
         save_data(data)
-        self._audit('delete', 'site', site_id, {'name': site_name})
+        self._audit('delete', 'site', site_id, {'name': site_name, 'sector_name': sector_name})
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_radio(self, radio_id):
         """DELETE /api/radios/<id>"""
         data = load_data()
+        radio = next((r for r in data['data']['radios'] if r['id'] == radio_id), None)
+        site_name = ''
+        if radio:
+            site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == radio.get('site_id')), '')
+        # Resolve frequency band: use stored value or look up via device type
+        band = (radio.get('frequency_band') or '') if radio else ''
+        if not band and radio and radio.get('device_type'):
+            rt_lookup = _radio_types_lookup(data['config'])
+            band = rt_lookup.get(radio['device_type'], '')
         data['data']['radios'] = [r for r in data['data']['radios'] if r['id'] != radio_id]
         save_data(data)
-        self._audit('delete', 'radio', radio_id)
+        self._audit('delete', 'radio', radio_id, {
+            'device_type':    radio.get('device_type', '') if radio else '',
+            'frequency_band': band,
+            'site_name':      site_name,
+        })
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_get_planned_missions(self):
@@ -1101,10 +1154,16 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             if mission['id'] == mission_id:
                 old_name = mission.get('name')
                 new_name = post_data.get('name')
-                before_m = {k: mission.get(k) for k in ('name', 'owner')}
+                before_m = {
+                    'name':               mission.get('name'),
+                    'owner':              mission.get('owner'),
+                    'time_start':         mission.get('time_start'),
+                    'time_end':           mission.get('time_end'),
+                    'requirements_count': len(mission.get('requirements') or []),
+                }
 
                 mission.update(post_data)
-                
+
                 if old_name and new_name and old_name != new_name:
                     # Only update config.missions if the mission is active
                     if mission.get('status') == 'active':
@@ -1122,7 +1181,13 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                             r['standby_mission'] = new_name
 
                 save_data(data)
-                after_m = {k: mission.get(k) for k in ('name', 'owner')}
+                after_m = {
+                    'name':               mission.get('name'),
+                    'owner':              mission.get('owner'),
+                    'time_start':         mission.get('time_start'),
+                    'time_end':           mission.get('time_end'),
+                    'requirements_count': len(mission.get('requirements') or []),
+                }
                 changed_m = [k for k in before_m if before_m[k] != after_m[k]]
                 self._audit('update', 'mission', mission_id, {
                     'before': {k: before_m[k] for k in changed_m},
@@ -1441,6 +1506,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 after = {k: link.get(k) for k in ('link_name', 'frequency', 'frequency_band', 'owner', 'generic_role')}
                 changed = [k for k in before if before[k] != after[k]]
                 self._audit('update', 'link', link_id, {
+                    'name':   before.get('link_name') or after.get('link_name', ''),
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
                 })
@@ -1450,9 +1516,14 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
     def handle_delete_link(self, link_id):
         """DELETE /api/links/<id>"""
         mapping = load_mapping()
+        link = next((l for l in mapping['mappings'] if l['id'] == link_id), None)
         mapping['mappings'] = [l for l in mapping['mappings'] if l['id'] != link_id]
         save_mapping(mapping)
-        self._audit('delete', 'link', link_id)
+        self._audit('delete', 'link', link_id, {
+            'link_name':      link.get('link_name', '')   if link else '',
+            'frequency':      link.get('frequency')       if link else None,
+            'frequency_band': link.get('frequency_band', '') if link else '',
+        })
         return self.send_json_response(200, {'message': 'Deleted'})
 
     # ==================== Batch Operations ====================
@@ -1478,13 +1549,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 radio['notes'] = None
                 cleared += 1
 
+        site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == site_id), '')
         save_data(data)
-        self._audit('batch_clear', 'site', site_id, {'devices_cleared': cleared})
+        self._audit('batch_clear', 'site', site_id, {'site_name': site_name, 'devices_cleared': cleared})
         return self.send_json_response(200, {'message': f'{cleared} device(s) cleared', 'cleared': cleared})
 
     def handle_batch_update_radios(self, post_data):
         """POST /api/batch/update_radios - Update multiple radios in one file write"""
         updates = post_data.get('updates', [])
+        trigger = post_data.get('_trigger')
         if not updates:
             return self.send_json_response(400, {'error': 'updates list is required'})
 
@@ -1527,10 +1600,16 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             after = {k: radio.get(k) for k in _tracked}
             changed = [k for k in _tracked if before[k] != after[k]]
             if changed:
-                self._audit('update', 'radio', radio_id, {
+                batch_site_name = next((s.get('name', '') for s in data['data']['sites'] if s['id'] == radio.get('site_id')), '')
+                audit_details = {
+                    'device_type': radio.get('device_type', ''),
+                    'site_name':   batch_site_name,
                     'before': {k: before[k] for k in changed},
                     'after':  {k: after[k]  for k in changed},
-                })
+                }
+                if trigger:
+                    audit_details['trigger'] = trigger
+                self._audit('update', 'radio', radio_id, audit_details)
             results.append(radio)
 
         save_data(data)
@@ -1541,13 +1620,19 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
     def handle_get_audit(self, parsed_path=None):
         """GET /api/audit - Return the last N audit log entries, newest first"""
         try:
-            limit = 200
+            limit = 50
+            offset = 0
             if parsed_path and parsed_path.query:
                 from urllib.parse import parse_qs
                 params = parse_qs(parsed_path.query)
                 if 'limit' in params:
                     try:
-                        limit = min(int(params['limit'][0]), 1000)
+                        limit = min(int(params['limit'][0]), 500)
+                    except (ValueError, IndexError):
+                        pass
+                if 'offset' in params:
+                    try:
+                        offset = max(0, int(params['offset'][0]))
                     except (ValueError, IndexError):
                         pass
 
@@ -1557,7 +1642,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             with open(AUDIT_LOG_FILE, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
 
-            recent = lines[-limit:] if len(lines) > limit else lines
+            total = len(lines)
+            # Entries are stored oldest-first; we want newest-first with pagination.
+            # offset=0 → last `limit` lines; offset=50 → the 50 lines before that, etc.
+            end   = max(0, total - offset)
+            start = max(0, end - limit)
+            recent = lines[start:end]
             entries = []
             for line in reversed(recent):
                 line = line.strip()

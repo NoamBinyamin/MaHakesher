@@ -29,6 +29,12 @@ async function refreshAllData() {
   ) {
     renderOwnerFreqsTab();
   }
+  if (
+    window.loadHistory && window.renderHistoryTab &&
+    document.getElementById("history")?.classList.contains("active")
+  ) {
+    loadHistory().then(renderHistoryTab);
+  }
 }
 
 function _buildSyncMessage(entry) {

@@ -132,6 +132,7 @@ async function startMission(missionId) {
           owner: missionOwner || radio.owner,
           frequency: newFrequency,
           role: requirement.role || null,
+          _trigger: 'allocate',
         });
       }
       showNotification(
@@ -146,7 +147,7 @@ async function startMission(missionId) {
   if (roleUpdates.length > 0) {
     try {
       for (const { radio, role } of roleUpdates) {
-        await apiCall(`/radios/${radio.id}`, "POST", { ...radio, role });
+        await apiCall(`/radios/${radio.id}`, "POST", { ...radio, role, _trigger: 'allocate' });
       }
       showNotification(`${roleUpdates.length} device role(s) updated`, "success");
     } catch (error) {
@@ -258,7 +259,7 @@ async function _activateStandbyInternal(mission) {
 
   if (batchUpdates.length > 0) {
     try {
-      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
+      await apiCall("/batch/update_radios", "POST", { _trigger: 'activate_standby', updates: batchUpdates });
     } catch (_) {
       failed += promoted;
       promoted = 0;
@@ -346,7 +347,7 @@ async function _demoteToStandbyInternal(mission) {
 
   if (batchUpdates.length > 0) {
     try {
-      await apiCall("/batch/update_radios", "POST", { updates: batchUpdates });
+      await apiCall("/batch/update_radios", "POST", { _trigger: 'demote_standby', updates: batchUpdates });
     } catch (_) {
       failed += demoted;
       demoted = 0;
@@ -492,6 +493,7 @@ async function allocateMission(missionId) {
   if (assignments.length > 0) {
     try {
       await apiCall("/batch/update_radios", "POST", {
+        _trigger: 'allocate',
         updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
           mission_name: missionName,
@@ -512,6 +514,7 @@ async function allocateMission(missionId) {
   if (roleUpdates.length > 0) {
     try {
       await apiCall("/batch/update_radios", "POST", {
+        _trigger: 'allocate',
         updates: roleUpdates.map(({ radio, role }) => ({ ...radio, role })),
       });
       showNotification(t("notify.roleUpdated", { count: roleUpdates.length }), "success");
@@ -607,6 +610,7 @@ async function allocateToStandby(missionId) {
   if (assignments.length > 0) {
     try {
       await apiCall("/batch/update_radios", "POST", {
+        _trigger: 'standby',
         updates: assignments.map(({ radio, requirement }) => ({
           ...radio,
           standby_mission: missionName,
@@ -739,6 +743,7 @@ async function placeOnStandby(missionId) {
           standby_owner: missionOwner || radio.standby_owner,
           standby_frequency: newStandbyFrequency,
           standby_role: requirement.role || null,
+          _trigger: 'standby',
         });
       }
       showNotification(
@@ -895,6 +900,7 @@ async function endMission(missionId) {
         standby_owner: null,
         standby_mission: null,
         standby_role: null,
+        _trigger: 'end_mission',
       });
     }
 
