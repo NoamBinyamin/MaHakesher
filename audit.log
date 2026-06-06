@@ -53,3 +53,10 @@
 {"timestamp": "2026-06-05T09:45:51.666071+00:00", "action": "update", "entity_type": "user", "details": {"username": "משתמש מדורי", "before": {"owner": "בעלים שלא מסגיר"}, "after": {"owner": "בעלים איכותי"}}, "changed_by": "נועם"}
 {"timestamp": "2026-06-05T09:52:35.513050+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
 {"timestamp": "2026-06-05T11:53:02.644231+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-06-06T12:30:51.853891+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-06-06T12:44:12.532982+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-06-06T12:46:44.168662+00:00", "action": "import", "entity_type": "full_backup", "details": {"sectors": 3, "sites": 7, "radios": 88, "warnings": 0}, "changed_by": "נועם"}
+{"timestamp": "2026-06-06T12:48:52.987490+00:00", "action": "rollback", "entity_type": "full_backup", "changed_by": "נועם"}
+{"timestamp": "2026-06-06T12:49:27.978799+00:00", "action": "login", "entity_type": "user", "details": {"username": "נועם"}}
+{"timestamp": "2026-06-06T12:49:44.076164+00:00", "action": "import", "entity_type": "full_backup", "details": {"sectors": 3, "sites": 7, "radios": 88, "warnings": 0}, "changed_by": "נועם"}
+{"timestamp": "2026-06-06T12:51:44.840176+00:00", "action": "rollback", "entity_type": "full_backup", "changed_by": "נועם"}

@@ -327,6 +327,14 @@
               <i class="fa-solid fa-download"></i> Template
             </button>
             <button
+              class="btn btn-secondary"
+              onclick="exportLinksExcel()"
+              data-i18n="links.exportExcel"
+            >
+              <i class="fa-solid fa-file-excel" style="color: #16a34a"></i>
+              Export Excel
+            </button>
+            <button
               class="btn btn-secondary view-mode-hide"
               onclick="document.getElementById('linkExcelUpload').click()"
               data-i18n="links.importExcel"
@@ -817,26 +825,6 @@
             ></i>
             Summary Statistics
           </h2>
-          <div style="display: flex; gap: 0.75rem">
-            <button class="btn btn-secondary" onclick="exportData()">
-              <i class="fa-solid fa-download"></i>
-              <span data-i18n="summary.export">Export Backup</span>
-            </button>
-            <button
-              class="btn btn-secondary view-mode-hide"
-              onclick="document.getElementById('importFileInput').click()"
-            >
-              <i class="fa-solid fa-upload"></i>
-              <span data-i18n="summary.import">Import Backup</span>
-            </button>
-            <input
-              type="file"
-              id="importFileInput"
-              accept=".json"
-              style="display: none"
-              onchange="importData(this)"
-            />
-          </div>
         </div>
         <div class="summary-grid">
           <div class="summary-card summary-accent-blue">

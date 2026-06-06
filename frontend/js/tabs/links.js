@@ -223,11 +223,8 @@ async function handleLinkExcelUpload(input) {
           continue;
         }
 
-        // Auto-detect band if column is absent or cell is empty
-        let frequencyBand =
-          bandIdx >= 0 ? String(row[bandIdx] || "").trim() : "";
-        if (!frequencyBand)
-          frequencyBand = getBandForFrequency(frequency) || "";
+        // Always auto-detect band from frequency; band column is optional/ignored
+        let frequencyBand = getBandForFrequency(frequency) || "";
         if (!frequencyBand) {
           errors.push(
             t("error.noBandDetected", { row: i + 1, freq: frequency }),
@@ -380,21 +377,38 @@ function closeLinkImportErrorsModal() {
   if (modal) modal.remove();
 }
 
+function exportLinksExcel() {
+  const links = (window.appState?.links || []).slice();
+  if (!links.length) {
+    showNotification(t("links.exportEmpty") || "No links to export", "warning");
+    return;
+  }
+  const rows = [
+    ["Link Name", "Frequency", "Band", "Owner", "Generic Role"],
+    ...links.map(l => [
+      l.link_name || "",
+      l.frequency || "",
+      l.frequency_band || "",
+      l.owner || "",
+      l.generic_role || "",
+    ]),
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"] = [{ wch: 22 }, { wch: 14 }, { wch: 12 }, { wch: 20 }, { wch: 18 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Links");
+  XLSX.writeFile(wb, "links_export.xlsx");
+}
+
 function downloadLinkTemplate() {
   const template = [
-    ["Link Name", "Frequency", "Band", "Owner", "Generic Role"],
-    ["NAME", "FREQUENCY", "FREQUENCY-BAND", "OWNER-NAME", "ROLE (optional)"],
+    ["Link Name", "Frequency", "Owner", "Generic Role"],
+    ["NAME", "FREQUENCY", "OWNER-NAME", "ROLE (optional)"],
   ];
   const ws = XLSX.utils.aoa_to_sheet(template);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Links");
-  ws["!cols"] = [
-    { wch: 20 },
-    { wch: 14 },
-    { wch: 12 },
-    { wch: 20 },
-    { wch: 18 },
-  ];
+  ws["!cols"] = [{ wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 18 }];
   XLSX.writeFile(wb, "link_dictionary_template.xlsx");
 }
 
@@ -405,4 +419,5 @@ window.lookupLink = lookupLink;
 window.clearLinkLookup = clearLinkLookup;
 window.handleLinkExcelUpload = handleLinkExcelUpload;
 window.downloadLinkTemplate = downloadLinkTemplate;
+window.exportLinksExcel = exportLinksExcel;
 window.closeLinkImportErrorsModal = closeLinkImportErrorsModal;

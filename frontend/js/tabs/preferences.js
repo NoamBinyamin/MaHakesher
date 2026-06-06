@@ -32,12 +32,16 @@ async function renderPreferencesTab() {
         <div style="flex:1;min-width:300px" id="prefOwnersSection"></div>
         <div style="flex:1;min-width:300px" id="prefDevicesSection"></div>
       </div>
-      <div style="margin-top:1.25rem">${_renderLanguageSection()}</div>`;
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;margin-top:1.25rem">
+        <div style="flex:1;min-width:260px">${_renderLanguageSection()}</div>
+        <div style="flex:1;min-width:260px" id="prefDataSection"></div>
+      </div>`;
   }
 
   _renderOwnersSection();
   _renderDevicesSection();
   _renderUsersSection();
+  _renderDataSection();
 }
 
 // ── Language section ─────────────────────────────────────────────────────────
@@ -975,6 +979,50 @@ function closeRolesHelp() {
   const modal = document.getElementById("rolesHelpModal");
   if (modal) modal.remove();
   enableBodyScroll();
+}
+
+// ── Data backup section ───────────────────────────────────────────────────────
+
+async function _renderDataSection() {
+  const sec = document.getElementById("prefDataSection");
+  if (!sec) return;
+  if (!isAdminRole()) { sec.innerHTML = ""; return; }
+
+  let rollbackAvailable = false;
+  let rollbackDate = "";
+  try {
+    const res = await apiCall("/rollback_available");
+    rollbackAvailable = res?.available || false;
+    if (res?.saved_at) rollbackDate = new Date(res.saved_at).toLocaleString();
+  } catch (_) {}
+
+  const rollbackBtn = rollbackAvailable ? `
+        <button class="btn btn-sm btn-danger" onclick="rollbackImport()" title="${escapeHTML(t("import.rollback.hint"))}">
+          <i class="fa-solid fa-rotate-left"></i>
+          ${escapeHTML(t("import.rollback.btn"))}
+          <span style="font-size:0.75rem;opacity:0.8;margin-inline-start:0.3rem;">(${escapeHTML(rollbackDate)})</span>
+        </button>` : "";
+
+  sec.innerHTML = `
+    <div class="pref-section-card">
+      <h3 class="pref-section-title"><i class="fa-solid fa-database"></i> ${escapeHTML(t("pref.data.title"))}</h3>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;padding:0.75rem 0.25rem 0.25rem;">
+        <button class="btn btn-secondary" onclick="exportData()">
+          <i class="fa-solid fa-download"></i>
+          <span>${escapeHTML(t("summary.export"))}</span>
+        </button>
+        <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()">
+          <i class="fa-solid fa-upload"></i>
+          <span>${escapeHTML(t("summary.import"))}</span>
+        </button>
+        <button class="btn btn-secondary" onclick="exportRadiosExcel()">
+          <i class="fa-solid fa-file-excel" style="color:#16a34a"></i>
+          <span>${escapeHTML(t("export.radios.btn"))}</span>
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(this)" />
+        ${rollbackBtn}
+      </div>
+    </div>`;
 }
 
 // ── Exports ──────────────────────────────────────────────────────────────────

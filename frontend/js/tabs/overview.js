@@ -397,11 +397,109 @@ function renderOverview() {
   _updateCollapseAllBtn();
 }
 
+// ==================== Excel Export ====================
+
+function _contrastHex(hex) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5 ? "000000" : "FFFFFF";
+}
+
+function exportRadiosExcel() {
+  const hierarchy = window.appState?.hierarchy || [];
+  if (!hierarchy.length) {
+    showNotification(t("links.exportEmpty"), "warning");
+    return;
+  }
+
+  const owners = window.appState?.config?.owners || [];
+  const ownerColors = {};
+  for (const o of owners) {
+    if (o.name && o.light) {
+      const bg = o.light.replace('#', '').toUpperCase().padStart(6, '0');
+      ownerColors[o.name] = { bg, fg: _contrastHex(o.light) };
+    }
+  }
+
+  const headers = [
+    t("export.col.sector"), t("export.col.site"),
+    t("export.col.band"), t("export.col.device"), t("export.col.freq"),
+    t("export.col.owner"), t("export.col.mission"), t("export.col.role"),
+    t("export.col.standbyFreq"), t("export.col.standbyOwner"),
+    t("export.col.standbyMission"), t("export.col.standbyRole"),
+    t("export.col.status"), t("export.col.notes"),
+  ];
+
+  const rows = [headers];
+  const ownerCells = [];
+
+  for (const sector of hierarchy) {
+    for (const site of (sector.sites || [])) {
+      for (const radio of (site.radios || [])) {
+        const rowIdx = rows.length;
+        rows.push([
+          sector.name || "",
+          site.name || "",
+          radio.frequency_band || "",
+          radio.device_type || "",
+          radio.frequency != null ? radio.frequency : "",
+          radio.owner || "",
+          radio.mission_name || "",
+          radio.role || "",
+          radio.standby_frequency != null ? radio.standby_frequency : "",
+          radio.standby_owner || "",
+          radio.standby_mission || "",
+          radio.standby_role || "",
+          t(radio.status === "Usable" ? "status.usable" : "status.unusable"),
+          radio.notes || "",
+        ]);
+        if (radio.owner)         ownerCells.push({ row: rowIdx, col: 5, owner: radio.owner });
+        if (radio.standby_owner) ownerCells.push({ row: rowIdx, col: 9, owner: radio.standby_owner });
+      }
+    }
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Style header row
+  for (let c = 0; c < headers.length; c++) {
+    const ref = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[ref]) ws[ref].s = {
+      fill: { patternType: "solid", fgColor: { rgb: "374151" } },
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+    };
+  }
+
+  // Apply owner background colors
+  for (const { row, col, owner } of ownerCells) {
+    const colors = ownerColors[owner];
+    if (!colors) continue;
+    const ref = XLSX.utils.encode_cell({ r: row, c: col });
+    if (ws[ref]) ws[ref].s = {
+      fill: { patternType: "solid", fgColor: { rgb: colors.bg } },
+      font: { color: { rgb: colors.fg } },
+    };
+  }
+
+  ws["!cols"] = [
+    { wch: 16 }, { wch: 14 }, { wch: 8  }, { wch: 18 }, { wch: 12 },
+    { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 18 },
+    { wch: 18 }, { wch: 14 }, { wch: 10 }, { wch: 24 },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Radios");
+  XLSX.writeFile(wb, `radios-export-${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
 // Export for inline onclick handlers
 window.renderOverview = renderOverview;
 window.clearDevice = clearDevice;
 window.switchDeviceStates = switchDeviceStates;
 window.clearAllDevicesAtSite = clearAllDevicesAtSite;
+window.exportRadiosExcel = exportRadiosExcel;
 
 async function switchDeviceStates(radioId) {
   const radio = window.appState.radios.find((r) => r.id === radioId);

@@ -641,25 +641,21 @@ async function handleMissionExcelUpload(input) {
       const header = rows[0].map((h) =>
         String(h || "").trim().toLowerCase(),
       );
-      const bandIdx = header.findIndex((h) => h.includes("band"));
+      const freqIdx = header.findIndex(
+        (h) => h.includes("mhz") || h.includes("freq") || h.includes("תדר"),
+      );
       const sectorIdx = header.findIndex(
         (h) => h.includes("sector") || h.includes("סקטור"),
       );
       const siteIdx = header.findIndex(
         (h) => h.includes("site") || h.includes("תחנה"),
       );
-      const freqIdx = header.findIndex(
-        (h) =>
-          h.includes("mhz") ||
-          (h.includes("freq") && !h.includes("band")) ||
-          h.includes("תדר"),
-      );
       const roleIdx = header.findIndex(
         (h) => h.includes("role") || h.includes("תפקיד"),
       );
 
-      if (bandIdx === -1) {
-        showNotification(t("notify.excelNoBandCol"), "error");
+      if (freqIdx === -1) {
+        showNotification(t("notify.excelNoFreqCol"), "error");
         return;
       }
 
@@ -668,58 +664,42 @@ async function handleMissionExcelUpload(input) {
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        if (!row || row.length === 0 || !row[bandIdx]) continue;
+        if (!row || row.length === 0) continue;
 
-        const frequencyBand = String(row[bandIdx] || "").trim();
+        // Frequency — required
+        const rawFreq = row[freqIdx];
+        if (rawFreq === undefined || rawFreq === null || rawFreq === "") continue;
+        const frequency = parseFloat(String(rawFreq).trim());
+        if (isNaN(frequency)) {
+          errors.push(t("import.link.invalidFreq", { row: i + 1, name: `row ${i + 1}` }));
+          continue;
+        }
+
+        // Band — always auto-detected from frequency
+        const frequencyBand = getBandForFrequency(frequency) || "";
+        if (!frequencyBand) {
+          errors.push(t("error.noBandDetected", { row: i + 1, freq: frequency }));
+          continue;
+        }
+
+        const limits = window.appState.config.frequency_bands[frequencyBand];
+        if (limits && (frequency < limits.min || frequency > limits.max)) {
+          errors.push(t("error.freqOutOfRangeRow", { row: i + 1, freq: frequency, band: frequencyBand, min: limits.min, max: limits.max }));
+          continue;
+        }
+        if (!isFreqAlignedToStep(frequency, frequencyBand)) {
+          errors.push(t("error.freqNotAlignedRow", { row: i + 1, freq: frequency, step: limits?.step, band: frequencyBand }));
+          continue;
+        }
+
         const sectorName = sectorIdx >= 0 ? String(row[sectorIdx] || "").trim() : "";
-        const siteName = siteIdx >= 0 ? String(row[siteIdx] || "").trim() : "";
-        const role = roleIdx >= 0 ? String(row[roleIdx] || "").trim() : "";
+        const siteName   = siteIdx   >= 0 ? String(row[siteIdx]   || "").trim() : "";
+        const role       = roleIdx   >= 0 ? String(row[roleIdx]   || "").trim() : "";
 
-        if (sectorName && siteName) {
-          errors.push(t("import.mission.bothSectorSite", { row: i + 1 }));
+        // Sector / site — at least one required
+        if (!sectorName && !siteName) {
+          errors.push(t("import.mission.noSectorOrSite", { row: i + 1 }));
           continue;
-        }
-
-        let frequency = null;
-        if (
-          freqIdx >= 0 &&
-          row[freqIdx] !== undefined &&
-          row[freqIdx] !== null &&
-          row[freqIdx] !== ""
-        ) {
-          const parsed = parseFloat(String(row[freqIdx]).trim());
-          if (!isNaN(parsed)) frequency = parsed;
-        }
-
-        const validBands = Object.keys(
-          window.appState.config.frequency_bands || {},
-        );
-        if (!validBands.includes(frequencyBand)) {
-          errors.push(
-            t("import.mission.unknownBand", { row: i + 1, band: frequencyBand }),
-          );
-          continue;
-        }
-
-        if (frequency) {
-          const limits = window.appState.config.frequency_bands[frequencyBand];
-          if (limits && (frequency < limits.min || frequency > limits.max)) {
-            errors.push(
-              t("error.freqOutOfRangeRow", {
-                row: i + 1,
-                freq: frequency,
-                band: frequencyBand,
-                min: limits.min,
-                max: limits.max,
-              }),
-            );
-            continue;
-          }
-          if (!isFreqAlignedToStep(frequency, frequencyBand)) {
-            const step = (limits || {}).step;
-            errors.push(t("error.freqNotAlignedRow", { row: i + 1, freq: frequency, step, band: frequencyBand }));
-            continue;
-          }
         }
 
         let sectorId = null;
@@ -731,31 +711,40 @@ async function handleMissionExcelUpload(input) {
           const site = window.appState.sites.find(
             (s) => s.name.toLowerCase() === siteName.toLowerCase(),
           );
-          if (site) {
-            siteId = site.id;
-            resolvedSiteName = site.name;
-            sectorId = site.sector_id;
-            const sector = window.appState.sectors.find((s) => s.id === sectorId);
-            resolvedSectorName = sector ? sector.name : null;
-          } else {
-            errors.push(
-              t("import.mission.siteNotFound", { row: i + 1, name: siteName }),
-            );
+          if (!site) {
+            errors.push(t("import.mission.siteNotFound", { row: i + 1, name: siteName }));
             continue;
           }
-        } else if (sectorName) {
+          siteId = site.id;
+          resolvedSiteName = site.name;
+          sectorId = site.sector_id;
+          const sector = window.appState.sectors.find((s) => s.id === sectorId);
+          resolvedSectorName = sector ? sector.name : null;
+
+          // Both provided — validate site belongs to the given sector
+          if (sectorName) {
+            const givenSector = window.appState.sectors.find(
+              (s) => s.name.toLowerCase() === sectorName.toLowerCase(),
+            );
+            if (!givenSector) {
+              errors.push(t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }));
+              continue;
+            }
+            if (site.sector_id !== givenSector.id) {
+              errors.push(t("import.mission.siteNotInSector", { row: i + 1, site: siteName, sector: sectorName }));
+              continue;
+            }
+          }
+        } else {
           const sector = window.appState.sectors.find(
             (s) => s.name.toLowerCase() === sectorName.toLowerCase(),
           );
-          if (sector) {
-            sectorId = sector.id;
-            resolvedSectorName = sector.name;
-          } else {
-            errors.push(
-              t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }),
-            );
+          if (!sector) {
+            errors.push(t("import.mission.sectorNotFound", { row: i + 1, name: sectorName }));
             continue;
           }
+          sectorId = sector.id;
+          resolvedSectorName = sector.name;
         }
 
         missionRequirements.push({
@@ -844,20 +833,14 @@ function closeExcelImportErrorsModal() {
 
 function downloadMissionTemplate() {
   const template = [
-    ["Frequency Band", "Sector", "Site", "Frequency (MHz)", "Role"],
-    ["FREQUENCY-BAND", "SECTOR-OPTIONAL", "SITE-OPTIONAL", "FREQUENCY", "ROLE"],
+    ["Frequency (MHz)", "Sector", "Site", "Role (optional)"],
+    ["FREQUENCY", "SECTOR (or Site)", "SITE (or Sector)", "ROLE"],
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(template);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Mission Requirements");
-  ws["!cols"] = [
-    { wch: 18 },
-    { wch: 20 },
-    { wch: 20 },
-    { wch: 20 },
-    { wch: 15 },
-  ];
+  ws["!cols"] = [{ wch: 20 }, { wch: 22 }, { wch: 22 }, { wch: 18 }];
   XLSX.writeFile(wb, "mission_requirements_template.xlsx");
 }
 

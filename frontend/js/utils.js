@@ -93,45 +93,226 @@ async function exportData() {
 async function importData(input) {
   const file = input.files[0];
   if (!file) return;
+  input.value = "";
 
-  if (!confirm(t("confirm.importData"))) {
-    input.value = "";
+  let payload;
+  try {
+    payload = JSON.parse(await file.text());
+  } catch (_) {
+    showNotification(t("notify.importBadFile"), "error");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const importPayload = JSON.parse(e.target.result);
+  if (!payload.data?.config || !payload.data?.data) {
+    showNotification(t("notify.importBadFile"), "error");
+    return;
+  }
 
-      if (!importPayload.data) {
-        showNotification(t("notify.importBadFile"), "error");
-        return;
-      }
+  _showImportConfirmModal(payload);
+}
 
-      await apiCall("/import", "POST", importPayload);
-      showNotification(t("notify.importOk"), "success");
-      await loadConfiguration();
-      await loadAllData();
-      await loadLinks();
-      populateSelects();
-      renderOverview();
-      renderMissionsTab();
-      renderLinksTab();
-      renderSummaryTab();
-    } catch (error) {
-      showNotification(
-        t("notify.importFailed", { error: error.message }),
-        "error",
-      );
-    }
+function _showImportConfirmModal(payload) {
+  const existing = document.getElementById("importConfirmModal");
+  if (existing) existing.remove();
+
+  const cfg = payload.data?.config || {};
+  const d   = payload.data?.data   || {};
+
+  const cur = {
+    radios:   (window.appState?.radios              || []).length,
+    links:    (window.appState?.links               || []).length,
+    missions: (window.appState?.plannedMissions     || []).length,
+    sectors:  (window.appState?.sectors             || []).length,
+    sites:    (window.appState?.sites               || []).length,
+    owners:   (window.appState?.config?.owners      || []).length,
+    devices:  (window.appState?.config?.radio_types || []).length,
   };
-  reader.readAsText(file);
-  input.value = "";
+  const inc = {
+    radios:   (d.radios                          || []).length,
+    links:    (payload.mapping?.mappings         || []).length,
+    missions: (d.planned_missions               || []).length,
+    sectors:  (d.sectors                        || []).length,
+    sites:    (d.sites                          || []).length,
+    owners:   (cfg.owners                       || []).length,
+    devices:  (cfg.radio_types                  || []).length,
+  };
+
+  // Client-side cross-reference validation
+  const warnings = [];
+  const ownerNames  = new Set((cfg.owners      || []).map(o  => o.name).filter(Boolean));
+  const deviceNames = new Set((cfg.radio_types || []).map(dt => dt.name).filter(Boolean));
+  for (const r of (d.radios || [])) {
+    const lbl = r.name || r.id || "?";
+    if (r.owner       && !ownerNames.has(r.owner))
+      warnings.push(`Radio "${lbl}": unknown owner "${r.owner}"`);
+    if (r.device_type && !deviceNames.has(r.device_type))
+      warnings.push(`Radio "${lbl}": unknown device type "${r.device_type}"`);
+  }
+  for (const lnk of (d.links || [])) {
+    const lbl = lnk.link_name || lnk.id || "?";
+    if (lnk.owner && !ownerNames.has(lnk.owner))
+      warnings.push(`Link "${lbl}": unknown owner "${lnk.owner}"`);
+  }
+  for (const m of (d.planned_missions || [])) {
+    const lbl = m.name || m.id || "?";
+    if (m.owner && !ownerNames.has(m.owner))
+      warnings.push(`Mission "${lbl}": unknown owner "${m.owner}"`);
+  }
+
+  const exportedAt = payload.exported_at
+    ? new Date(payload.exported_at).toLocaleString()
+    : "—";
+
+  const rowDefs = [
+    ["import.modal.radios",   "fa-walkie-talkie", cur.radios,   inc.radios  ],
+    ["import.modal.links",    "fa-link",          cur.links,    inc.links   ],
+    ["import.modal.missions", "fa-crosshairs",    cur.missions, inc.missions],
+    ["import.modal.sectors",  "fa-layer-group",   cur.sectors,  inc.sectors ],
+    ["import.modal.sites",    "fa-location-dot",  cur.sites,    inc.sites   ],
+    ["import.modal.owners",   "fa-users",         cur.owners,   inc.owners  ],
+    ["import.modal.devices",  "fa-microchip",     cur.devices,  inc.devices ],
+  ];
+
+  const tableRows = rowDefs.map(([key, icon, c, i]) => {
+    const diff = i - c;
+    const diffCell = diff === 0
+      ? `<span style="color:var(--gray-400)">—</span>`
+      : `<span style="color:${diff > 0 ? "var(--success-color)" : "var(--danger-color)"};font-weight:600;">${diff > 0 ? "+" : ""}${diff}</span>`;
+    return `<tr style="border-bottom:1px solid var(--gray-100);">
+      <td style="padding:0.4rem 0.75rem;color:var(--gray-700);">
+        <i class="fa-solid ${icon}" style="color:var(--gray-400);width:1rem;margin-inline-end:0.35rem;"></i>${escapeHTML(t(key))}
+      </td>
+      <td style="padding:0.4rem 0.75rem;text-align:center;color:var(--gray-500);">${c}</td>
+      <td style="padding:0.4rem 0.75rem;text-align:center;font-weight:600;">${i}</td>
+      <td style="padding:0.4rem 0.75rem;text-align:center;">${diffCell}</td>
+    </tr>`;
+  }).join("");
+
+  const warningsHtml = warnings.length ? `
+    <div style="margin-top:1rem;padding:0.75rem 1rem;background:rgba(217,119,6,0.12);border:1px solid var(--warning-color);border-radius:6px;">
+      <p style="margin:0 0 0.4rem;font-weight:600;color:var(--warning-color);">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        ${warnings.length} ${escapeHTML(t("import.modal.warnings"))}
+      </p>
+      <ul style="margin:0;padding-inline-start:1.25rem;font-size:0.82rem;color:var(--gray-700);">
+        ${warnings.map(w => `<li>${escapeHTML(w)}</li>`).join("")}
+      </ul>
+    </div>` : "";
+
+  const modal = document.createElement("div");
+  modal.id = "importConfirmModal";
+  modal.className = "modal";
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:500px;">
+      <div class="modal-header">
+        <h3>
+          <i class="fa-solid fa-file-import" style="color:var(--primary-color);margin-inline-end:0.4rem;"></i>
+          ${escapeHTML(t("import.modal.title"))}
+        </h3>
+        <button class="modal-close" onclick="closeImportConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-form" style="padding:1.25rem;">
+        <p style="font-size:0.83rem;color:var(--gray-500);margin:0 0 1rem;">
+          <i class="fa-regular fa-clock"></i>
+          ${escapeHTML(t("import.modal.exportedAt"))}: <strong>${escapeHTML(exportedAt)}</strong>
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--gray-200);">
+              <th style="padding:0.3rem 0.75rem;color:var(--gray-500);font-weight:600;"></th>
+              <th style="padding:0.3rem 0.75rem;text-align:center;color:var(--gray-500);font-weight:600;">${escapeHTML(t("import.modal.current"))}</th>
+              <th style="padding:0.3rem 0.75rem;text-align:center;color:var(--gray-500);font-weight:600;">${escapeHTML(t("import.modal.inFile"))}</th>
+              <th style="padding:0.3rem 0.75rem;text-align:center;color:var(--gray-500);font-weight:600;">${escapeHTML(t("import.modal.diff"))}</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+        ${warningsHtml}
+        <div style="margin-top:1.25rem;padding:0.75rem 1rem;background:rgba(220,38,38,0.1);border:1.5px solid var(--danger-color);border-radius:6px;">
+          <p style="margin:0 0 0.25rem;font-weight:600;color:var(--danger-color);">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            ${escapeHTML(t("import.modal.warning"))}
+          </p>
+          <p style="margin:0;font-size:0.82rem;color:var(--gray-600);">
+            ${escapeHTML(t("import.modal.warningDetail"))}
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeImportConfirmModal()">
+          ${escapeHTML(t("btn.cancel"))}
+        </button>
+        <button class="btn btn-danger" onclick="_doImport()">
+          <i class="fa-solid fa-file-import"></i>
+          ${escapeHTML(t("import.modal.confirm"))}
+        </button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeImportConfirmModal(); });
+  disableBodyScroll();
+  window._pendingImportPayload = payload;
+}
+
+function closeImportConfirmModal() {
+  const modal = document.getElementById("importConfirmModal");
+  if (modal) modal.remove();
+  enableBodyScroll();
+  window._pendingImportPayload = null;
+}
+
+async function _doImport() {
+  const payload = window._pendingImportPayload;
+  if (!payload) return;
+  closeImportConfirmModal();
+  try {
+    const res = await apiCall("/import", "POST", payload);
+    const warnCount = res?.warnings?.length || 0;
+    showNotification(
+      t("notify.importOk") + (warnCount ? ` — ${warnCount} ${t("import.modal.warnings")}` : ""),
+      warnCount ? "warning" : "success",
+    );
+    await loadConfiguration();
+    await loadAllData();
+    await loadLinks();
+    populateSelects();
+    renderOverview();
+    renderMissionsTab();
+    renderLinksTab();
+    renderSummaryTab();
+    if (typeof renderPreferencesTab === "function") renderPreferencesTab();
+  } catch (error) {
+    showNotification(t("notify.importFailed", { error: error.message }), "error");
+  }
+}
+
+async function rollbackImport() {
+  if (!confirm(t("import.rollback.confirm"))) return;
+  try {
+    await apiCall("/rollback_import", "POST", {});
+    showNotification(t("import.rollback.ok"), "success");
+    await loadConfiguration();
+    await loadAllData();
+    await loadLinks();
+    populateSelects();
+    renderOverview();
+    renderMissionsTab();
+    renderLinksTab();
+    renderSummaryTab();
+    if (typeof renderPreferencesTab === "function") renderPreferencesTab();
+  } catch (error) {
+    showNotification(t("import.rollback.failed"), "error");
+  }
 }
 
 window.exportData = exportData;
 window.importData = importData;
+window._showImportConfirmModal = _showImportConfirmModal;
+window.closeImportConfirmModal = closeImportConfirmModal;
+window._doImport = _doImport;
+window.rollbackImport = rollbackImport;
 window.getMissionOwner = getMissionOwner;
 window.getBandForFrequency = getBandForFrequency;
 

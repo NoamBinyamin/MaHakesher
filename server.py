@@ -304,6 +304,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_version()
         elif path == '/api/export':
             return self.handle_export()
+        elif path == '/api/rollback_available':
+            return self.handle_rollback_available()
         elif path == '/api/audit':
             return self.handle_get_audit(parsed_path)
         elif path.startswith('/api/'):
@@ -396,6 +398,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_create_link(post_data)
         elif path == '/api/import':
             return self.handle_import(post_data)
+        elif path == '/api/rollback_import':
+            return self.handle_rollback_import()
         elif path == '/api/batch/clear_site':
             return self.handle_batch_clear_site(post_data)
         elif path == '/api/batch/update_radios':
@@ -1715,13 +1719,40 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
 
         imported_data = post_data['data']
 
-        # Basic structural validation
+        # Structural validation
         if 'config' not in imported_data or 'data' not in imported_data:
             return self.send_json_response(400, {'error': 'Invalid data structure: must contain "config" and "data" keys'})
 
         required_data_keys = {'sectors', 'sites', 'radios'}
         if not required_data_keys.issubset(set(imported_data.get('data', {}).keys())):
             return self.send_json_response(400, {'error': f'Invalid data structure: "data" must contain {required_data_keys}'})
+
+        # Cross-reference validation — collect warnings (non-blocking)
+        warnings = []
+        cfg = imported_data.get('config', {})
+        d   = imported_data.get('data', {})
+        owner_names  = {o['name']  for o in cfg.get('owners', [])      if 'name' in o}
+        device_names = {dv['name'] for dv in cfg.get('radio_types', []) if 'name' in dv}
+
+        for r in d.get('radios', []):
+            lbl = r.get('name') or r.get('id', '?')
+            if r.get('owner') and r['owner'] not in owner_names:
+                warnings.append(f'Radio "{lbl}": unknown owner "{r["owner"]}"')
+            if r.get('device_type') and r['device_type'] not in device_names:
+                warnings.append(f'Radio "{lbl}": unknown device type "{r["device_type"]}"')
+        for lnk in d.get('links', []):
+            lbl = lnk.get('link_name') or lnk.get('id', '?')
+            if lnk.get('owner') and lnk['owner'] not in owner_names:
+                warnings.append(f'Link "{lbl}": unknown owner "{lnk["owner"]}"')
+        for m in d.get('planned_missions', []):
+            lbl = m.get('name') or m.get('id', '?')
+            if m.get('owner') and m['owner'] not in owner_names:
+                warnings.append(f'Mission "{lbl}": unknown owner "{m["owner"]}"')
+
+        # Save pre-import backup before overwriting
+        pre_import_path = os.path.join(_BASE_DIR, 'data_pre_import.json')
+        with open(pre_import_path, 'w', encoding='utf-8') as f:
+            json.dump(load_data(), f, ensure_ascii=False, indent=2)
 
         # Migrate imported data to current schema before saving
         migrate_config(imported_data)
@@ -1733,8 +1764,38 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             if 'mappings' in imported_mapping:
                 save_mapping(imported_mapping)
 
-        self._audit('import', 'full_backup', details={'sectors': len(imported_data['data'].get('sectors', [])), 'sites': len(imported_data['data'].get('sites', [])), 'radios': len(imported_data['data'].get('radios', []))})
-        return self.send_json_response(200, {'message': 'Data imported successfully'})
+        self._audit('import', 'full_backup', details={
+            'sectors':  len(d.get('sectors', [])),
+            'sites':    len(d.get('sites', [])),
+            'radios':   len(d.get('radios', [])),
+            'warnings': len(warnings),
+        })
+        return self.send_json_response(200, {
+            'message': 'Data imported successfully',
+            'warnings': warnings,
+            'backup_saved': True,
+        })
+
+    def handle_rollback_available(self):
+        """GET /api/rollback_available"""
+        pre_import_path = os.path.join(_BASE_DIR, 'data_pre_import.json')
+        if not os.path.exists(pre_import_path):
+            return self.send_json_response(200, {'available': False})
+        mtime = os.path.getmtime(pre_import_path)
+        saved_at = datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat()
+        return self.send_json_response(200, {'available': True, 'saved_at': saved_at})
+
+    def handle_rollback_import(self):
+        """POST /api/rollback_import"""
+        pre_import_path = os.path.join(_BASE_DIR, 'data_pre_import.json')
+        if not os.path.exists(pre_import_path):
+            return self.send_json_response(404, {'error': 'No pre-import backup found'})
+        with open(pre_import_path, 'r', encoding='utf-8') as f:
+            backup_data = json.load(f)
+        save_data(backup_data)
+        os.remove(pre_import_path)
+        self._audit('rollback', 'full_backup', details={})
+        return self.send_json_response(200, {'message': 'Rollback successful'})
 
     # ==================== Helper Methods ====================
 

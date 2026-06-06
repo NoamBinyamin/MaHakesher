@@ -419,6 +419,8 @@ function describeTitle(entry) {
         sites:   details.sites,
         radios:  details.radios,
       });
+    case "rollback":
+      return t("history.rollback");
     default:
       return `${action} ${entity_type}`;
   }
@@ -534,7 +536,7 @@ function _matchesEntityFilter(e, filter) {
   if (filter === "site")        return (e.entity_type === "site" && !_isSectorLevel(e)) || _isSiteLevel(e);
   if (filter === "sector")      return e.entity_type === "sector" || _isSectorLevel(e);
   if (filter === "mission")     return e.entity_type === "mission" || e.entity_type === "archived_mission";
-  if (filter === "preferences") return e.entity_type === "owner" || e.entity_type === "device" || e.entity_type === "user";
+  if (filter === "preferences") return e.entity_type === "owner" || e.entity_type === "device" || e.entity_type === "user" || e.entity_type === "full_backup";
   return e.entity_type === filter;
 }
 
