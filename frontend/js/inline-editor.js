@@ -3,6 +3,10 @@
 // Track currently open editor
 let activeInlineEditor = null;
 
+// Promise that resolves once the in-flight save + renderOverview completes.
+// openInlineEditor awaits this so the DOM is stable before a new editor opens.
+let _pendingSave = null;
+
 // Column configuration: which fields use dropdowns (key matches data-col attribute)
 // 1=Frequency Band, 2=Device Type (not editable), 3=Frequency, 4=Owner, 5=Mission,
 // 6=Role (editable when no mission), 7=Standby Frequency, 8=Standby Owner, 9=Standby Mission,
@@ -230,8 +234,28 @@ function clearInlineError(cell) {
   if (existingError) existingError.remove();
 }
 
-function openInlineEditor(cell, radioId, columnIndex) {
+function _findRadioCell(radioId, columnIndex) {
+  const btn = document.querySelector(
+    `td.col-actions button[onclick*="openRadioModal('${radioId}')"]`
+  );
+  if (!btn) return null;
+  const row = btn.closest("tr");
+  return row ? row.querySelector(`td[data-col="${columnIndex}"]`) : null;
+}
+
+async function openInlineEditor(cell, radioId, columnIndex) {
   if (window.guardAdminOnly && guardAdminOnly()) return;
+  if (window._ovHideMaintenanceTip) _ovHideMaintenanceTip();
+
+  // If a save + re-render is in flight, wait for it so the DOM is stable,
+  // then re-find the cell (renderOverview rebuilds the table entirely).
+  if (_pendingSave) {
+    await _pendingSave;
+    const freshCell = _findRadioCell(radioId, columnIndex);
+    if (!freshCell) return;
+    cell = freshCell;
+  }
+
   // Close any existing editor first
   closeInlineEditor(true);
 
@@ -435,27 +459,29 @@ function saveInlineEdit(cell, radioId, columnIndex, input, radio) {
   }
 
   // Call API to update
-  apiCall(`/radios/${radioId}`, "POST", updateData)
-    .then(() => {
+  _pendingSave = apiCall(`/radios/${radioId}`, "POST", updateData)
+    .then(async () => {
       showNotification(t("notify.deviceUpdated"), "success");
       // Reload all data to ensure hierarchy is also updated
-      loadAllData().then(() => {
-        renderOverview();
-        if (window.renderMissionsTab) {
-          renderMissionsTab();
-        }
-        // Update search tab if it's active
-        if (
-          document.getElementById("search").classList.contains("active") &&
-          window.performSearch
-        ) {
-          performSearch();
-        }
-      });
+      await loadAllData();
+      renderOverview();
+      if (window.renderMissionsTab) {
+        renderMissionsTab();
+      }
+      // Update search tab if it's active
+      if (
+        document.getElementById("search").classList.contains("active") &&
+        window.performSearch
+      ) {
+        performSearch();
+      }
     })
-    .catch((error) => {
+    .catch(() => {
       showNotification(t("notify.deviceUpdateFailed"), "error");
       cancelInlineEdit(cell, oldValue || "-");
+    })
+    .finally(() => {
+      _pendingSave = null;
     });
 
   closeInlineEditor(false);

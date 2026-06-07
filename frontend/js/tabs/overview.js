@@ -1,5 +1,84 @@
 // ==================== Overview Rendering (Unified Table) ====================
 
+// ── Maintenance tooltip ───────────────────────────────────────────────────────
+
+function _ovGetMaintenanceTip() {
+  let tip = document.getElementById("ov-maintenance-tooltip");
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.id = "ov-maintenance-tooltip";
+    tip.style.display = "none";
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+function _ovShowMaintenanceTooltip(el, e) {
+  const reason = el.dataset.maintReason;
+  const returnDate = el.dataset.maintDate;
+  if (!reason) return;
+
+  const tip = _ovGetMaintenanceTip();
+  const isDark = document.documentElement.classList.contains("dark");
+  const bg = isDark ? "#1e2d45" : "#ffffff";
+  const border = isDark ? "rgba(255,255,255,0.12)" : "var(--gray-200)";
+  const textMain = isDark ? "#e2e8f0" : "var(--gray-800)";
+  const textSub = isDark ? "#94a3b8" : "var(--gray-500)";
+  const shadow = isDark ? "0 4px 20px rgba(0,0,0,0.5)" : "0 4px 16px rgba(0,0,0,0.15)";
+
+  const isOverdue = returnDate && new Date(returnDate) < new Date(new Date().toDateString());
+  const fmtDate = (iso) => {
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  };
+  const dateLabel = returnDate
+    ? (isOverdue
+        ? `<span style="color:#ef4444;font-weight:600;">${fmtDate(returnDate)} ⚠</span>`
+        : fmtDate(returnDate))
+    : "—";
+
+  tip.style.cssText = `
+    position:fixed;z-index:9999;pointer-events:none;
+    background:${bg};border:1px solid ${border};border-radius:10px;
+    padding:0.75rem 1rem;box-shadow:${shadow};
+    font-size:0.82rem;min-width:180px;max-width:260px;
+    display:block;line-height:1.6;color:${textMain};
+  `;
+  tip.innerHTML = `
+    <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.5rem;
+                border-right:3px solid #f59e0b;padding-right:0.45rem;">
+      🔧 ${t("radio.maintenance.title")}
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:0.2rem 0.65rem;align-items:baseline;">
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">${t("radio.maintenance.reason")}</span>
+      <span>${escapeHTML(reason)}</span>
+      <span style="color:${textSub};font-size:0.74rem;white-space:nowrap;">${t("radio.maintenance.returnDate")}</span>
+      <span>${dateLabel}</span>
+    </div>
+  `;
+  _ovMoveTip(e);
+}
+
+function _ovMoveTip(e) {
+  const tip = document.getElementById("ov-maintenance-tooltip");
+  if (!tip || tip.style.display === "none") return;
+  const margin = 14;
+  let x = e.clientX + margin;
+  let y = e.clientY - margin;
+  const tipW = tip.offsetWidth || 260;
+  const tipH = tip.offsetHeight || 100;
+  if (x + tipW > window.innerWidth - 8) x = e.clientX - tipW - margin;
+  if (y + tipH > window.innerHeight - 8) y = e.clientY - tipH - margin;
+  if (y < 8) y = 8;
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+}
+
+function _ovHideMaintenanceTip() {
+  const tip = document.getElementById("ov-maintenance-tooltip");
+  if (tip) tip.style.display = "none";
+}
+
 function getFreqLabel(freq, band) {
   if (!freq || freq === "-") return freq || "-";
   if (window.overviewFreqMode === "link") {
@@ -321,8 +400,17 @@ function renderOverview() {
         row.dataset.parentSite = site.id;
         if (isCollapsed || isSiteCollapsed) row.style.display = "none";
 
+        const hasMaintenance = radio.status !== "Usable" && radio.maintenance_reason;
         const statusClass =
-          radio.status === "Usable" ? "status-usable" : "status-unusable";
+          radio.status === "Usable"
+            ? "status-usable"
+            : hasMaintenance
+              ? "status-unusable status-maintenance-logged"
+              : "status-unusable";
+
+        const maintAttrs = hasMaintenance
+          ? `data-maint-reason="${escapeHTML(radio.maintenance_reason)}" data-maint-date="${escapeHTML(radio.maintenance_return_date || "")}" onmouseenter="_ovShowMaintenanceTooltip(this,event)" onmousemove="_ovMoveTip(event)" onmouseleave="_ovHideMaintenanceTip()" style="cursor:help;"`
+          : "";
 
         // Owner colors for current state (owner, frequency, mission)
         const ownerColor = radio.owner ? getOwnerColor(radio.owner) : null;
@@ -378,7 +466,7 @@ function renderOverview() {
           <td style="word-wrap: break-word; ${standbyOwnerCellStyle}" data-col="8" ondblclick="openInlineEditor(this, '${radio.id}', 8)">${escapeHTML(radio.standby_owner) || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}" data-col="9" ondblclick="openInlineEditor(this, '${radio.id}', 9)">${escapeHTML(radio.standby_mission) || "-"}</td>
           <td style="word-wrap: break-word; ${standbyMissionCellStyle}" data-col="10" ondblclick="openInlineEditor(this, '${radio.id}', 10)">${escapeHTML(radio.standby_role) || "-"}</td>
-          <td style="word-wrap: break-word;" data-col="11" ondblclick="openInlineEditor(this, '${radio.id}', 11)"><span class="status-badge ${statusClass}">${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
+          <td style="word-wrap: break-word;" data-col="11" ondblclick="openInlineEditor(this, '${radio.id}', 11)"><span class="status-badge ${statusClass}" ${maintAttrs}>${t(radio.status === "Usable" ? "status.usable" : "status.unusable")}</span></td>
           <td style="word-wrap: break-word;" data-col="12" ondblclick="openInlineEditor(this, '${radio.id}', 12)">${escapeHTML(radio.notes) || "-"}</td>
           <td class="col-actions" style="word-wrap: break-word; white-space: nowrap; text-align: center;">
             <div style="display: inline-flex; gap: 0.3rem; flex-wrap: nowrap; align-items: center; justify-content: center;">

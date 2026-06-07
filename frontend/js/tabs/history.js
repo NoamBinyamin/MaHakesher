@@ -171,6 +171,8 @@ const _FIELD_KEY_MAP = {
   device_type: "history.field.deviceType",
   site_name: "history.field.siteName",
   sector_name: "history.field.sectorName",
+  maintenance_reason: "history.field.maintenanceReason",
+  maintenance_return_date: "history.field.maintenanceReturnDate",
 };
 
 function _getFieldLabel(field) {

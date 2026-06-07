@@ -17,9 +17,13 @@ async function renderPreferencesTab() {
   const container = document.getElementById("preferencesContent");
   if (!container) return;
 
-  try {
-    _prefUsers = await apiGetUsers();
-  } catch (_) {
+  if (isAdminRole()) {
+    try {
+      _prefUsers = await apiGetUsers();
+    } catch (_) {
+      _prefUsers = [];
+    }
+  } else {
     _prefUsers = [];
   }
 
@@ -71,6 +75,7 @@ function _renderLanguageSection() {
 function _renderOwnersSection() {
   const sec = document.getElementById("prefOwnersSection");
   if (!sec) return;
+  if (!isAdminRole()) { sec.innerHTML = ""; return; }
   const owners =
     (window.appState.config && window.appState.config.owners) || [];
 
@@ -159,6 +164,7 @@ function _ownerAddRow() {
 function _renderDevicesSection() {
   const sec = document.getElementById("prefDevicesSection");
   if (!sec) return;
+  if (!isAdminRole()) { sec.innerHTML = ""; return; }
   const devices = _getDevices();
   const bandOpts = _getAvailableBands()
     .map((b) => `<option value="${b}">${b}</option>`)
@@ -361,6 +367,7 @@ function _ownerBadge(ownerName) {
 function _renderUsersSection() {
   const sec = document.getElementById("prefUsersSection");
   if (!sec) return;
+  if (!isAdminRole()) { sec.innerHTML = ""; return; }
 
   const ownerNames = (window.appState.config?.owners || []).map((o) => o.name);
 

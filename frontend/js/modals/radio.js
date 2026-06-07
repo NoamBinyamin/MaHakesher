@@ -3,6 +3,44 @@
 // Module-level handler references so we can remove them on next open
 let _missionChangeHandler = null;
 let _standbyMissionChangeHandler = null;
+let _maintenanceDurationInterval = null;
+
+function _formatMaintenanceDuration(startedAtIso) {
+  const start = new Date(startedAtIso);
+  if (isNaN(start.getTime())) return "—";
+  let diffMinutes = Math.floor((Date.now() - start.getTime()) / 60000);
+  if (diffMinutes < 0) diffMinutes = 0;
+  const days = Math.floor(diffMinutes / 1440);
+  const hours = Math.floor((diffMinutes % 1440) / 60);
+  const minutes = diffMinutes % 60;
+  const parts = [];
+  if (days) parts.push(t("common.durationDays", { count: days }));
+  if (days || hours) parts.push(t("common.durationHours", { count: hours }));
+  parts.push(t("common.durationMinutes", { count: minutes }));
+  return parts.join(" ");
+}
+
+function _stopMaintenanceDurationTimer() {
+  if (_maintenanceDurationInterval) {
+    clearInterval(_maintenanceDurationInterval);
+    _maintenanceDurationInterval = null;
+  }
+}
+
+function _startMaintenanceDurationTimer(startedAtIso) {
+  _stopMaintenanceDurationTimer();
+  const row = document.getElementById("maintenanceDurationRow");
+  const display = document.getElementById("maintenanceDuration");
+  if (!startedAtIso) {
+    row.style.display = "none";
+    return;
+  }
+  row.style.display = "flex";
+  display.textContent = _formatMaintenanceDuration(startedAtIso);
+  _maintenanceDurationInterval = setInterval(() => {
+    display.textContent = _formatMaintenanceDuration(startedAtIso);
+  }, 60000);
+}
 
 function openRadioModal(radioId) {
   const radio = window.appState.radios.find((r) => r.id === radioId);
@@ -25,6 +63,12 @@ function openRadioModal(radioId) {
 
   document.getElementById("radioStatus").value = radio.status || "Usable";
   document.getElementById("radioNotes").value = radio.notes || "";
+  document.getElementById("maintenanceReason").value = radio.maintenance_reason || "";
+  document.getElementById("maintenanceReturnDate").value = radio.maintenance_return_date || "";
+  toggleMaintenanceFields();
+  _startMaintenanceDurationTimer(
+    radio.status === "Unusable" ? radio.maintenance_started_at : null,
+  );
 
   // Populate mission selects
   populateMissionSelects();
@@ -115,10 +159,20 @@ function openRadioModal(radioId) {
   missionSelect.addEventListener("change", _missionChangeHandler);
   standbyMissionSelect.addEventListener("change", _standbyMissionChangeHandler);
 
+  const statusSelect = document.getElementById("radioStatus");
+  statusSelect.removeEventListener("change", toggleMaintenanceFields);
+  statusSelect.addEventListener("change", toggleMaintenanceFields);
+
   openModal("radioModal", false);
 }
 
+function toggleMaintenanceFields() {
+  const isUnusable = document.getElementById("radioStatus").value === "Unusable";
+  document.getElementById("maintenanceFields").style.display = isUnusable ? "block" : "none";
+}
+
 function closeRadioModal() {
+  _stopMaintenanceDurationTimer();
   closeModal("radioModal");
 }
 
@@ -171,6 +225,8 @@ async function saveRadio() {
     standby_mission: standbyMissionName,
     status: document.getElementById("radioStatus").value,
     notes: document.getElementById("radioNotes").value,
+    maintenance_reason: document.getElementById("maintenanceReason").value.trim(),
+    maintenance_return_date: document.getElementById("maintenanceReturnDate").value,
   };
 
   await withSaveSpinner("radioModal", async () => {

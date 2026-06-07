@@ -1927,6 +1927,43 @@
             </div>
           </div>
 
+          <!-- Maintenance Fields (shown only when status = Unusable) -->
+          <div id="maintenanceFields" style="display:none; padding: 1rem 0 0.5rem; border-bottom: 2px solid var(--gray-200);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+              <i class="fa-solid fa-wrench" style="color: var(--warning-color, #f59e0b);"></i>
+              <strong style="color: var(--warning-color, #f59e0b);" data-i18n="radio.maintenance.title">Maintenance Details</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+              <div class="form-group">
+                <label for="maintenanceReason">
+                  <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning-color, #f59e0b); margin-right: 0.4rem"></i>
+                  <span data-i18n="radio.maintenance.reason">Reason</span>
+                </label>
+                <input
+                  type="text"
+                  id="maintenanceReason"
+                  data-i18n-placeholder="radio.maintenance.reasonPlaceholder"
+                  placeholder="e.g. Broken antenna, Sent for repair..."
+                />
+              </div>
+              <div class="form-group">
+                <label for="maintenanceReturnDate">
+                  <i class="fa-solid fa-calendar-check" style="color: var(--warning-color, #f59e0b); margin-right: 0.4rem"></i>
+                  <span data-i18n="radio.maintenance.returnDate">Expected Return Date</span>
+                </label>
+                <input
+                  type="date"
+                  id="maintenanceReturnDate"
+                />
+              </div>
+            </div>
+            <div id="maintenanceDurationRow" style="display:none; margin-top: 0.8rem; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-stopwatch" style="color: var(--warning-color, #f59e0b);"></i>
+              <span data-i18n="radio.maintenance.duration">Time in maintenance</span>:
+              <strong id="maintenanceDuration">—</strong>
+            </div>
+          </div>
+
           <div class="modal-footer">
             <button
               type="button"
@@ -2400,32 +2437,24 @@
               border-bottom: 2px solid var(--gray-200);
             "
           >
-            <div
+            <h4
               style="
-                padding: 0.5rem 0;
-                border-bottom: 2px solid var(--gray-200);
-                margin-bottom: 1.25rem;
+                color: var(--gray-900);
+                font-size: 1rem;
+                margin: 0 0 1.25rem 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
               "
             >
-              <h4
-                style="
-                  color: var(--gray-900);
-                  font-size: 1rem;
-                  margin: 0;
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                "
+              <i
+                class="fa-solid fa-file-lines"
+                style="color: var(--primary-color)"
+              ></i>
+              <span data-i18n="planMission.infoSection"
+                >Mission Information</span
               >
-                <i
-                  class="fa-solid fa-file-lines"
-                  style="color: var(--primary-color)"
-                ></i>
-                <span data-i18n="planMission.infoSection"
-                  >Mission Information</span
-                >
-              </h4>
-            </div>
+            </h4>
             <div
               id="missionInfoGrid"
               style="
@@ -2591,33 +2620,25 @@
               border-bottom: 2px solid var(--gray-200);
             "
           >
-            <div
+            <h4
               id="reqSectionHeader"
               style="
-                padding: 0.5rem 0;
-                border-bottom: 2px solid var(--gray-200);
-                margin-bottom: 1.25rem;
+                color: var(--gray-900);
+                font-size: 1rem;
+                margin: 0 0 1.25rem 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
               "
             >
-              <h4
-                style="
-                  color: var(--gray-900);
-                  font-size: 1rem;
-                  margin: 0;
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                "
+              <i
+                class="fa-solid fa-tower-cell"
+                style="color: var(--primary-color)"
+              ></i>
+              <span data-i18n="planMission.deviceReqs"
+                >Device Requirements</span
               >
-                <i
-                  class="fa-solid fa-tower-cell"
-                  style="color: var(--primary-color)"
-                ></i>
-                <span data-i18n="planMission.deviceReqs"
-                  >Device Requirements</span
-                >
-              </h4>
-            </div>
+            </h4>
 
             <!-- Add Requirement Form -->
             <div
@@ -3062,66 +3083,75 @@
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal hidden">
-      <div class="modal-content" style="max-width: 360px">
-        <div class="modal-header">
-          <h3>
-            <i
-              class="fa-solid fa-right-to-bracket"
-              style="color: var(--primary-color); margin-right: 0.5rem"
-            ></i>
-            <span data-i18n="login.title">Login</span>
-          </h3>
-          <button class="modal-close" onclick="closeLoginModal()">
-            &times;
-          </button>
+      <div class="modal-content" style="max-width: 500px">
+        <button class="modal-close login-modal-close" onclick="closeLoginModal()">
+          &times;
+        </button>
+        <div class="login-modal-banner">
+          <div class="login-modal-badge">
+            <i class="fa-solid fa-right-to-bracket"></i>
+          </div>
+          <h3 data-i18n="login.title">Login</h3>
         </div>
-        <div class="modal-form">
+        <div class="modal-form login-modal-form">
           <div class="form-group">
-            <label for="loginUsername">
-              <i
-                class="fa-solid fa-user"
-                style="color: var(--gray-400); margin-right: 0.4rem"
-              ></i>
-              <span data-i18n="login.username">Username</span>
-            </label>
-            <input
-              type="text"
-              id="loginUsername"
-              data-i18n-placeholder="login.usernamePlaceholder"
-              placeholder="Username"
-              autocomplete="username"
-              onkeydown="
-                if (event.key === 'Enter')
-                  document.getElementById('loginPassword').focus();
-              "
-            />
+            <label for="loginUsername" data-i18n="login.username">Username</label>
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-user input-icon"></i>
+              <input
+                type="text"
+                id="loginUsername"
+                class="input-with-icon"
+                data-i18n-placeholder="login.usernamePlaceholder"
+                placeholder="Username"
+                autocomplete="username"
+                oninput="_onLoginUsernameChanged()"
+                onkeydown="
+                  if (event.key === 'Enter')
+                    document.getElementById('loginPassword').focus();
+                "
+              />
+            </div>
           </div>
           <div class="form-group">
-            <label for="loginPassword">
-              <i
-                class="fa-solid fa-lock"
-                style="color: var(--gray-400); margin-right: 0.4rem"
-              ></i>
+            <label for="loginPassword" class="login-label-with-hint">
               <span data-i18n="login.password">Password</span>
+              <span
+                id="loginCapsIcon"
+                class="login-caps-icon hidden"
+                data-tooltip=""
+              >
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </span>
             </label>
-            <input
-              type="password"
-              id="loginPassword"
-              data-i18n-placeholder="login.passwordPlaceholder"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              onkeydown="if (event.key === 'Enter') submitLogin();"
-            />
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-lock input-icon"></i>
+              <input
+                type="password"
+                id="loginPassword"
+                class="input-with-icon input-with-toggle"
+                data-i18n-placeholder="login.passwordPlaceholder"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                onkeydown="if (event.key === 'Enter') submitLogin();"
+              />
+              <button
+                type="button"
+                class="input-icon-toggle"
+                id="loginPasswordToggle"
+                tabindex="-1"
+                onclick="toggleLoginPasswordVisibility()"
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
           </div>
-          <p
-            id="loginError"
-            style="
-              display: none;
-              color: var(--danger-color);
-              font-size: 0.83rem;
-              margin-top: 0.5rem;
-            "
-          ></p>
+          <div class="login-modal-alerts">
+            <div id="loginError" class="login-alert hidden">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span id="loginErrorText"></span>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <div></div>
@@ -3137,6 +3167,7 @@
             <button
               type="button"
               class="btn btn-primary"
+              id="loginSubmitBtn"
               onclick="submitLogin()"
             >
               <i class="fa-solid fa-right-to-bracket"></i>
@@ -3156,6 +3187,9 @@
       (function () {
         var saved = localStorage.getItem("mahakesher-tab");
         if (!saved || saved === "overview") return;
+        // Preferences is admin-only — don't pre-paint it without at least a stored
+        // token (auth.js validates the token async and corrects this if it's stale).
+        if (saved === "preferences" && !localStorage.getItem("mahakesher-token")) return;
         var fromBtn = document.querySelector(
           '.tab-button[data-tab="overview"]',
         );

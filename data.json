@@ -53,9 +53,9 @@
     "missions": [
       "סופת חול",
       "סוף עונה",
-      "מצילים את ווילי",
       "רעמים וברקים",
-      "חתונת השנה"
+      "חתונת השנה",
+      "מצילים את ווילי"
     ],
     "owners": [
       {
@@ -171,7 +171,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": null,
-        "frequency_band": "UHF"
+        "frequency_band": "UHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-d8438905",
@@ -219,7 +222,10 @@
         "standby_mission": "רעמים וברקים",
         "status": "Usable",
         "notes": null,
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-0d95a3d6",
@@ -234,7 +240,10 @@
         "standby_role": null,
         "standby_mission": null,
         "status": "Unusable",
-        "notes": null
+        "notes": "",
+        "maintenance_reason": "תקול לא ידוע למה",
+        "maintenance_return_date": "2026-06-12",
+        "maintenance_started_at": "2026-06-07T05:12:43.359441+00:00"
       },
       {
         "id": "radio-6fde4339",
@@ -250,7 +259,9 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": null,
-        "frequency_band": "LVHF"
+        "frequency_band": "LVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": ""
       },
       {
         "id": "radio-b90528d7",
@@ -372,13 +383,16 @@
         "owner": "בעלים שלא מסגיר",
         "mission_name": "מצילים את ווילי",
         "role": "תצפית קדמית",
-        "standby_frequency": 35.5,
-        "standby_owner": "המדור היותר חזק",
-        "standby_role": "סיוע",
-        "standby_mission": "רעמים וברקים",
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
         "status": "Usable",
         "notes": null,
-        "frequency_band": "LVHF"
+        "frequency_band": "LVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-a7c495fa",
@@ -442,7 +456,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": null,
-        "frequency_band": "UHF"
+        "frequency_band": "UHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-687ee740",
@@ -584,7 +601,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": null,
-        "frequency_band": "LVHF"
+        "frequency_band": "LVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-ea0c47e1",
@@ -632,7 +652,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "UHF"
+        "frequency_band": "UHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-33c6ec2c",
@@ -695,7 +718,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-c5ce41dc",
@@ -778,17 +804,20 @@
         "id": "radio-41f65604",
         "site_id": "site-98c312bf",
         "device_type": "מכשיר טוב",
-        "frequency": null,
-        "owner": "",
-        "mission_name": null,
-        "role": null,
-        "standby_frequency": 135.5,
-        "standby_owner": "בעלים שלא מסגיר",
-        "standby_role": "סיוע חזק",
-        "standby_mission": "מצילים את ווילי",
+        "frequency": 135.5,
+        "owner": "בעלים שלא מסגיר",
+        "mission_name": "מצילים את ווילי",
+        "role": "סיוע חזק",
+        "standby_frequency": null,
+        "standby_owner": null,
+        "standby_role": null,
+        "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-2155ccbc",
@@ -986,7 +1015,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-f12310c9",
@@ -1002,7 +1034,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-7a3ed7a0",
@@ -1155,7 +1190,10 @@
         "standby_mission": null,
         "status": "Usable",
         "notes": "",
-        "frequency_band": "HVHF"
+        "frequency_band": "HVHF",
+        "maintenance_reason": "",
+        "maintenance_return_date": "",
+        "maintenance_started_at": null
       },
       {
         "id": "radio-aba0f39c",
@@ -1650,108 +1688,6 @@
         "time_end": null
       },
       {
-        "id": "mission-dfdbc343",
-        "name": "מצילים את ווילי",
-        "owner": "בעלים שלא מסגיר",
-        "status": "active",
-        "requirements": [
-          {
-            "sectorId": "sector-b010130f",
-            "sectorName": "גזרת מרכז",
-            "siteId": "site-7386869d",
-            "siteName": "תל אביב",
-            "frequencyBand": "UHF",
-            "frequency": 260.1,
-            "role": "חפ\"ק משימתי"
-          },
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-748505e4",
-            "siteName": "באר שבע",
-            "frequencyBand": "HVHF",
-            "frequency": 122.3,
-            "role": "כוח חילוץ והצלה"
-          },
-          {
-            "sectorId": "sector-374d66fb",
-            "sectorName": "גזרת צפון",
-            "siteId": "site-c24276b5",
-            "siteName": "עפולה",
-            "frequencyBand": "LVHF",
-            "frequency": 40.5,
-            "role": "תצפית קדמית"
-          },
-          {
-            "sectorId": "sector-374d66fb",
-            "sectorName": "גזרת צפון",
-            "siteId": "site-ef4653df",
-            "siteName": "צפת",
-            "frequencyBand": "UHF",
-            "frequency": 280.2,
-            "role": "כוח פריצה"
-          },
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-f9b55cfc",
-            "siteName": "אשדוד",
-            "frequencyBand": "HVHF",
-            "frequency": 135,
-            "role": "מפקד גזרה"
-          },
-          {
-            "sectorId": "sector-b010130f",
-            "sectorName": "גזרת מרכז",
-            "siteId": "site-7386869d",
-            "siteName": "תל אביב",
-            "frequencyBand": "LVHF",
-            "frequency": 90.1,
-            "role": "צוות רפואה"
-          },
-          {
-            "sectorId": "sector-f95115a4",
-            "sectorName": "גזרת דרום",
-            "siteId": "site-748505e4",
-            "siteName": "באר שבע",
-            "frequencyBand": "UHF",
-            "frequency": 300.5,
-            "role": "כוח עתודה"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-7386869d",
-            "siteName": "תל אביב",
-            "frequencyBand": "HVHF",
-            "frequency": 130.5,
-            "role": "חילוץ"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-f9b55cfc",
-            "siteName": "אשדוד",
-            "frequencyBand": "HVHF",
-            "frequency": 132,
-            "role": "בת\"ק"
-          },
-          {
-            "sectorId": null,
-            "sectorName": null,
-            "siteId": "site-98c312bf",
-            "siteName": "יבנה",
-            "frequencyBand": "HVHF",
-            "frequency": 135.5,
-            "role": "סיוע חזק"
-          }
-        ],
-        "created_at": "2026-05-19T22:53:54.864298",
-        "created_by": "נועם",
-        "time_start": "2026-06-05T22:52",
-        "time_end": "2026-06-04T22:52"
-      },
-      {
         "id": "mission-3f0ebb69",
         "name": "המשימה של המדור שלי",
         "owner": "המדור החזק",
@@ -1930,6 +1866,108 @@
         "created_by": "נועם",
         "time_start": "2026-06-07T23:01",
         "time_end": "2026-06-20T23:01"
+      },
+      {
+        "id": "mission-dfdbc343",
+        "name": "מצילים את ווילי",
+        "owner": "בעלים שלא מסגיר",
+        "status": "active",
+        "requirements": [
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "UHF",
+            "frequency": 260.1,
+            "role": "חפ\"ק משימתי"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "HVHF",
+            "frequency": 122.3,
+            "role": "כוח חילוץ והצלה"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-c24276b5",
+            "siteName": "עפולה",
+            "frequencyBand": "LVHF",
+            "frequency": 40.5,
+            "role": "תצפית קדמית"
+          },
+          {
+            "sectorId": "sector-374d66fb",
+            "sectorName": "גזרת צפון",
+            "siteId": "site-ef4653df",
+            "siteName": "צפת",
+            "frequencyBand": "UHF",
+            "frequency": 280.2,
+            "role": "כוח פריצה"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-f9b55cfc",
+            "siteName": "אשדוד",
+            "frequencyBand": "HVHF",
+            "frequency": 135,
+            "role": "מפקד גזרה"
+          },
+          {
+            "sectorId": "sector-b010130f",
+            "sectorName": "גזרת מרכז",
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "LVHF",
+            "frequency": 90.1,
+            "role": "צוות רפואה"
+          },
+          {
+            "sectorId": "sector-f95115a4",
+            "sectorName": "גזרת דרום",
+            "siteId": "site-748505e4",
+            "siteName": "באר שבע",
+            "frequencyBand": "UHF",
+            "frequency": 300.5,
+            "role": "כוח עתודה"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-7386869d",
+            "siteName": "תל אביב",
+            "frequencyBand": "HVHF",
+            "frequency": 130.5,
+            "role": "חילוץ"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-f9b55cfc",
+            "siteName": "אשדוד",
+            "frequencyBand": "HVHF",
+            "frequency": 132,
+            "role": "בת\"ק"
+          },
+          {
+            "sectorId": null,
+            "sectorName": null,
+            "siteId": "site-98c312bf",
+            "siteName": "יבנה",
+            "frequencyBand": "HVHF",
+            "frequency": 135.5,
+            "role": "סיוע חזק"
+          }
+        ],
+        "created_at": "2026-05-19T22:53:54.864298",
+        "created_by": "נועם",
+        "time_start": "2026-06-05T22:52",
+        "time_end": "2026-06-04T22:52"
       }
     ],
     "archived_missions": [

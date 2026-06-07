@@ -49,10 +49,11 @@ async function saveSector() {
   await withSaveSpinner("sectorModal", async () => {
     if (sectorId) {
       await apiCall(`/sectors/${sectorId}`, "POST", sectorData);
+      showNotification(t("notify.sectorUpdated"), "success");
     } else {
       await apiCall("/sectors", "POST", sectorData);
+      showNotification(t("notify.sectorAdded"), "success");
     }
-    showNotification(t("notify.sectorSaved"), "success");
     markModalClean("sectorModal");
     closeSectorModal();
     await loadAllData();

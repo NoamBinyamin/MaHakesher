@@ -26,12 +26,54 @@ HOST = '0.0.0.0'
 PORT = int(os.environ.get('PORT', 8000))
 FRONTEND_DIR = os.path.join(_BASE_DIR, 'frontend')
 USERS_FILE   = os.path.join(_BASE_DIR, 'users.json')
+SESSIONS_FILE = os.path.join(_BASE_DIR, 'sessions.json')
 
-# In-memory session store: token → {username, role}
+# Sessions persist across restarts (token → {username, role, owner, last_ping})
 _sessions = {}
+
+# Login brute-force protection: username → {'count': int, 'locked_until': iso str or None}
+_login_failures = {}
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_LOCKOUT_MINUTES = 5
 
 
 # ==================== Utility Functions ====================
+
+def _atomic_write_json(path, data):
+    """Write JSON to a temp file and atomically replace the target —
+    a crash or power loss mid-write can never leave a corrupted file behind."""
+    tmp_path = f"{path}.tmp-{os.getpid()}"
+    with open(tmp_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, path)
+
+def _print_log(emoji, message):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {emoji} {message}")
+
+def _login_lockout_remaining(ip, username):
+    """Return remaining lockout seconds for an (ip, username) pair, or None if not locked.
+
+    Keyed by IP+username (not username alone) so a remote attacker can only ever
+    lock themselves out of their own address — not block the real account owner
+    from logging in from their usual network."""
+    entry = _login_failures.get((ip, username))
+    if not entry or not entry.get('locked_until'):
+        return None
+    locked_until = datetime.fromisoformat(entry['locked_until'])
+    remaining = (locked_until - datetime.now(timezone.utc)).total_seconds()
+    if remaining <= 0:
+        _login_failures.pop((ip, username), None)
+        return None
+    return int(remaining)
+
+def _record_login_failure(ip, username):
+    """Track a failed login; lock that (ip, username) pair after LOGIN_MAX_ATTEMPTS consecutive failures."""
+    entry = _login_failures.setdefault((ip, username), {'count': 0, 'locked_until': None})
+    entry['count'] += 1
+    if entry['count'] >= LOGIN_MAX_ATTEMPTS:
+        entry['locked_until'] = (datetime.now(timezone.utc) + timedelta(minutes=LOGIN_LOCKOUT_MINUTES)).isoformat()
+        _print_log('🚨', f"Login for '{username}' locked for {LOGIN_LOCKOUT_MINUTES} minute(s) "
+                         f"from {ip} after {LOGIN_MAX_ATTEMPTS} failed attempts")
 
 def migrate_config(data):
     """Add IDs to owners and convert radio_types from dict to array. Returns True if changed."""
@@ -148,8 +190,7 @@ def load_data():
 
 def save_data(data):
     """Save data to JSON file"""
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    _atomic_write_json(DATA_FILE, data)
 
 def load_mapping():
     """Load mapping data from JSON file"""
@@ -161,8 +202,7 @@ def load_mapping():
 
 def save_mapping(data):
     """Save mapping data to JSON file"""
-    with open(MAPPING_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    _atomic_write_json(MAPPING_FILE, data)
 
 def get_frequency_band_for_device(device_type):
     """Get the frequency band for a given device type"""
@@ -215,8 +255,7 @@ def load_users():
         return []
 
 def save_users(users):
-    with open(USERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users, f, indent=2, ensure_ascii=False)
+    _atomic_write_json(USERS_FILE, users)
 
 def create_default_users():
     if not os.path.exists(USERS_FILE):
@@ -226,9 +265,23 @@ def create_default_users():
         print(f"⚠️  Created default admin account  →  username: admin  |  password: {default_password}")
         print(f"⚠️  Edit {USERS_FILE} to change credentials.")
 
+def _load_sessions():
+    """Restore sessions on startup so a server restart doesn't force everyone to re-login.
+    Stale sessions are pruned naturally by get_session()'s timeout check on first use."""
+    global _sessions
+    try:
+        with open(SESSIONS_FILE, 'r', encoding='utf-8') as f:
+            _sessions = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        _sessions = {}
+
+def _save_sessions():
+    _atomic_write_json(SESSIONS_FILE, _sessions)
+
 def create_session(username, role, owner=None):
     token = str(uuid.uuid4())
     _sessions[token] = {'username': username, 'role': role, 'owner': owner, 'last_ping': datetime.now(timezone.utc).isoformat()}
+    _save_sessions()
     return token
 
 def get_session(token):
@@ -243,13 +296,15 @@ def get_session(token):
             age = (datetime.now(timezone.utc) - datetime.fromisoformat(last_ping)).total_seconds()
             if age > SESSION_TIMEOUT_HOURS * 3600:
                 _sessions.pop(token, None)
+                _save_sessions()
                 return None
         except Exception:
             pass
     return session
 
 def delete_session(token):
-    _sessions.pop(token, None)
+    if _sessions.pop(token, None) is not None:
+        _save_sessions()
 
 def get_online_usernames(max_age_seconds=60):
     """Return set of usernames with a ping in the last max_age_seconds."""
@@ -490,6 +545,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         audit_log(action, entity_type, entity_id, details,
                   changed_by=getattr(self, '_request_user', None))
 
+    def _server_log(self, emoji, message):
+        """Print a timestamped headline for a server manager tailing the console —
+        for high-impact events only; the audit log already holds the full detail."""
+        who = getattr(self, '_request_user', None) or 'unknown'
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {emoji} {message} (by '{who}')")
+
     # ==================== Auth Endpoints ====================
 
     def handle_ping(self):
@@ -514,10 +575,30 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         password = post_data.get('password') or ''
         if not username or not password:
             return self.send_json_response(400, {'error': 'Username and password are required'})
+
+        client_ip = self.client_address[0]
+
+        remaining = _login_lockout_remaining(client_ip, username)
+        if remaining is not None:
+            return self.send_json_response(429, {
+                'error': f'Too many failed attempts. Try again in {remaining} second(s).',
+                'code': 'account_locked',
+                'retry_after': remaining,
+            })
+
         users = load_users()
         user = next((u for u in users if u['username'] == username), None)
         if not user or not verify_password(password, user.get('password_hash', '')):
-            return self.send_json_response(401, {'error': 'Invalid username or password'})
+            _record_login_failure(client_ip, username)
+            attempt_count = _login_failures.get((client_ip, username), {}).get('count', 0)
+            return self.send_json_response(401, {
+                'error': 'Invalid username or password',
+                'code': 'invalid_credentials',
+                'attempt_count': attempt_count,
+                'max_attempts': LOGIN_MAX_ATTEMPTS,
+            })
+
+        _login_failures.pop((client_ip, username), None)
         token = create_session(username, user['role'], owner=user.get('owner'))
         user['last_login'] = datetime.now(timezone.utc).isoformat()
         save_users(users)
@@ -567,6 +648,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'before': {k: before_u[k] for k in changed_u},
             'after':  {k: after_u[k]  for k in changed_u},
         })
+        if old_role != new_role:
+            self._server_log('🔑', f"User '{username}' role changed: '{old_role}' -> '{new_role}'")
         return self.send_json_response(200, {'username': username, 'role': new_role, 'owner': new_owner})
 
     def handle_reset_password(self, username, post_data):
@@ -665,6 +748,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                         'standby_mission': radio.get('standby_mission'),
                         'status': radio.get('status', 'Usable'),
                         'notes': radio.get('notes', ''),
+                        'maintenance_reason': radio.get('maintenance_reason', ''),
+                        'maintenance_return_date': radio.get('maintenance_return_date', ''),
                         'type': 'radio'
                     }
                     site_data['radios'].append(radio_data)
@@ -937,7 +1022,10 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'standby_role': post_data.get('standby_role'),
             'standby_mission': post_data.get('standby_mission'),
             'status': post_data.get('status', 'Usable'),
-            'notes': post_data.get('notes', '')
+            'notes': post_data.get('notes', ''),
+            'maintenance_reason': '',
+            'maintenance_return_date': '',
+            'maintenance_started_at': None
         }
         data['data']['radios'].append(new_radio)
         save_data(data)
@@ -963,11 +1051,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after = {k: sector.get(k) for k in ('name',)}
                 changed = [k for k in before if before[k] != after[k]]
-                self._audit('update', 'sector', sector_id, {
-                    'name':   before.get('name') or after.get('name', ''),
-                    'before': {k: before[k] for k in changed},
-                    'after':  {k: after[k]  for k in changed},
-                })
+                if changed:
+                    self._audit('update', 'sector', sector_id, {
+                        'name':   before.get('name') or after.get('name', ''),
+                        'before': {k: before[k] for k in changed},
+                        'after':  {k: after[k]  for k in changed},
+                    })
                 return self.send_json_response(200, sector)
         return self.send_json_response(404, {'error': 'Sector not found'})
 
@@ -982,11 +1071,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_data(data)
                 after = {k: site.get(k) for k in ('name', 'coordinates_utm', 'site_type')}
                 changed = [k for k in before if before[k] != after[k]]
-                self._audit('update', 'site', site_id, {
-                    'name':   before.get('name') or after.get('name', ''),
-                    'before': {k: before[k] for k in changed},
-                    'after':  {k: after[k]  for k in changed},
-                })
+                if changed:
+                    self._audit('update', 'site', site_id, {
+                        'name':   before.get('name') or after.get('name', ''),
+                        'before': {k: before[k] for k in changed},
+                        'after':  {k: after[k]  for k in changed},
+                    })
                 return self.send_json_response(200, site)
         return self.send_json_response(404, {'error': 'Site not found'})
 
@@ -1027,11 +1117,20 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                         return self.send_json_response(400, {'error': err})
 
                 _tracked = ('frequency', 'owner', 'mission_name', 'role', 'status',
-                            'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role', 'notes')
+                            'standby_frequency', 'standby_owner', 'standby_mission', 'standby_role', 'notes',
+                            'maintenance_reason', 'maintenance_return_date')
                 before = {k: radio.get(k) for k in _tracked}
+                old_status = radio.get('status')
                 post_data.pop('id', None)
                 trigger = post_data.pop('_trigger', None)
                 radio.update(post_data)
+                new_status = radio.get('status')
+                if new_status == 'Usable':
+                    radio['maintenance_reason'] = ''
+                    radio['maintenance_return_date'] = ''
+                    radio['maintenance_started_at'] = None
+                elif new_status == 'Unusable' and old_status != 'Unusable':
+                    radio['maintenance_started_at'] = datetime.now(timezone.utc).isoformat()
                 save_data(data)
                 after = {k: radio.get(k) for k in _tracked}
                 changed = [k for k in _tracked if before[k] != after[k]]
@@ -1044,7 +1143,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 }
                 if trigger:
                     audit_details['trigger'] = trigger
-                self._audit('update', 'radio', radio_id, audit_details)
+                if changed:
+                    self._audit('update', 'radio', radio_id, audit_details)
                 return self.send_json_response(200, radio)
         return self.send_json_response(404, {'error': 'Radio not found'})
 
@@ -1067,6 +1167,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         data['data']['sectors'] = [s for s in data['data']['sectors'] if s['id'] != sector_id]
         save_data(data)
         self._audit('delete', 'sector', sector_id, {'name': sector_name, 'cascaded_sites': sites_in_sector})
+        self._server_log('🗑️', f"Sector '{sector_name}' deleted — cascaded {len(sites_in_sector)} site(s) and their radios")
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_site(self, site_id):
@@ -1078,10 +1179,12 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         if site and site.get('sector_id'):
             sector_name = next((sec.get('name', '') for sec in data['data']['sectors'] if sec['id'] == site['sector_id']), '')
 
+        cascaded_radio_count = sum(1 for r in data['data']['radios'] if r.get('site_id') == site_id)
         data['data']['radios'] = [r for r in data['data']['radios'] if r.get('site_id') != site_id]
         data['data']['sites']  = [s for s in data['data']['sites']  if s['id'] != site_id]
         save_data(data)
         self._audit('delete', 'site', site_id, {'name': site_name, 'sector_name': sector_name})
+        self._server_log('🗑️', f"Site '{site_name}' deleted — cascaded {cascaded_radio_count} radio(s)")
         return self.send_json_response(200, {'message': 'Deleted'})
 
     def handle_delete_radio(self, radio_id):
@@ -1618,6 +1721,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             results.append(radio)
 
         save_data(data)
+        if results:
+            self._server_log('📡', f"Batch update — {len(results)} radio(s) changed in one action")
         return self.send_json_response(200, {'updated': len(results), 'radios': results})
 
     # ==================== Audit Log ====================
@@ -1770,6 +1875,9 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             'radios':   len(d.get('radios', [])),
             'warnings': len(warnings),
         })
+        self._server_log('📥', f"Full data import — {len(d.get('sectors', []))} sectors, "
+                               f"{len(d.get('sites', []))} sites, {len(d.get('radios', []))} radios "
+                               f"({len(warnings)} warning(s)); pre-import backup saved")
         return self.send_json_response(200, {
             'message': 'Data imported successfully',
             'warnings': warnings,
@@ -1795,6 +1903,7 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         save_data(backup_data)
         os.remove(pre_import_path)
         self._audit('rollback', 'full_backup', details={})
+        self._server_log('↩️', 'Rolled back to pre-import backup — all data reverted')
         return self.send_json_response(200, {'message': 'Rollback successful'})
 
     # ==================== Helper Methods ====================
@@ -1856,6 +1965,9 @@ if __name__ == '__main__':
 
     # Create default admin account if users.json is missing
     create_default_users()
+
+    # Restore sessions from disk so a restart doesn't force everyone to re-login
+    _load_sessions()
 
     # Initialize data files if they don't exist, migrate if they do
     if not os.path.exists(DATA_FILE):

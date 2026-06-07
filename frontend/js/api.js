@@ -46,12 +46,17 @@ async function apiCall(endpoint, method = "GET", data = null) {
         if (window._handleSessionExpired) window._handleSessionExpired();
       }
       let errorMsg = `API Error: ${response.status}`;
+      let errorData = null;
       try {
-        const errorData = await response.json();
+        errorData = await response.json();
         if (errorData.error) errorMsg = errorData.error;
         if (errorData.details) errorMsg += ": " + errorData.details.join(", ");
       } catch (_) {}
-      throw new Error(errorMsg);
+      const apiError = new Error(errorMsg);
+      apiError.code = errorData?.code || null;
+      apiError.retryAfter = errorData?.retry_after ?? null;
+      apiError.data = errorData || {};
+      throw apiError;
     }
 
     return await response.json();

@@ -170,12 +170,134 @@ async function confirmLogout() {
 
 // ── Login modal ──────────────────────────────────────────────────────────────
 
+let _loginLockoutInterval = null;
+
+function _setLoginBannerError(active) {
+  const banner = document.querySelector("#loginModal .login-modal-banner");
+  if (banner) banner.classList.toggle("login-banner-error", active);
+}
+
+function _showLoginError(message) {
+  const errorEl = document.getElementById("loginError");
+  document.getElementById("loginErrorText").textContent = message;
+  errorEl.classList.remove("hidden");
+  _setLoginBannerError(true);
+}
+
+function _hideLoginError() {
+  const errorEl = document.getElementById("loginError");
+  errorEl.classList.add("hidden");
+  document.getElementById("loginErrorText").textContent = "";
+  _setLoginBannerError(false);
+}
+
+function _setLoginBusy(busy) {
+  const btn = document.getElementById("loginSubmitBtn");
+  if (!btn) return;
+  if (busy) {
+    if (!btn._originalHTML) btn._originalHTML = btn.innerHTML;
+    btn.classList.add("btn-loading");
+    btn.disabled = true;
+    btn.innerHTML = `<span class="btn-spinner"></span>`;
+  } else {
+    btn.classList.remove("btn-loading");
+    btn.disabled = false;
+    if (btn._originalHTML) btn.innerHTML = btn._originalHTML;
+  }
+}
+
+function _formatLockoutTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function _stopLoginLockoutCountdown() {
+  if (_loginLockoutInterval) {
+    clearInterval(_loginLockoutInterval);
+    _loginLockoutInterval = null;
+  }
+  const btn = document.getElementById("loginSubmitBtn");
+  if (btn) btn.disabled = false;
+}
+
+function _startLoginLockoutCountdown(seconds) {
+  _stopLoginLockoutCountdown();
+  let remaining = seconds;
+  const btn = document.getElementById("loginSubmitBtn");
+  if (btn) btn.disabled = true;
+  _showLoginError(t("login.accountLocked").replace("{time}", _formatLockoutTime(remaining)));
+  _loginLockoutInterval = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      _stopLoginLockoutCountdown();
+      _hideLoginError();
+      return;
+    }
+    _showLoginError(t("login.accountLocked").replace("{time}", _formatLockoutTime(remaining)));
+  }, 1000);
+}
+
+function _onLoginUsernameChanged() {
+  if (_loginLockoutInterval) {
+    _stopLoginLockoutCountdown();
+    _hideLoginError();
+  }
+}
+
+// Browsers expose Caps Lock state only through keyboard/mouse event objects —
+// there's no way to "poll" it directly. So we track it globally from any key
+// or click anywhere on the page (capture phase, so it's seen even if the login
+// modal isn't open yet) and just reflect the latest known value when the modal
+// shows its hint icon.
+let _capsLockOn = false;
+
+function _trackCapsLockState(event) {
+  if (typeof event.getModifierState !== "function") return;
+  _capsLockOn = event.getModifierState("CapsLock");
+  _syncLoginCapsIcon();
+}
+
+function _syncLoginCapsIcon() {
+  const iconEl = document.getElementById("loginCapsIcon");
+  if (!iconEl) return;
+  iconEl.classList.toggle("hidden", !_capsLockOn);
+}
+
+document.addEventListener("keydown", _trackCapsLockState, true);
+document.addEventListener("mousedown", _trackCapsLockState, true);
+
+function toggleLoginPasswordVisibility() {
+  const input = document.getElementById("loginPassword");
+  const btn = document.getElementById("loginPasswordToggle");
+  if (!input || !btn) return;
+  const icon = btn.querySelector("i");
+  const showing = input.type === "text";
+  input.type = showing ? "password" : "text";
+  if (icon) {
+    icon.classList.toggle("fa-eye", showing);
+    icon.classList.toggle("fa-eye-slash", !showing);
+  }
+  input.focus();
+}
+
 function openLoginModal() {
   const modal = document.getElementById("loginModal");
   if (!modal) return;
   document.getElementById("loginUsername").value = "";
   document.getElementById("loginPassword").value = "";
-  document.getElementById("loginError").style.display = "none";
+  document.getElementById("loginPassword").type = "password";
+  const toggleIcon = document.querySelector("#loginPasswordToggle i");
+  if (toggleIcon) {
+    toggleIcon.classList.add("fa-eye");
+    toggleIcon.classList.remove("fa-eye-slash");
+  }
+  const capsIcon = document.getElementById("loginCapsIcon");
+  capsIcon.setAttribute("data-tooltip", t("login.capsLockOn"));
+  _syncLoginCapsIcon();
+  _hideLoginError();
+  _setLoginBusy(false);
+  _stopLoginLockoutCountdown();
   modal.classList.remove("hidden");
   disableBodyScroll();
   requestAnimationFrame(() => document.getElementById("loginUsername").focus());
@@ -187,26 +309,38 @@ function closeLoginModal() {
     modal.classList.add("hidden");
     enableBodyScroll();
   }
+  _stopLoginLockoutCountdown();
 }
 
 async function submitLogin() {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
-  const errorEl = document.getElementById("loginError");
-  errorEl.style.display = "none";
+  _hideLoginError();
+  _stopLoginLockoutCountdown();
 
   if (!username || !password) {
-    errorEl.textContent = t("login.fieldRequired");
-    errorEl.style.display = "block";
+    _showLoginError(t("login.fieldRequired"));
     return;
   }
 
   let result;
+  _setLoginBusy(true);
   try {
     result = await apiLogin(username, password);
-  } catch (_) {
-    errorEl.textContent = t("login.invalidCredentials");
-    errorEl.style.display = "block";
+  } catch (err) {
+    _setLoginBusy(false);
+    if (err && err.code === "account_locked") {
+      const seconds = err.retryAfter != null ? err.retryAfter : 0;
+      _startLoginLockoutCountdown(seconds);
+    } else if (err && err.code === "invalid_credentials" && err.data?.attempt_count != null) {
+      _showLoginError(
+        t("login.invalidCredentialsCount")
+          .replace("{count}", err.data.attempt_count)
+          .replace("{max}", err.data.max_attempts),
+      );
+    } else {
+      _showLoginError(t("login.invalidCredentials"));
+    }
     document.getElementById("loginPassword").value = "";
     document.getElementById("loginPassword").focus();
     return;
@@ -214,6 +348,7 @@ async function submitLogin() {
 
   localStorage.setItem("mahakesher-token", result.token);
   _loggedInUser = { username: result.username, role: result.role, owner: result.owner || null };
+  _setLoginBusy(false);
   closeLoginModal();
   _applyRoleClasses();
   _updateModeButton();
@@ -279,6 +414,20 @@ window._handleSessionExpired = function () {
   openLoginModal();
 };
 
+// Same lockdown as a session expiry, but for when the server itself becomes
+// unreachable (network drop, process down) — pings never come back with a 401,
+// so this is the only signal that the local "logged in" state is stale.
+window._handleDisconnected = function () {
+  if (!_loggedInUser) return;
+  localStorage.removeItem("mahakesher-token");
+  _loggedInUser = null;
+  document.documentElement.classList.remove("user-role");
+  _setEditMode(false);
+  _updateUserButton();
+  showNotification(t("login.connectionLost"), "warning");
+  openLoginModal();
+};
+
 // ==================== Presentation Modal ====================
 
 function openPresentationModal() {
@@ -316,6 +465,7 @@ window.toggleMode = toggleMode;
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.submitLogin = submitLogin;
+window.toggleLoginPasswordVisibility = toggleLoginPasswordVisibility;
 window.logout = logout;
 window.confirmLogout = confirmLogout;
 window.guardViewMode = guardViewMode;

@@ -134,6 +134,16 @@ function restoreLastTab() {
   }
   const btn = document.querySelector(`.tab-button[data-tab="${saved}"]`);
   if (!btn) return;
+
+  // Admin-gated tabs (e.g. Preferences) must not be restored for a session that
+  // turned out to be invalid — also corrects the inline pre-paint switch in
+  // index.html, which runs before auth is known and may have guessed wrong.
+  if (btn.classList.contains("view-mode-hide") && !isAdminRole()) {
+    const overviewBtn = document.querySelector('.tab-button[data-tab="overview"]');
+    if (overviewBtn) overviewBtn.click();
+    return;
+  }
+
   btn.click();
 }
 

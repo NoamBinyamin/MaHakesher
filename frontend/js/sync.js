@@ -1,7 +1,9 @@
 // ==================== Live Sync ====================
 
 const POLL_INTERVAL_MS = 10000; // 10 seconds
+const DISCONNECT_THRESHOLD = 2; // consecutive failed polls (~20s) before treating as disconnected
 let _lastKnownTs = 0;
+let _consecutiveUnreachable = 0;
 
 // Reload all data from the server and re-render every tab.
 // Called after polling detects a change, on keyboard shortcut, and from preferences.
@@ -93,6 +95,7 @@ async function _pollForChanges() {
     const { ts, latest } = await fetch(window.API_BASE + "/version").then((r) =>
       r.json(),
     );
+    _consecutiveUnreachable = 0;
 
     if (_lastKnownTs === 0) {
       _lastKnownTs = ts;
@@ -110,7 +113,13 @@ async function _pollForChanges() {
       await refreshAllData();
     }
   } catch (_) {
-    // Silent — server may be temporarily unreachable
+    // Server may be temporarily unreachable — but if it stays unreachable while
+    // the user is "logged in" locally, lock down sensitive views (e.g. Preferences)
+    // rather than leaving them visible with no way to detect the lost session.
+    _consecutiveUnreachable++;
+    if (_consecutiveUnreachable >= DISCONNECT_THRESHOLD && isAuthenticated()) {
+      if (window._handleDisconnected) window._handleDisconnected();
+    }
   }
 }
 
