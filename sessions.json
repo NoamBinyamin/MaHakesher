@@ -1,8 +1,20 @@
 {
-  "9e22ff19-bb2b-4ccc-abcc-50759da9c519": {
+  "e7602af0-903b-4934-ba08-9b06555d19a1": {
     "username": "נועם",
     "role": "admin",
     "owner": null,
-    "last_ping": "2026-06-07T13:48:33.601325+00:00"
+    "last_ping": "2026-06-08T17:11:03.771268+00:00"
+  },
+  "cfe8d4c2-e5b5-47bd-9028-98b4060abcb1": {
+    "username": "נועם",
+    "role": "admin",
+    "owner": null,
+    "last_ping": "2026-06-09T05:57:10.847376+00:00"
+  },
+  "4aa1fe4e-42d5-467e-812d-c1fa025808f5": {
+    "username": "נועם",
+    "role": "admin",
+    "owner": null,
+    "last_ping": "2026-06-09T07:04:55.190962+00:00"
   }
 }

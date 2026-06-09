@@ -82,7 +82,7 @@ async function loadConfiguration() {
 }
 
 async function loadAllData() {
-  const [sectors, sites, radios, hierarchy, plannedMissions, archivedMissions] =
+  const [sectors, sites, radios, hierarchy, plannedMissions, archivedMissions, timelineAnnotations] =
     await Promise.all([
       apiCall("/sectors").catch(() => []),
       apiCall("/sites").catch(() => []),
@@ -90,6 +90,7 @@ async function loadAllData() {
       apiCall("/hierarchy").catch(() => []),
       apiCall("/planned_missions").catch(() => []),
       apiCall("/archived_missions").catch(() => []),
+      apiCall("/timeline_annotations").catch(() => []),
     ]);
 
   window.appState.sectors = sectors || [];
@@ -98,7 +99,24 @@ async function loadAllData() {
   window.appState.hierarchy = hierarchy || [];
   window.appState.plannedMissions = plannedMissions || [];
   window.appState.archivedMissions = archivedMissions || [];
+  window.appState.timelineAnnotations = timelineAnnotations || [];
 }
+
+// ==================== Timeline Annotations ====================
+
+async function createTimelineAnnotation(data) {
+  return apiCall("/timeline_annotations", "POST", data);
+}
+async function updateTimelineAnnotation(id, data) {
+  return apiCall(`/timeline_annotations/${id}`, "POST", data);
+}
+async function deleteTimelineAnnotation(id) {
+  return apiCall(`/timeline_annotations/${id}`, "DELETE");
+}
+
+window.createTimelineAnnotation = createTimelineAnnotation;
+window.updateTimelineAnnotation = updateTimelineAnnotation;
+window.deleteTimelineAnnotation = deleteTimelineAnnotation;
 
 async function loadLinks() {
   try {

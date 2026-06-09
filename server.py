@@ -116,6 +116,16 @@ def migrate_config(data):
         config['missions'] = [m['name'] for m in planned if m.get('status') == 'active']
         changed = True
 
+    # Ensure timeline_annotations list exists and every entry has a color
+    d = data.get('data', {})
+    if 'timeline_annotations' not in d:
+        d['timeline_annotations'] = []
+        changed = True
+    for ann in d.get('timeline_annotations', []):
+        if 'color' not in ann:
+            ann['color'] = '#f59e0b'
+            changed = True
+
     # Migrate frequency bands: add "decimals", "color", "step" fields if missing
     for band_cfg in config.get('frequency_bands', {}).values():
         if 'decimals' not in band_cfg:
@@ -171,7 +181,8 @@ def _make_default_data():
             "sites": [],
             "radios": [],
             "planned_missions": [],
-            "archived_missions": []
+            "archived_missions": [],
+            "timeline_annotations": []
         }
     }
 
@@ -349,6 +360,8 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
             return self.handle_get_planned_missions()
         elif path == '/api/archived_missions':
             return self.handle_get_archived_missions()
+        elif path == '/api/timeline_annotations':
+            return self.handle_get_timeline_annotations()
         elif path == '/api/hierarchy':
             return self.handle_hierarchy()
         elif path == '/api/links':
@@ -433,6 +446,11 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         # Everything else is admin-only
         elif _admin_only():
             return
+        elif path == '/api/timeline_annotations':
+            return self.handle_create_timeline_annotation(post_data)
+        elif path.startswith('/api/timeline_annotations/'):
+            annotation_id = path.split('/')[-1]
+            return self.handle_update_timeline_annotation(annotation_id, post_data)
         elif path == '/api/config/owners':
             return self.handle_create_owner(post_data)
         elif path.startswith('/api/config/owners/'):
@@ -535,6 +553,11 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         elif path.startswith('/api/links/'):
             link_id = path.split('/')[-1]
             return self.handle_delete_link(link_id)
+        elif path.startswith('/api/timeline_annotations/'):
+            if self._request_role != 'admin':
+                return self.send_json_response(403, {'error': 'Admin access required'})
+            annotation_id = path.split('/')[-1]
+            return self.handle_delete_timeline_annotation(annotation_id)
         else:
             return self.send_json_response(404, {'error': 'Endpoint not found'})
 
@@ -1220,6 +1243,77 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
         missions = data.get('data', {}).get('archived_missions', [])
         return self.send_json_response(200, missions)
 
+    def handle_get_timeline_annotations(self):
+        """GET /api/timeline_annotations"""
+        data = load_data()
+        annotations = data.get('data', {}).get('timeline_annotations', [])
+        return self.send_json_response(200, annotations)
+
+    def handle_create_timeline_annotation(self, post_data):
+        """POST /api/timeline_annotations — admin only"""
+        date = (post_data.get('date') or '').strip()
+        text = (post_data.get('text') or '').strip()
+        if not date:
+            return self.send_json_response(400, {'error': 'Date is required'})
+        if not text:
+            return self.send_json_response(400, {'error': 'Text is required'})
+
+        import re as _re
+        raw_color = (post_data.get('color') or '').strip()
+        color = raw_color if _re.match(r'^#[0-9a-fA-F]{6}$', raw_color) else '#f59e0b'
+
+        data = load_data()
+        data['data'].setdefault('timeline_annotations', [])
+        new_annotation = {
+            'id': generate_id('annotation'),
+            'date': date,
+            'text': text,
+            'color': color,
+            'created_by': self._request_user,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+        }
+        data['data']['timeline_annotations'].append(new_annotation)
+        save_data(data)
+        self._audit('create', 'timeline_annotation', new_annotation['id'], {'date': date, 'text': text})
+        return self.send_json_response(201, new_annotation)
+
+    def handle_delete_timeline_annotation(self, annotation_id):
+        """DELETE /api/timeline_annotations/<id> — admin only"""
+        data = load_data()
+        annotations = data['data'].get('timeline_annotations', [])
+        annotation = next((a for a in annotations if a['id'] == annotation_id), None)
+        if not annotation:
+            return self.send_json_response(404, {'error': 'Annotation not found'})
+        data['data']['timeline_annotations'] = [a for a in annotations if a['id'] != annotation_id]
+        save_data(data)
+        self._audit('delete', 'timeline_annotation', annotation_id, {
+            'date': annotation.get('date', ''),
+            'text': annotation.get('text', ''),
+        })
+        return self.send_json_response(200, {'message': 'Deleted'})
+
+    def handle_update_timeline_annotation(self, annotation_id, post_data):
+        """POST /api/timeline_annotations/<id> — admin only"""
+        data = load_data()
+        annotations = data['data'].get('timeline_annotations', [])
+        annotation = next((a for a in annotations if a['id'] == annotation_id), None)
+        if not annotation:
+            return self.send_json_response(404, {'error': 'Annotation not found'})
+        text = (post_data.get('text') or '').strip()
+        if not text:
+            return self.send_json_response(400, {'error': 'Text is required'})
+        date = (post_data.get('date') or '').strip()
+        if date:
+            annotation['date'] = date
+        annotation['text'] = text
+        import re as _re
+        raw_color = (post_data.get('color') or '').strip()
+        if _re.match(r'^#[0-9a-fA-F]{6}$', raw_color):
+            annotation['color'] = raw_color
+        save_data(data)
+        self._audit('update', 'timeline_annotation', annotation_id, {'text': text})
+        return self.send_json_response(200, annotation)
+
     def handle_create_planned_mission(self, post_data):
         """POST /api/planned_missions"""
         if self._request_role == 'user':
@@ -1870,13 +1964,15 @@ class RadioManagerHandler(http.server.SimpleHTTPRequestHandler):
                 save_mapping(imported_mapping)
 
         self._audit('import', 'full_backup', details={
-            'sectors':  len(d.get('sectors', [])),
-            'sites':    len(d.get('sites', [])),
-            'radios':   len(d.get('radios', [])),
-            'warnings': len(warnings),
+            'sectors':     len(d.get('sectors', [])),
+            'sites':       len(d.get('sites', [])),
+            'radios':      len(d.get('radios', [])),
+            'annotations': len(d.get('timeline_annotations', [])),
+            'warnings':    len(warnings),
         })
         self._server_log('📥', f"Full data import — {len(d.get('sectors', []))} sectors, "
-                               f"{len(d.get('sites', []))} sites, {len(d.get('radios', []))} radios "
+                               f"{len(d.get('sites', []))} sites, {len(d.get('radios', []))} radios, "
+                               f"{len(d.get('timeline_annotations', []))} annotations "
                                f"({len(warnings)} warning(s)); pre-import backup saved")
         return self.send_json_response(200, {
             'message': 'Data imported successfully',

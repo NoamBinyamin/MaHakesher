@@ -112,7 +112,7 @@ function setupTabNavigation() {
       localStorage.setItem("mahakesher-tab", tabName);
 
       if (tabName === "history") {
-        loadHistory().then(renderHistoryTab);
+        refreshHistory();
       }
       if (tabName === "timeline") {
         if (window.renderTimelineTab) renderTimelineTab();

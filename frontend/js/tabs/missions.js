@@ -452,6 +452,11 @@ async function savePlannedMission() {
     const timeStart = document.getElementById("planMissionTimeStart")?.value || null;
     const timeEnd = document.getElementById("planMissionTimeEnd")?.value || null;
 
+    if (timeStart && timeEnd && new Date(timeEnd) <= new Date(timeStart)) {
+      showNotification(t("error.missionEndBeforeStart"), "error");
+      return;
+    }
+
     const missionData = {
       name: missionName,
       owner: missionOwner,

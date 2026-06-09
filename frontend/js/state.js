@@ -34,6 +34,7 @@ window.appState = {
   links: [],
   plannedMissions: [],
   archivedMissions: [],
+  timelineAnnotations: [],
   hierarchy: [],
   sortColumn: "frequency_band",
   sortDirection: "asc",

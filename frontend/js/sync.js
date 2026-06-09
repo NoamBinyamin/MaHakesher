@@ -32,10 +32,10 @@ async function refreshAllData() {
     renderOwnerFreqsTab();
   }
   if (
-    window.loadHistory && window.renderHistoryTab &&
+    window.refreshHistory &&
     document.getElementById("history")?.classList.contains("active")
   ) {
-    loadHistory().then(renderHistoryTab);
+    refreshHistory();
   }
 }
 
@@ -70,6 +70,8 @@ function _buildSyncMessage(entry) {
       else if (entity_type === "mission")           msg = t("sync.missionUpdated");
       else if (entity_type === "sector" || entity_type === "site") msg = t("sync.structureUpdated");
       else if (entity_type === "owner" || entity_type === "device") msg = t("sync.configUpdated");
+      else if (entity_type === "timeline_annotation")
+        msg = action === "delete" ? t("sync.annotationRemoved") : t("sync.annotationAdded");
       break;
   }
 

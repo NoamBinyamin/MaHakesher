@@ -3639,6 +3639,277 @@ html.view-mode td[data-inline-editable] {
   color: var(--gray-300);
 }
 
+/* ── Timeline toolbar: legend + add-note action ── */
+.timeline-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  font-size: 0.78rem;
+  color: var(--gray-600);
+}
+.timeline-legend-title {
+  font-weight: 700;
+  color: var(--gray-500);
+}
+.timeline-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+.timeline-legend-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.timeline-legend-swatch-active {
+  background: var(--gray-400);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+}
+.timeline-legend-swatch-planned {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0px, transparent 4px,
+      rgba(255, 255, 255, 0.55) 4px, rgba(255, 255, 255, 0.55) 5.5px
+    ),
+    var(--gray-400);
+  border: 1.5px dashed rgba(0, 0, 0, 0.28);
+}
+.timeline-legend-annotation-badge {
+  font-size: 0.6rem !important;
+  padding: 2px 5px !important;
+  box-shadow: none !important;
+  pointer-events: none;
+  transition: none !important;
+}
+.dark .timeline-legend,
+.dark .timeline-legend-title {
+  color: var(--gray-300);
+}
+.dark .timeline-legend-swatch-active {
+  background: #64748b;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.dark .timeline-legend-swatch-planned {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0px, transparent 4px,
+      rgba(255, 255, 255, 0.35) 4px, rgba(255, 255, 255, 0.35) 5.5px
+    ),
+    #64748b;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Status badges (planned vs. active) ── */
+.tl-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tl-status-planned {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+.dark .tl-status-planned {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+
+/* ── Annotation markers on the Gantt ── */
+.tl-annotation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #f59e0b;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 9px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease;
+}
+.tl-annotation-flag:hover .tl-annotation-badge {
+  transform: scale(1.12);
+}
+
+/* ── Manage-notes modal cards ── */
+.tl-annotation-note-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-inline-start: 3px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.tl-annotation-note-card + .tl-annotation-note-card {
+  margin-top: 0.75rem;
+}
+.tl-annotation-note-content {
+  flex: 1;
+  min-width: 0;
+}
+.tl-annotation-note-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  line-height: 1.55;
+  word-break: break-word;
+  margin-bottom: 0.35rem;
+}
+.tl-annotation-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+.tl-annotation-row-meta {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+}
+
+/* Inline edit controls */
+.tl-annotation-edit-textarea {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border: 1.5px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  background: white;
+  color: var(--gray-900);
+}
+.tl-annotation-edit-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
+}
+
+/* Dark mode */
+html.dark .tl-annotation-note-card {
+  background: #243044;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-inline-start-color: #f59e0b;
+}
+html.dark .tl-annotation-note-text {
+  color: var(--gray-900);
+}
+html.dark .tl-annotation-row-meta {
+  color: #94a3b8;
+}
+html.dark .tl-annotation-edit-textarea {
+  background: #1a2235;
+  color: var(--gray-900);
+  border-color: var(--primary-color);
+}
+
+/* ── Status filter toggle (Both / Active / Planned) ── */
+.timeline-status-toggle {
+  display: flex;
+  gap: 0.35rem;
+  padding-inline-end: 0.5rem;
+  border-inline-end: 1px solid var(--gray-200);
+  margin-inline-end: 0.15rem;
+}
+.dark .timeline-status-toggle {
+  border-inline-end-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Annotation color picker ── */
+.tl-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.25rem 0;
+}
+.tl-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  transition: transform 0.12s ease;
+}
+.tl-color-swatch:hover {
+  transform: scale(1.2);
+}
+.tl-color-swatch.selected {
+  outline: 2.5px solid var(--gray-700);
+  outline-offset: 2px;
+}
+html.dark .tl-color-swatch.selected {
+  outline-color: white;
+}
+
+/* ── Annotation inline date input ── */
+.tl-annotation-edit-date {
+  width: 100%;
+  margin-bottom: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border: 1.5px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: white;
+  color: var(--gray-900);
+}
+html.dark .tl-annotation-edit-date {
+  background: #1a2235;
+  color: var(--gray-900);
+  border-color: var(--primary-color);
+}
+
+/* ── Toolbar action buttons (jump-to-now / add-note) ── */
+.timeline-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.timeline-jump-now-btn {
+  color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+.timeline-jump-now-btn:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: #ef4444 !important;
+}
+.dark .timeline-jump-now-btn {
+  color: #f87171 !important;
+}
+
 /* ── Changelog party icon float ── */
 @keyframes changelogFloat {
   0%, 100% { transform: translateY(0)     rotate(0deg);  }

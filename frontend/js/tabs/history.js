@@ -1,5 +1,11 @@
 // ==================== History Tab ====================
 
+function _fmtAnnotationDate(dateStr) {
+  if (!dateStr) return "—";
+  const p = dateStr.split("-");
+  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : dateStr;
+}
+
 let _historyEntries  = [];
 let _historyFilter   = "all";
 let _historySearch   = "";
@@ -32,6 +38,7 @@ async function refreshHistory() {
   _historyHasMore = false;
   _expandedGroups.clear();
   await loadHistory();
+  while (_historyHasMore) await loadHistory(true);
   renderHistoryTab();
   _updateHistoryFilterCounts();
 }
@@ -42,15 +49,20 @@ async function loadMoreHistory() {
   _updateHistoryFilterCounts();
 }
 
-function setHistoryFilter(filter) {
+async function setHistoryFilter(filter) {
   _historyFilter = filter;
-  ["all", "radio", "mission", "sector", "site", "link", "preferences"].forEach(
+  ["all", "radio", "mission", "sector", "site", "link", "preferences", "timeline"].forEach(
     (f) => {
       const btn = document.getElementById(`hf-${f}`);
       if (btn)
         btn.className = `btn btn-sm ${f === filter ? "btn-primary" : "btn-secondary"}`;
     },
   );
+  if (filter !== "all") {
+    while (_historyHasMore) {
+      await loadHistory(true);
+    }
+  }
   renderHistoryTab();
 }
 
@@ -59,17 +71,23 @@ function setHistorySearch(query) {
   renderHistoryTab();
 }
 
-function setHistoryDateFilter(filter) {
+async function setHistoryDateFilter(filter) {
   _historyDateFilter = filter;
   ["all", "today", "24h", "week"].forEach(f => {
     const btn = document.getElementById(`hdf-${f}`);
     if (btn) btn.className = `btn btn-sm ${f === filter ? "btn-primary" : "btn-secondary"}`;
   });
+  if (filter !== "all") {
+    while (_historyHasMore) await loadHistory(true);
+  }
   renderHistoryTab();
 }
 
-function setHistoryUserFilter(user) {
+async function setHistoryUserFilter(user) {
   _historyUserFilter = user;
+  if (user !== "all") {
+    while (_historyHasMore) await loadHistory(true);
+  }
   renderHistoryTab();
 }
 
@@ -82,7 +100,9 @@ function toggleHistoryGroup(key) {
 // ---- Time formatting ----
 
 function formatTimestamp(iso) {
+  if (!iso) return "—";
   const date = new Date(iso);
+  if (isNaN(date.getTime())) return "—";
   const now = new Date();
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
@@ -128,6 +148,7 @@ const BADGE_COLORS = {
   owner: "#db2777",
   device: "#0d9488",
   user: "#6366f1",
+  timeline_annotation: "#f59e0b",
 };
 
 function getBadgeLabel(entity_type) {
@@ -142,6 +163,7 @@ function getBadgeLabel(entity_type) {
     owner: t("history.badge.owner"),
     device: t("history.badge.device"),
     user: t("history.badge.user"),
+    timeline_annotation: t("history.badge.timelineAnnotation"),
   };
   return map[entity_type] || entity_type.replace(/_/g, " ");
 }
@@ -164,6 +186,8 @@ const _FIELD_KEY_MAP = {
   frequency_band: "history.field.band",
   generic_role: "history.field.genericRole",
   notes: "history.field.notes",
+  annotation_date: "history.field.annotationDate",
+  annotation_text: "history.field.annotationText",
   band: "history.field.band",
   time_start: "history.field.timeStart",
   time_end: "history.field.timeEnd",
@@ -245,6 +269,11 @@ function _getEntityDetailFields(entity_type, details) {
         ["name", details.name],
         ["band", details.band],
       ];
+    case "timeline_annotation":
+      return [
+        ["annotation_date", _fmtAnnotationDate(details.date)],
+        ["annotation_text", details.text],
+      ];
     default:
       return [];
   }
@@ -325,6 +354,8 @@ function describeTitle(entry) {
         return t("history.create.owner", { name: details.name });
       if (entity_type === "device")
         return t("history.create.device", { name: details.name, band: details.band });
+      if (entity_type === "timeline_annotation")
+        return t("history.create.timelineAnnotation", { date: _fmtAnnotationDate(details.date) });
       return t("history.create.other", { type: entity_type });
 
     case "update": {
@@ -363,6 +394,8 @@ function describeTitle(entry) {
           return t("history.update.userPwdReset", { name });
         return t("history.update.userRole", { name });
       }
+      if (entity_type === "timeline_annotation")
+        return t("history.update.timelineAnnotation");
       return t("history.update.other", { type: entity_type });
     }
 
@@ -402,6 +435,8 @@ function describeTitle(entry) {
         return t("history.delete.owner", { name: details.name });
       if (entity_type === "device")
         return t("history.delete.device", { name: details.name });
+      if (entity_type === "timeline_annotation")
+        return t("history.delete.timelineAnnotation", { date: _fmtAnnotationDate(details.date) });
       return t("history.delete.other", { type: entity_type });
 
     case "start_mission":  return t("history.startMission",  { name: details.name });
@@ -539,6 +574,7 @@ function _matchesEntityFilter(e, filter) {
   if (filter === "sector")      return e.entity_type === "sector" || _isSectorLevel(e);
   if (filter === "mission")     return e.entity_type === "mission" || e.entity_type === "archived_mission";
   if (filter === "preferences") return e.entity_type === "owner" || e.entity_type === "device" || e.entity_type === "user" || e.entity_type === "full_backup";
+  if (filter === "timeline")    return e.entity_type === "timeline_annotation";
   return e.entity_type === filter;
 }
 
@@ -589,7 +625,7 @@ function _getFilterCount(filter) {
 }
 
 function _updateHistoryFilterCounts() {
-  ["all", "radio", "mission", "sector", "site", "link", "preferences"].forEach((f) => {
+  ["all", "radio", "mission", "sector", "site", "link", "preferences", "timeline"].forEach((f) => {
     const btn = document.getElementById(`hf-${f}`);
     if (!btn) return;
     const count = _getFilterCount(f);
@@ -714,7 +750,7 @@ function _renderGroup(item) {
 
   const summary = `
     <div style="display:flex; gap:0.875rem; padding:0.8rem 1rem; border-bottom:1px solid var(--gray-100); align-items:center; cursor:pointer; background:${c}08; transition:background 0.15s;"
-         onclick="toggleHistoryGroup('${escapeHTML(key)}')"
+         data-group-key="${escapeHTML(key)}"
          onmouseover="this.style.background='${c}14'" onmouseout="this.style.background='${c}08'">
       <div style="width:30px; height:30px; border-radius:50%; background:${c}1a; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
         <i class="fa-solid fa-layer-group" style="color:${c}; font-size:0.8rem;"></i>
@@ -766,6 +802,10 @@ function renderHistoryTab() {
   container.innerHTML =
     items.map((item) => item.type === "group" ? _renderGroup(item) : _renderEntry(item.entry)).join("") +
     loadMoreBtn;
+
+  container.querySelectorAll("[data-group-key]").forEach((el) => {
+    el.addEventListener("click", () => toggleHistoryGroup(el.dataset.groupKey));
+  });
 
   _updateHistoryFilterCounts();
 }

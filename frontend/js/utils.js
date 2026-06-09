@@ -119,22 +119,24 @@ function _showImportConfirmModal(payload) {
   const d   = payload.data?.data   || {};
 
   const cur = {
-    radios:   (window.appState?.radios              || []).length,
-    links:    (window.appState?.links               || []).length,
-    missions: (window.appState?.plannedMissions     || []).length,
-    sectors:  (window.appState?.sectors             || []).length,
-    sites:    (window.appState?.sites               || []).length,
-    owners:   (window.appState?.config?.owners      || []).length,
-    devices:  (window.appState?.config?.radio_types || []).length,
+    radios:      (window.appState?.radios              || []).length,
+    links:       (window.appState?.links               || []).length,
+    missions:    (window.appState?.plannedMissions     || []).length,
+    sectors:     (window.appState?.sectors             || []).length,
+    sites:       (window.appState?.sites               || []).length,
+    owners:      (window.appState?.config?.owners      || []).length,
+    devices:     (window.appState?.config?.radio_types || []).length,
+    annotations: (window.appState?.timelineAnnotations || []).length,
   };
   const inc = {
-    radios:   (d.radios                          || []).length,
-    links:    (payload.mapping?.mappings         || []).length,
-    missions: (d.planned_missions               || []).length,
-    sectors:  (d.sectors                        || []).length,
-    sites:    (d.sites                          || []).length,
-    owners:   (cfg.owners                       || []).length,
-    devices:  (cfg.radio_types                  || []).length,
+    radios:      (d.radios                        || []).length,
+    links:       (payload.mapping?.mappings       || []).length,
+    missions:    (d.planned_missions              || []).length,
+    sectors:     (d.sectors                       || []).length,
+    sites:       (d.sites                         || []).length,
+    owners:      (cfg.owners                      || []).length,
+    devices:     (cfg.radio_types                 || []).length,
+    annotations: (d.timeline_annotations          || []).length,
   };
 
   // Client-side cross-reference validation
@@ -164,13 +166,14 @@ function _showImportConfirmModal(payload) {
     : "—";
 
   const rowDefs = [
-    ["import.modal.radios",   "fa-walkie-talkie", cur.radios,   inc.radios  ],
-    ["import.modal.links",    "fa-link",          cur.links,    inc.links   ],
-    ["import.modal.missions", "fa-crosshairs",    cur.missions, inc.missions],
-    ["import.modal.sectors",  "fa-layer-group",   cur.sectors,  inc.sectors ],
-    ["import.modal.sites",    "fa-location-dot",  cur.sites,    inc.sites   ],
-    ["import.modal.owners",   "fa-users",         cur.owners,   inc.owners  ],
-    ["import.modal.devices",  "fa-microchip",     cur.devices,  inc.devices ],
+    ["import.modal.radios",       "fa-walkie-talkie", cur.radios,      inc.radios      ],
+    ["import.modal.links",        "fa-link",          cur.links,       inc.links       ],
+    ["import.modal.missions",     "fa-crosshairs",    cur.missions,    inc.missions    ],
+    ["import.modal.sectors",      "fa-layer-group",   cur.sectors,     inc.sectors     ],
+    ["import.modal.sites",        "fa-location-dot",  cur.sites,       inc.sites       ],
+    ["import.modal.owners",       "fa-users",         cur.owners,      inc.owners      ],
+    ["import.modal.devices",      "fa-microchip",     cur.devices,     inc.devices     ],
+    ["import.modal.annotations",  "fa-note-sticky",   cur.annotations, inc.annotations ],
   ];
 
   const tableRows = rowDefs.map(([key, icon, c, i]) => {
